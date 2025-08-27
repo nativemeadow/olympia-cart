@@ -1,0 +1,2135 @@
+[
+  {
+    "id": 2,
+    "name": "Amendments",
+    "image": "amendments.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:51",
+    "updated_at": null
+  },
+  {
+    "id": 27,
+    "name": "lighting",
+    "image": "lighting.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 36,
+    "name": "pre-bagged-soils-composts",
+    "image": "pre-bagged-soils-composts.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 28,
+    "name": "mulches",
+    "image": "mulches.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 37,
+    "name": "precast-concrete",
+    "image": "precast-concrete.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 10,
+    "name": "Cement Grout Quikrete",
+    "image": "cement-grout-quikrete.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:51",
+    "updated_at": null
+  },
+  {
+    "id": 29,
+    "name": "natural-stone",
+    "image": "natural-stone.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 38,
+    "name": "premium-pebbles",
+    "image": "premium-pebbles.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 11,
+    "name": "Columns",
+    "image": "columns.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:51",
+    "updated_at": null
+  },
+  {
+    "id": 53,
+    "name": "1-1-2-3-1-2 Green Aqua Cove Pebbles",
+    "image": "1-1-2-3-1-2GreenAquaCovePebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 49,
+    "name": "veneer-panels",
+    "image": "veneer-panels.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 50,
+    "name": "water-features",
+    "image": "water-features.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 44,
+    "name": "stains-sealers-cleaners",
+    "image": "stains-sealers-cleaners.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 54,
+    "name": "1-12 Lin Creek Pebbles",
+    "image": "1-12LinCreekPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 57,
+    "name": "1-2-1 Red LaPaz Pebbles",
+    "image": "1-2-1RedLaPazPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 51,
+    "name": "water-treatments",
+    "image": "water-treatments.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 61,
+    "name": "1-2 Buff LaPaz Pebbles",
+    "image": "1-2BuffLaPazPebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 55,
+    "name": "1-2-1 Black LaPaz Pebbles",
+    "image": "1-2-1BlackLaPazPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 45,
+    "name": "statuary",
+    "image": "statuary.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 58,
+    "name": "1-2-2-1-2 Green Aqua Cove Pebbles",
+    "image": "1-2-2-1-2GreenAquaCovePebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 56,
+    "name": "1-2-1 Buff LaPaz Pebbles",
+    "image": "1-2-1BuffLaPazPebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 52,
+    "name": "030 Lapis Lustre Sand 100",
+    "image": "030LapisLustreSand100.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 62,
+    "name": "1-2 Kuro Black High Polish Pebbles",
+    "image": "1-2KuroBlackHighPolishPebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 46,
+    "name": "step-stone",
+    "image": "step-stone.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 16,
+    "name": "Decorative Pebbles",
+    "image": "decorative-pebbles.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 71,
+    "name": "1 Olympia Sand",
+    "image": "1-olympia-sand.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 17,
+    "name": "Dimensional Stone",
+    "image": "dimensional-stone.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 72,
+    "name": "12-78 Glacier Green",
+    "image": "12-78GlacerGreen.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 66,
+    "name": "1-2 Samon Bay Pebbles",
+    "image": "1-2samonBayPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 5,
+    "name": "Biological Minerals Liquid Fertilizers",
+    "image": "biological-minerals-liquid-fertilizers.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:51",
+    "updated_at": null
+  },
+  {
+    "id": 3,
+    "name": "Base Rock",
+    "image": "base-rock.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:51",
+    "updated_at": null
+  },
+  {
+    "id": 47,
+    "name": "structural-and-edging",
+    "image": "structural-and-edging.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 63,
+    "name": "1-2 Lin Creek Pebbles",
+    "image": "1-2LinCreekPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 59,
+    "name": "1-20 Lapis Lustre Sand 100",
+    "image": "1-20LapisLustreSand100.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 4,
+    "name": "Basins",
+    "image": "basins.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:51",
+    "updated_at": null
+  },
+  {
+    "id": 6,
+    "name": "Blades",
+    "image": "blades.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:51",
+    "updated_at": null
+  },
+  {
+    "id": 76,
+    "name": "2-16 Lapis Lustre Sand 100",
+    "image": "2-16LapisLustreSand100.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 73,
+    "name": "14 Fur Bark",
+    "image": "14-fur-bark.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 13,
+    "name": "Compost",
+    "image": "compost.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:51",
+    "updated_at": null
+  },
+  {
+    "id": 67,
+    "name": "1-3 Green AquaCove Pebbles",
+    "image": "1-3GreenAquaCovePebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 18,
+    "name": "Down To Earth",
+    "image": "down-to-earth.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 9,
+    "name": "Calstone",
+    "image": "calstone.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:51",
+    "updated_at": null
+  },
+  {
+    "id": 7,
+    "name": "Bocce Ball Court Materials",
+    "image": "bocce-ball-court-materials.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:51",
+    "updated_at": null
+  },
+  {
+    "id": 15,
+    "name": "Crushed Rock",
+    "image": "crushed-rock.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 48,
+    "name": "tools",
+    "image": "tools.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 64,
+    "name": "1-2 Quartz Pebbles",
+    "image": "1-2QuartzPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 60,
+    "name": "1-2 Black LaPaz Pebbles",
+    "image": "1-2BlackLaPazPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 77,
+    "name": "2-3 Black LaPaz Pebbles.jpb",
+    "image": "2-3BlackLaPazPebbles.jpb.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 14,
+    "name": "Construction Tools",
+    "image": "construction-tools.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 74,
+    "name": "15-7 Autumn Slate Tumbled Chip",
+    "image": "15-7AutumnSlateTumbledChip.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 78,
+    "name": "2-3 Buff LaPaz Pebbles",
+    "image": "2-3BuffLaPazPebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 65,
+    "name": "1-2 RedLa Paz Pebbles",
+    "image": "1-2RedLaPazPebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 68,
+    "name": "1-4-1-2 Mixed LaPaz Pebbles",
+    "image": "1-4-1-2MixedLaPazPebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 87,
+    "name": "3-4-1-1-4 Niji Pebbles",
+    "image": "3-4-1-1-4NijiPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 93,
+    "name": "3-5 BlackLaPazPebbles",
+    "image": "3-5BlackLaPazPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 79,
+    "name": "2-3 Kuro Black High Polish Pebbles",
+    "image": "2-3KuroBlackHighPolishPebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 42,
+    "name": "sheet-mulching-supplies",
+    "image": "sheet-mulching-supplies.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 81,
+    "name": "2-4 Lin Creek Cobble",
+    "image": "2-4LinCreekCobble.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 97,
+    "name": "3-8 CrushedBlackBasalt",
+    "image": "3-8CrushedBlackBasalt.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 69,
+    "name": "1-8-1-4 Mixed LaPaz Pebbles",
+    "image": "1-8-1-4MixedLaPazPebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 94,
+    "name": "3-5 BuffLaPazPebbles",
+    "image": "3-5BuffLaPazPebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 75,
+    "name": "15-7 Midnight Black SlateTumbled Chip",
+    "image": "15-7MidnightBlackSlateTumbledChip.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 88,
+    "name": "3-4 Desert Gold",
+    "image": "3-4DesertGold.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 98,
+    "name": "3-8 CrushedRoseGold",
+    "image": "3-8CrushedRoseGold.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 19,
+    "name": "Driveway Cubes Cobbles Pavers",
+    "image": "driveway-cubes-cobbles-pavers.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 80,
+    "name": "2-3 RedLa Paz Pebbles",
+    "image": "2-3RedLaPazPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 89,
+    "name": "3-4 Pami Pebbles",
+    "image": "3-4PamiPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 107,
+    "name": "BasaltColumnsNotDrilled",
+    "image": "BasaltColumnsNotDrilled.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 43,
+    "name": "soils",
+    "image": "soils.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 95,
+    "name": "3-5 RedLaPazPebbles",
+    "image": "3-5RedLaPazPebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 70,
+    "name": "1-8 Desert Gold",
+    "image": "1-8DesertGold.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 102,
+    "name": "3-8 PamiPebbles",
+    "image": "3-8PamiPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 99,
+    "name": "3-8 CrushedYosemiteTan",
+    "image": "3-8CrushedYosemiteTan.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 20,
+    "name": "Drystack Wall Rocks",
+    "image": "drystack-wall-rocks.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 96,
+    "name": "3-8 Pea-gravel",
+    "image": "3-8-pea-gravel.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 112,
+    "name": "BlackOwlBiochar",
+    "image": "BlackOwlBiochar.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 117,
+    "name": "CoregravelDriveway",
+    "image": "CoregravelDriveway.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 90,
+    "name": "3-4 Quartz Pebbles",
+    "image": "3-4QuartzPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 108,
+    "name": "BasaltFountainNaturalTop",
+    "image": "BasaltFountainNaturalTop.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 103,
+    "name": "3-8 Taffy",
+    "image": "3-8Taffy.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 82,
+    "name": "2-5-2-8 Niji Pebbles",
+    "image": "2-5-2-8NijiPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 113,
+    "name": "BlackOwlBiocharEnvironmentalUltra",
+    "image": "BlackOwlBiocharEnvironmentalUltra.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 119,
+    "name": "CrawfordGraniteBoulder-closeup",
+    "image": "CrawfordGraniteBoulder-closeup.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 111,
+    "name": "Black Basalt Fines",
+    "image": "Black Basalt Fines.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 101,
+    "name": "3-8 LinCreekCobble",
+    "image": "3-8LinCreekCobble.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 125,
+    "name": "LargeBasaltFountainNaturalTop",
+    "image": "LargeBasaltFountainNaturalTop.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 131,
+    "name": "PerkgroutGrey",
+    "image": "PerkgroutGrey.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 149,
+    "name": "Amador Granite Boulders",
+    "image": "amadorGraniteBoulders.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 167,
+    "name": "Buckthorn Yellow High Polish Pebbles",
+    "image": "buckthornYellowHighPolishPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 168,
+    "name": "BusBlend Biodynamic Compost",
+    "image": "busBlendBiodynamicCompost.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 25,
+    "name": "Irregular Flagstone",
+    "image": "irregular-flagstone.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 184,
+    "name": "Double Doody Organic Compost",
+    "image": "doubleDoodyOrganicCompost.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 225,
+    "name": "Woodgrain High Polish Pebbles",
+    "image": "woodgrainHighPolishPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 109,
+    "name": "BasaltFountainPolishedTop",
+    "image": "BasaltFountainPolishedTop.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 40,
+    "name": "sand-grave-decorative-rocks",
+    "image": "sand-grave-decorative-rocks.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 100,
+    "name": "3-8 DesertGold",
+    "image": "3-8DesertGold.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 91,
+    "name": "3-4 Crushed DrainRock",
+    "image": "3-4crushedDrainRock.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 83,
+    "name": "2 Olympia Sand",
+    "image": "2-olympia-sand.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 110,
+    "name": "BasaltFountainSet",
+    "image": "BasaltFountainSet.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 128,
+    "name": "LehighWhiteCement94Lbs",
+    "image": "LehighWhiteCement94Lbs.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 120,
+    "name": "CrawfordGraniteBoulder",
+    "image": "CrawfordGraniteBoulder.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 114,
+    "name": "BouquetCanyonBoulders-closeup",
+    "image": "BouquetCanyonBoulders-closeup.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 127,
+    "name": "LarkspurPlanter",
+    "image": "LarkspurPlanter.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 105,
+    "name": "60 LapisLustreSand100",
+    "image": "60-LapisLustreSand100.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 121,
+    "name": "CupertinoPlanter",
+    "image": "CupertinoPlanter.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 85,
+    "name": "3-11-4 Five Springs High Polish Pebbles",
+    "image": "3-11-4FiveSpringsHighPolishPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 147,
+    "name": "Swirl Pattern Basalt Fountain",
+    "image": "SwirlPatternBasaltFountain.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 129,
+    "name": "OaklandPlanter",
+    "image": "OaklandPlanter.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 142,
+    "name": "QuikreteMortarMix80",
+    "image": "QuikreteMortarMix80.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 34,
+    "name": "pottery",
+    "image": "pottery.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 151,
+    "name": "Atwater Granite Boulder",
+    "image": "atwaterGraniteBoulder.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 35,
+    "name": "pre-bagged-sand",
+    "image": "pre-bagged-sand.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 130,
+    "name": "OrganicDiestelStructuredCompost",
+    "image": "OrganicDiestelStructuredCompost.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 86,
+    "name": "3-4-1-1-4 Kuro Black High Polish Pebbles",
+    "image": "3-4-1-1-4KuroBlackHighPolishPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 156,
+    "name": "Basalt Columns Sawn Bottom",
+    "image": "basaltColumnsSawnBottom.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 139,
+    "name": "QuikreteFencePostMix80Lbs",
+    "image": "QuikreteFencePostMix80Lbs.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 116,
+    "name": "ChiefcliffBoulders",
+    "image": "ChiefcliffBoulders.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 144,
+    "name": "QuikretePortlandCement94",
+    "image": "QuikretePortlandCement94.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 152,
+    "name": "Azomite Powder",
+    "image": "azomitePowder.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 148,
+    "name": "Actively Aerated CompostTea",
+    "image": "activelyAeratedCompostTea.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 22,
+    "name": "Fertilizers Amendments",
+    "image": "fertilizers-amendments.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 145,
+    "name": "QuikreteThinSetSandedGray50",
+    "image": "QuikreteThinSetSandedGray50.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 165,
+    "name": "Blue Fines Stabilized",
+    "image": "blueFinesStabilized.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 134,
+    "name": "PlasticBenderBoard2x4x20",
+    "image": "PlasticBenderBoard2x4x20.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 23,
+    "name": "Gravel",
+    "image": "gravel.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 146,
+    "name": "SpecialCarvingBasaltFountain",
+    "image": "SpecialCarvingBasaltFountain.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 154,
+    "name": "Baby BuBiodynamic Potting Soil",
+    "image": "babyBuBiodynamicPottingSoil.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 158,
+    "name": "Black Aqua Cove Pebbles1",
+    "image": "blackAquaCovePebbles1.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 150,
+    "name": "Arizona Flagstone Buckskin",
+    "image": "arizona-flagstone-buckskin.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 191,
+    "name": "Heritage Organics",
+    "image": "heritageOrganics.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 174,
+    "name": "Connecticut Blue Stone",
+    "image": "connecticut-blue-stone.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 196,
+    "name": "Lodi Pebbles",
+    "image": "lodiPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 159,
+    "name": "Black Aqua Cove Pebbles3",
+    "image": "blackAquaCovePebbles3.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 136,
+    "name": "PrefilledPokyWovenSanBag50lbs",
+    "image": "PrefilledPokyWovenSanBag50lbs.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 202,
+    "name": "Oregon Bull Organic Aged Humus",
+    "image": "oregonBullOrganicAgedHumus.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 204,
+    "name": "Organic Amendment Mix",
+    "image": "organicAmendmentMix.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 208,
+    "name": "Oyster Shell Bocce Blend",
+    "image": "oysterShellBocceBlend.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 169,
+    "name": "Chiefcliff Boulders",
+    "image": "chiefcliffBoulders.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 210,
+    "name": "Premium Arbo rMulch",
+    "image": "premiumArborMulch.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 198,
+    "name": "Mahogany Chip",
+    "image": "mahoganyChip.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 207,
+    "name": "Oyster Shell  Flour",
+    "image": "osterShellFlour.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 211,
+    "name": "Redwood Sawdust",
+    "image": "redwoodSawdust.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 212,
+    "name": "Samon Bay Pebbles",
+    "image": "samonBayPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 26,
+    "name": "Ledger Stone",
+    "image": "ledgerstones.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 221,
+    "name": "Walk On Bark",
+    "image": "walkOnBark.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 220,
+    "name": "Tufa White High Polish Pebbles",
+    "image": "tufaWhiteHighPolishPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 171,
+    "name": "Class2 Permeable Baserock",
+    "image": "class2permeableBaserock.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 31,
+    "name": "plumbing",
+    "image": "plumbing.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 226,
+    "name": "Wuyi Brown High Polish Pebbles",
+    "image": "wuyiBrownHighPolishPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 32,
+    "name": "polished-pebbles",
+    "image": "polished-pebbles.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 118,
+    "name": "CoregravelPathway",
+    "image": "CoregravelPathway.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 92,
+    "name": "3-5-8 FiveSpringsHighPolishPebbles",
+    "image": "3-5-8FiveSpringsHighPolishPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 137,
+    "name": "QuikreteBaseCoatStucco60Lbs",
+    "image": "QuikreteBaseCoatStucco60Lbs.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 138,
+    "name": "QuikreteBaseCoatStucco80Lbs",
+    "image": "QuikreteBaseCoatStucco80Lbs.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 164,
+    "name": "Blue Fines",
+    "image": "blueFines.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 172,
+    "name": "Compost Mulch",
+    "image": "compostMulch.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 161,
+    "name": "Black Basalt Fines",
+    "image": "blackBasaltFines.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 162,
+    "name": "Black Basalt Fines Stabilized",
+    "image": "blackBasaltFinesStabilized.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 206,
+    "name": "Organic Green Waste Garden Compost",
+    "image": "organicGreenWasteGardenCompost.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 214,
+    "name": "Shredded Cedar Bark",
+    "image": "shreddedCedarBark.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 224,
+    "name": "Wood Chips",
+    "image": "woodChips.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 104,
+    "name": "5-16 horticultureLava",
+    "image": "5-16-horticultureLava.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 123,
+    "name": "GatorGeotextFabricView",
+    "image": "GatorGeotextFabricView.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 132,
+    "name": "PerkgroutGreyTan",
+    "image": "PerkgroutGreyTan.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 106,
+    "name": "AntigoBolder",
+    "image": "AntigoBolder.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 133,
+    "name": "PlasticBenderBoard1x4x20",
+    "image": "PlasticBenderBoard1x4x20.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 140,
+    "name": "QuikreteHighPerformanceBlacktopRepair50",
+    "image": "QuikreteHighPerformanceBlacktopRepair50.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 175,
+    "name": "Crushed Black Basalt",
+    "image": "crushedBlackBasalt.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 186,
+    "name": "Essential Soil",
+    "image": "essentialSoil.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 193,
+    "name": "LandScape Mix",
+    "image": "landScapeMix.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 187,
+    "name": "Galaxy Black Limestone",
+    "image": "galaxy-black-limestone.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 222,
+    "name": "Wasabi Green Pebbles",
+    "image": "wasabiGreenPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 122,
+    "name": "FilledBurlapSandBag",
+    "image": "FilledBurlapSandBag.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 84,
+    "name": "21-2 Crushed Black Basalt",
+    "image": "21-2CrushedBlackBasalt.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 124,
+    "name": "GatorGeotextileFabric",
+    "image": "GatorGeotextileFabric.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 115,
+    "name": "CalistogaPlanter",
+    "image": "CalistogaPlanter.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 143,
+    "name": "QuikretePlasticCement94",
+    "image": "QuikretePlasticCement94.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 160,
+    "name": "Black Aqua Cove Pebbles5",
+    "image": "blackAquaCovePebbles5.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 141,
+    "name": "QuikreteMasonsMix80",
+    "image": "QuikreteMasonsMix80.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 155,
+    "name": "Basalt Columns Sawn Bottom-Drilled",
+    "image": "basaltColumnsSawnBottom-Drilled.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 190,
+    "name": "Henna Red High Polish Pebbles",
+    "image": "hennaRedHighPolishPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 213,
+    "name": "Sea Coast Compost",
+    "image": "seaCoastCompost.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 223,
+    "name": "Web Ranch Premium Compost",
+    "image": "webRanchPremiumCompost.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 8,
+    "name": "Boulders",
+    "image": "boulders.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:51",
+    "updated_at": null
+  },
+  {
+    "id": 12,
+    "name": "Compost Mulch",
+    "image": "compost-mulch.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:51",
+    "updated_at": null
+  },
+  {
+    "id": 39,
+    "name": "pumps",
+    "image": "pumps.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 33,
+    "name": "pottery-garden-ornements",
+    "image": "pottery-garden-ornements.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 24,
+    "name": "Installation Parts",
+    "image": "installation-parts.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 153,
+    "name": "Azure Limestone",
+    "image": "azure-limestone.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 126,
+    "name": "LargeBasaltFountainPolishedTop",
+    "image": "LargeBasaltFountainPolishedTop.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 157,
+    "name": "Bio Treatment Soil Mix",
+    "image": "biotreatmentSoilMix.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 166,
+    "name": "Bouquet Canyon Boulders",
+    "image": "bouquetCanyonBoulders.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 173,
+    "name": "Concrete Sand",
+    "image": "concrete-sand.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 135,
+    "name": "PlasticBenderBoardStakes",
+    "image": "PlasticBenderBoardStakes.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 188,
+    "name": "Ground Redwood Bark",
+    "image": "groundRedwoodBark.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 194,
+    "name": "Linga Peat",
+    "image": "lingaPeat.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 185,
+    "name": "Down-To-Earth All Natural PottingSoil",
+    "image": "downToEarchAllNaturalPottingSoil.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 200,
+    "name": "Mocha bChip",
+    "image": "mochaChip.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 189,
+    "name": "Hama Pebbles",
+    "image": "hamaPebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 192,
+    "name": "Jade Green High Polish Pebbles",
+    "image": "jadeGreenHighPolishPebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 41,
+    "name": "sand",
+    "image": "sand.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 163,
+    "name": "Black Button LaPaz Pebbles",
+    "image": "blackButtonLaPazPebbles.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 183,
+    "name": "Desert Brown Fines",
+    "image": "desertBrownFines.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 201,
+    "name": "One Quarter Inch Pea Gravel",
+    "image": "oneQuarterInchPeaGravel.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 203,
+    "name": "Organic Amendment Mix",
+    "image": "organicAmendmentMix.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 197,
+    "name": "Luna Gray Sandstone",
+    "image": "luna-gray-sandstone.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 205,
+    "name": "Organic Diestal Structured Compost",
+    "image": "organicDiestalStructuredCompost.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 30,
+    "name": "path-fines",
+    "image": "path-fines.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 21,
+    "name": "Earthenware Planters",
+    "image": "earthenware-planters.jpg",
+    "description": null,
+    "category": "product-categories",
+    "created_at": "2024-05-15T06:16:52",
+    "updated_at": null
+  },
+  {
+    "id": 209,
+    "name": "Playground Fiber",
+    "image": "playgroundFiber.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 199,
+    "name": "Mini Mulch Fir Bark",
+    "image": "miniMulchFirBark.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 215,
+    "name": "Small Fir Bark",
+    "image": "smallFirBark.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 170,
+    "name": "Class 2 Baserock",
+    "image": "class2baserock.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 216,
+    "name": "Snow White Pebbles",
+    "image": "snowWhitePebbles.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 217,
+    "name": "Sunset Gold Path Fines Stabilized",
+    "image": "sunsetGoldPathFines-stabliized.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 219,
+    "name": "Taffy Fine",
+    "image": "taffyFine.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 218,
+    "name": "Sunset Gold PathFines",
+    "image": "sunsetGoldPathFines.jpg",
+    "description": null,
+    "category": "products",
+    "created_at": "2024-05-15T06:18:24",
+    "updated_at": null
+  },
+  {
+    "id": 416,
+    "name": "Joe McClintock",
+    "image": "joe-mcclintock.jpg",
+    "description": "<p>This is cool image</p>",
+    "category": "product-categories",
+    "created_at": "2025-01-08T02:18:05.791",
+    "updated_at": null
+  },
+  {
+    "id": 426,
+    "name": "Recycled Sand",
+    "image": "recycled-sand.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-03-10T18:18:10.427",
+    "updated_at": null
+  },
+  {
+    "id": 436,
+    "name": "Plaster Sand",
+    "image": "plaster-sand.png",
+    "description": "<p class=\"editor-paragraph\" dir=\"ltr\"><span style=\"white-space: pre-wrap;\">Plaster Sand</span></p>",
+    "category": "products",
+    "created_at": "2025-03-10T18:23:53.452",
+    "updated_at": null
+  },
+  {
+    "id": 446,
+    "name": "Antigo ledger stone",
+    "image": "antigo-ledger-stone.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-03-27T17:12:04.743",
+    "updated_at": null
+  },
+  {
+    "id": 456,
+    "name": "Antigo ledger stone wall",
+    "image": "antigo-ledger-stone-wall.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-03-27T17:12:49.58",
+    "updated_at": null
+  },
+  {
+    "id": 466,
+    "name": "Arizona Sanpped Ledger Stone",
+    "image": "arizona-sanpped-ledger-stone.jpeg",
+    "description": "<p class=\"editor-paragraph\"><br></p>",
+    "category": "products",
+    "created_at": "2025-03-27T22:59:31.322",
+    "updated_at": null
+  },
+  {
+    "id": 476,
+    "name": "Bedford Hills Ledger Stone",
+    "image": "bedford-hills-ledger-stone.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-03-28T17:20:42.663",
+    "updated_at": null
+  },
+  {
+    "id": 486,
+    "name": "Bouquet Canyon Ledge Stone",
+    "image": "bouquet-canyon-ledge-stone.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-03-31T16:19:05.431",
+    "updated_at": null
+  },
+  {
+    "id": 496,
+    "name": "Bronze Ledge Stone",
+    "image": "bronze-ledge-stone.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-03-31T16:54:38.628",
+    "updated_at": null
+  },
+  {
+    "id": 506,
+    "name": "Cameron Ledger Stone",
+    "image": "cameron-ledger-stone.png",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-03-31T17:23:05.217",
+    "updated_at": null
+  },
+  {
+    "id": 516,
+    "name": "Chefcliff Ledge Stone",
+    "image": "chefcliff-ledge-stone.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-03-31T17:32:15.403",
+    "updated_at": null
+  },
+  {
+    "id": 526,
+    "name": "Down to Earth acid mix box",
+    "image": "down-to-earth-acid-mix-box.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-04-01T00:45:47.381",
+    "updated_at": null
+  },
+  {
+    "id": 536,
+    "name": "Down to Earth acid mix 25 lbs box",
+    "image": "down-to-earth-acid-mix-25-lbs-box.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-04-01T16:27:04.65",
+    "updated_at": null
+  },
+  {
+    "id": 546,
+    "name": "Down to Earth acid mix 50 lbs box",
+    "image": "down-to-earth-acid-mix-50-lbs-box.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-04-01T16:27:41.202",
+    "updated_at": null
+  },
+  {
+    "id": 556,
+    "name": "Down to Earth acid mix 6 lbs box",
+    "image": "down-to-earth-acid-mix-6-lbs-box.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-04-01T16:28:21.191",
+    "updated_at": null
+  },
+  {
+    "id": 566,
+    "name": "Down to Earth acid mix All",
+    "image": "down-to-earth-acid-mix-all.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-04-01T16:29:34.092",
+    "updated_at": null
+  },
+  {
+    "id": 576,
+    "name": "Down to Earth Vegetable Garden",
+    "image": "down-to-earth-vegetable-garden.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-04-02T17:02:24.353",
+    "updated_at": null
+  },
+  {
+    "id": 586,
+    "name": "Down to Earth ALFALFA MEAL 2.5-0.5-2.5",
+    "image": "alfalfa-meal-2.5-0.5-2.5.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-04-08T16:42:12.754",
+    "updated_at": null
+  },
+  {
+    "id": 596,
+    "name": "Alfalfa Meal Box 2.5-0.5-2.5",
+    "image": "alfalfa-meal-box-2.5-0.5-2.5.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-04-08T16:57:28.374",
+    "updated_at": null
+  },
+  {
+    "id": 606,
+    "name": "Alfalfa Meal Bag 2.5-0.5-2.5",
+    "image": "alfalfa-meal-bag-2.5-0.5-2.5.jpeg",
+    "description": null,
+    "category": "products",
+    "created_at": "2025-04-08T16:58:12.916",
+    "updated_at": null
+  }
+]
