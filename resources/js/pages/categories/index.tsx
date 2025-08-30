@@ -1,9 +1,9 @@
 import RenderImage from '@/components/render-image';
-import { type Category } from '@/types/model-types';
+import { Category } from '@/types/model-types';
 import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
-export default function Welcome() {
+export default function CategoriesIndex() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -18,7 +18,7 @@ export default function Welcome() {
 
     return (
         <>
-            <Head title="Welcome" />
+            <Head title="Product Categories" />
             <h2 className="mb-2 text-xl font-bold text-[#1b1b18] dark:text-[#EDEDEC]">Browse Our Product Categories</h2>
             {loading ? (
                 <div className="border-b border-[#e5e7eb] text-center text-[#1b1b18] dark:border-[#3E3E3A] dark:text-[#EDEDEC]">Loading...</div>

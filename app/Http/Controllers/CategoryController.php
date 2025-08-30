@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class CategoryController extends Controller
 {
@@ -25,5 +28,22 @@ class CategoryController extends Controller
     {
         $parents = \App\Models\Category::where('child_id', $id)->get();
         return response()->json($parents);
+    }
+
+
+    public function index(): Response
+    {
+        $categories = Category::whereDoesntHave('parents')->get();
+        return Inertia::render('categories/index', [
+            'categories' => $categories,
+        ]);
+    }
+
+    public function show($slug): Response
+    {
+        $category = Category::where('slug', $slug)->firstOrFail();
+        return Inertia::render('categories/show', [
+            'category' => $category,
+        ]);
     }
 }
