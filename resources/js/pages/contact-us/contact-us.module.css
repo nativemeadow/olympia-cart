@@ -1,0 +1,130 @@
+.main {
+	flex: 1 0 auto;
+	max-width: var(--max-container-size);
+	min-width: var(--min-container-size);
+	margin: auto;
+	padding: 5rem 0 6.25rem 0;
+	min-height: calc(100vh - 7rem);
+	background-color: darkgray;
+}
+
+.override {
+	width: inherit;
+	background-image: url('/images/assets/IMG_2652.jpeg');
+}
+
+.content-wrapper {
+	display: block;
+	width: 65%;
+	margin: auto;
+}
+
+.register-wrapper {
+	width: 92%;
+}
+
+.form-control {
+	margin: 0;
+}
+
+.form-control label,
+.form-control input,
+.form-control textarea {
+	display: block;
+}
+
+.form-fields-grid {
+	display: grid;
+	grid-template-columns: 12rem 25rem 2rem;
+	grid-template-rows: auto;
+	grid-gap: 0.5rem;
+	width: 100%;
+}
+
+.error-message-wrapper {
+	grid-column-start: 1;
+}
+
+.form-control label {
+	font-weight: bold;
+	color: #fff;
+	/* margin-bottom: 0.5rem; */
+}
+
+.form-control input,
+.form-control textarea {
+	width: 100%;
+	/* font: inherit;
+    border: 1px solid #ccc;
+    background: #f8f8f8; */
+	/* padding: 0.15rem 0.25rem; */
+}
+
+.form-control input:focus,
+.form-control textarea:focus {
+	outline: none;
+	background: #ebebeb;
+	border-color: #510077;
+}
+
+.form-control--invalid label,
+.form-control--invalid p {
+	color: red;
+}
+
+.form-control--invalid input,
+.form-control--invalid textarea {
+	border-color: red;
+	background: #ffd1d1;
+}
+
+.error {
+	color: #aa081e;
+	font-size: 1rem;
+	text-align: left;
+	background-color: #fff;
+	padding: 0.5rem;
+	border-color: #aa081e;
+	border-width: thin;
+	border-radius: 0.15rem;
+}
+
+.required {
+	color: #aa081e;
+	font-size: 1.5rem;
+}
+
+.form-field {
+	display: block;
+	line-height: 25px;
+	width: 100%;
+	/* margin-bottom: 1rem; */
+	color: #666;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+.form-field-label {
+	color: #1f0404;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.contact_button {
+	background-color: #a5844b;
+}
+
+.contact_button:hover,
+.contact_button:active {
+	background-color: #a5844b;
+	color: #fff;
+}
+
+.contact_button:disabled,
+.contact_button:hover:disabled,
+.contact_button:active:disabled {
+	background: #ccc;
+	color: #979797;
+	border-color: #ccc;
+	cursor: not-allowed;
+}

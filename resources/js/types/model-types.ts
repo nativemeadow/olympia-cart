@@ -21,6 +21,14 @@ export type Category = {
     children?: Category[];
 };
 
+export type Categories = Array<{
+    id: number;
+    title: string;
+    slug: string;
+    description: string;
+    image: string;
+}>;
+
 export type Product = {
     id: number;
     uuid: string;

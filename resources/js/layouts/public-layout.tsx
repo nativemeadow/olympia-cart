@@ -1,8 +1,11 @@
 import PublicHeader from '@/components/public-header';
 import { useBreadcrumbsFromPath } from '@/hooks/useBreadcrumbsFromPath';
+import OMG_Logo from '@/layouts/OGM_Logo';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ReactNode } from 'react';
+import NavLinks from './NavLinks';
+import Footer from './Footer';
 
 type PublicLayoutProps = {
     children: ReactNode;
@@ -14,10 +17,9 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
 
     return (
         <>
-            <div className="flex min-h-screen flex-col items-center bg-[#FDFDFC] p-6 text-[#1b1b18] lg:justify-center lg:p-8 dark:bg-[#0a0a0a]">
-                <header className="mb-6 w-full max-w-[335px] text-sm not-has-[nav]:hidden lg:max-w-4xl">
-                    <nav className="flex items-stretch justify-end gap-4">
-                        <PublicHeader breadcrumbs={breadcrumbs.map((b) => ({ ...b, href: b.href ?? '' }))} />
+            <div className="w-full bg-[#FDFDFC] text-[#1b1b18] lg:justify-center dark:bg-[#0a0a0a]">
+                <header className="w-full text-sm not-has-[nav]:hidden">
+                    <nav className="mr-1.5 flex h-12 items-center justify-end gap-4">
                         {auth.user ? (
                             <Link
                                 href={route('dashboard')}
@@ -42,12 +44,24 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                             </>
                         )}
                     </nav>
+                    <div className="site_menu my-4 flex h-[64px] w-full items-center justify-start bg-[#1914001a] px-4 text-[#1b1b18] dark:bg-[#3E3E3A] dark:text-[#fff]">
+                        <Link href="/">
+                            <OMG_Logo className="logo" />
+                        </Link>
+                        <NavLinks />
+                    </div>
+                    <nav>
+                        <PublicHeader breadcrumbs={breadcrumbs.map((b) => ({ ...b, href: b.href ?? '' }))} />
+                    </nav>
                 </header>
-                <main className="flex w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0">
+            </div>
+            <div className="flex min-h-screen flex-col items-center bg-[#FDFDFC] p-6 text-[#1b1b18] lg:justify-center lg:p-2 dark:bg-[#0a0a0a]">
+                <main className="flex w-full justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0">
                     <div className="w-full max-w-4xl">{children}</div>
                 </main>
                 <div className="hidden h-14.5 lg:block"></div>
             </div>
+            <Footer />
         </>
     );
 }

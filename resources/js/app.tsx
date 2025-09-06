@@ -15,7 +15,7 @@ createInertiaApp({
         const pagePromise = resolvePageComponent<any>(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx'));
 
         pagePromise.then((module) => {
-            if (module.default.layout === undefined && !name.startsWith('auth/') && !name.startsWith('settings/') && name !== 'dashboard') {
+            if (module.default.layout === undefined && name !== 'dashboard') {
                 module.default.layout = (page: ReactNode) => <PublicLayout>{page}</PublicLayout>;
             }
         });

@@ -231,3 +231,33 @@
         @apply bg-background text-foreground;
     }
 }
+
+.logo {
+    max-width: 100%;
+    height: auto;
+}
+
+.site_menu {
+    background-color: rgb(165, 132, 75);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Styles for the contact us page body */
+.contact-us-page-body,
+body.contact-us-page-body {
+    background: url(/storage/assets/Redwoods-One-4.jpeg) no-repeat center center fixed;
+    background-size: cover;
+}
+
+.footer {
+    color: var(--primary-foreground);
+    width: 100%;
+    background: var(--muted-foreground);
+    height: 2.44rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-right: 1rem;
+}
