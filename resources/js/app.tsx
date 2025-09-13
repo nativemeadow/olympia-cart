@@ -11,15 +11,15 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
-    resolve: (name) => {
-        const pagePromise = resolvePageComponent<any>(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx'));
+    resolve: async (name) => {
+        const page = await resolvePageComponent<any>(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx'));
 
-        pagePromise.then((module) => {
-            if (module.default.layout === undefined && name !== 'dashboard') {
-                module.default.layout = (page: ReactNode) => <PublicLayout>{page}</PublicLayout>;
-            }
-        });
-        return pagePromise;
+        // Apply the public layout to all pages that don't have a layout defined and are not auth, settings, or dashboard pages.
+        if (page.default.layout === undefined && !name.startsWith('auth/') && !name.startsWith('settings/') && name !== 'dashboard') {
+            page.default.layout = (p: ReactNode) => <PublicLayout>{p}</PublicLayout>;
+        }
+
+        return page;
     },
     setup({ el, App, props }) {
         const root = createRoot(el);

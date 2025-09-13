@@ -6,6 +6,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { ReactNode } from 'react';
 import NavLinks from './NavLinks';
 import Footer from './Footer';
+import PageTransition from '@/components/page-transition';
 
 type PublicLayoutProps = {
     children: ReactNode;
@@ -45,7 +46,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                         )}
                     </nav>
                     <div className="site_menu my-4 flex h-[64px] w-full items-center justify-start bg-[#1914001a] px-4 text-[#1b1b18] dark:bg-[#3E3E3A] dark:text-[#fff]">
-                        <Link href="/">
+                        <Link href="/categories">
                             <OMG_Logo className="logo" />
                         </Link>
                         <NavLinks />
@@ -56,8 +57,8 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                 </header>
             </div>
             <div className="flex min-h-screen flex-col items-center bg-[#FDFDFC] p-6 text-[#1b1b18] lg:justify-center lg:p-2 dark:bg-[#0a0a0a]">
-                <main className="flex w-full justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0">
-                    <div className="w-full max-w-4xl">{children}</div>
+                <main className="flex w-full justify-center lg:grow">
+                    <PageTransition>{children}</PageTransition>
                 </main>
                 <div className="hidden h-14.5 lg:block"></div>
             </div>

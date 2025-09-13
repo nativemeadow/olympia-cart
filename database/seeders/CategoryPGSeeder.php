@@ -14,11 +14,11 @@ class CategoryPGSeeder extends Seeder
     public function run(): void
     {
         $json = file_get_contents(database_path('/csv/category.json'));
-        $categories = json_decode($json, true);
+        $categoriesData = json_decode($json, true);
 
 
-        foreach ($categories as $data) {
-            \App\Models\Category::create([
+        foreach ($categoriesData as $data) {
+            Category::create([
                 'id' => $data['id'],
                 'uuid' => $data['uuid'],
                 'title' => $data['title'],
@@ -32,9 +32,10 @@ class CategoryPGSeeder extends Seeder
         }
 
         $json = file_get_contents(database_path('/csv/category_tree.json'));
-        $categories = json_decode($json, true);
+        $categoryTreeData = json_decode($json, true);
 
-        foreach ($categories as $data) {
+        $childIdsInTree = [];
+        foreach ($categoryTreeData as $data) {
             // Create the category tree structure
             DB::table('category_category')->insert([
                 'parent_id' => $data['parent_category_id'],
@@ -42,6 +43,25 @@ class CategoryPGSeeder extends Seeder
                 'order' => $data['category_order'],
                 'created_at' => $data['created_at'] ?? now(),
                 'updated_at' => $data['updated_at'] ?? now(),
+            ]);
+            $childIdsInTree[] = $data['category_id'];
+        }
+
+        // Get all category IDs that were just created
+        $allCategoryIds = array_column($categoriesData, 'id');
+
+        // Determine which categories were not included in the tree structure file.
+        // These are assumed to be top-level categories.
+        $missingTopLevelIds = array_diff($allCategoryIds, $childIdsInTree);
+
+        // Add the missing categories as top-level entries in the pivot table.
+        foreach ($missingTopLevelIds as $categoryId) {
+            DB::table('category_category')->insert([
+                'parent_id' => null,
+                'child_id' => $categoryId,
+                'order' => 0, // Default order for auto-added top-level categories
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
     }

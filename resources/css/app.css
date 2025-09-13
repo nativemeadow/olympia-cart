@@ -261,3 +261,10 @@ body.contact-us-page-body {
     align-items: center;
     padding-right: 1rem;
 }
+
+/* resources/css/app.css or a dedicated transition.css file */
+.page-wrapper {
+    transition:
+        opacity 0.4s ease,
+        transform 0.4s ease;
+}

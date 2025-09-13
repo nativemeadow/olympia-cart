@@ -13,13 +13,14 @@ const list = ({ categories, basePath }: Props) => {
         <div className={classes.list_grid}>
             {categories.map((category) => {
                 const href = basePath ? `/categories/${basePath}/${category.slug}` : `/categories/${category.slug}`;
+
                 return (
                     <div key={category.id} className={classes.list_item_wrapper}>
                         {category.image && (
                             <img className={classes.list_item_image} src={`/category_images/${category.image}`} alt={category.title} />
                         )}
                         <div className={classes.list_item_title_wrapper}>
-                            <Link href={href} className={classes.list_item_title_link}>
+                            <Link href={`/categories/${category.slug}`} className={classes.list_item_title_link}>
                                 {category.title}
                             </Link>
                         </div>

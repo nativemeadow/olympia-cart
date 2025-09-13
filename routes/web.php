@@ -16,11 +16,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
-Route::get('categories/top-level', [CategoryController::class, 'topLevelCategories']);
-
+Route::get('/', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
-Route::get('/categories/{slug}', [CategoryController::class, 'show'])->where('slug', '.*')->name('categories.show');
+Route::get('/categories/{categorySlug}', [CategoryController::class, 'show'])->where('categorySlug', '.*')->name('categories.show');
 
 Route::inertia('/resources', 'resources/index')->name('resources');
 Route::inertia('/sustainability', 'sustainability/index')->name('sustainability');
