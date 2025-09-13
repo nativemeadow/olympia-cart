@@ -1,0 +1,68 @@
+.card {
+	border: 0.125rem;
+	border-style: solid;
+	border-radius: 0.7rem;
+	border-color: #cac9c9;
+	height: 100%;
+}
+
+.card {
+	transition: box-shadow 0.3s ease-in-out;
+}
+
+.card:hover,
+.card:active {
+	-webkit-box-shadow: 1px 1px 15px 1px rgba(0, 0, 0, 0.5);
+	-moz-box-shadow: 1px 1px 15px 1px rgba(0, 0, 0, 0.425);
+	box-shadow: 1px 1px 15px 1px rgb(0 0 0 / 35%);
+}
+
+.card_container {
+	padding: 0.5rem;
+}
+
+.card_image img {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	object-fit: contain; /* Changed from 'cover' to 'contain' */
+	max-height: 100px;
+	width: 100%; /* Ensure image takes full width of container */
+	height: auto; /* Maintain aspect ratio */
+}
+
+/* Add a fixed height to the card_image container for consistent sizing */
+.card_image {
+	height: 150px; /* Match your Image component height */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.card_title a {
+	font-size: 0.96rem;
+	color: var(--title-color);
+	font-weight: 600;
+}
+
+.card_content h2 {
+	text-align: center;
+}
+
+.car_price-info {
+	text-align: center;
+}
+
+.card_pricing {
+	list-style: none;
+}
+
+.card_pricing li {
+	font-size: 0.7rem;
+	color: #8c8c8c;
+	font-weight: 500;
+}
+
+.card_pricing li ::before {
+	content: '$';
+}

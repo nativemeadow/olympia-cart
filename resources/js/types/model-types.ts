@@ -19,6 +19,7 @@ export type Category = {
     // Relationships
     parents?: Category[];
     children?: Category[];
+    products?: Product[];
 };
 
 export type Categories = Array<{

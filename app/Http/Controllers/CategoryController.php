@@ -11,24 +11,23 @@ class CategoryController extends Controller
 {
     public function children($id)
     {
-        $children = Category::find($id)->children;
+        $children = Category::findOrFail($id)->children;
         return response()->json($children);
     }
 
     public function parents($id)
     {
-        $parents = Category::where('child_id', $id)->get();
+        $parents = Category::findOrFail($id)->parents;
         return response()->json($parents);
     }
 
 
     public function index(): Response
     {
-        $categories = Category::whereIn('id', function ($query) {
-            $query->select('child_id')
-                ->from('category_category')
-                ->whereNull('parent_id');
-        })->get();
+        // A top-level category is one that does not have any parents.
+        // Using doesntHave() is more expressive and robust than the previous subquery.
+        $categories = Category::doesntHave('parents')->get();
+
         return Inertia::render('categories/index', [
             'categories' => $categories,
         ]);
@@ -37,9 +36,8 @@ class CategoryController extends Controller
     public function show($categorySlug): Response
     {
         $category = Category::where('slug', $categorySlug)
+            ->with(['children', 'products.prices'])
             ->firstOrFail();
-        // Load children for the category to display subcategories
-        $category->load('children');
 
         return Inertia::render('categories/show', [
             'category' => $category,
