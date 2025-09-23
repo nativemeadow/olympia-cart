@@ -42,7 +42,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
     }, []);
 
     return (
-        <div ref={pageWrapperRef} className="page-wrapper w-full max-w-4xl translate-y-4 opacity-0">
+        <div ref={pageWrapperRef} className="page-wrapper w-full translate-y-4 opacity-0">
             {children}
         </div>
     );

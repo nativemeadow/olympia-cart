@@ -1,0 +1,60 @@
+.row {
+	display: flex;
+	flex-wrap: wrap;
+	margin-right: -15px;
+}
+
+.wrapper {
+	display: flex;
+	max-width: fit-content;
+	/* margin-top: 1.5rem; */
+	align-items: stretch;
+	width: 100%;
+}
+
+.control {
+	flex: 0 0 30.66666667%;
+	max-width: 41.66666667%;
+}
+
+.input {
+	text-align: center;
+	border: 2px solid var(--number-spinner-color);
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.031372549);
+	position: relative;
+	flex: 1 1 auto;
+	width: 1%;
+	min-width: 3.5rem;
+	margin-bottom: 0;
+}
+
+/* Chrome, Safari, Edge, Opera */
+.input::-webkit-outer-spin-button,
+.input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+/* Firefox */
+.input {
+	-moz-appearance: textfield;
+}
+
+.button {
+	margin: auto;
+	color: var(--number-spinner-text-color);
+	border-color: var(--number-spinner-border-color);
+	height: 50px;
+	width: 150px;
+	background-color: var(--number-spinner-color);
+}
+
+.button_left {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.button_right {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}

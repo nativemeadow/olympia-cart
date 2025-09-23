@@ -1,12 +1,24 @@
 import { Category } from '@/types/model-types';
 import { Head, usePage } from '@inertiajs/react';
 import List from '@/pages/categories/list';
+import parse from 'html-react-parser';
 import type { Categories } from '@/types/model-types';
 import type { Product } from '@/types/model-types';
 import ProductsList from '@/pages/categories/product-list';
+import { useEffect } from 'react';
 
 export default function CategoryShow() {
     const { category, category_path } = usePage<{ category: Category; category_path: string }>().props;
+
+    useEffect(() => {
+        const main = document.querySelector('main');
+        if (main) {
+            main.classList.add('category-list');
+            return () => {
+                main.classList.remove('category-list');
+            };
+        }
+    }, []); // Empty dependency array ensures this runs only once on mount and unmount
 
     return (
         <div className="text-center">
@@ -22,7 +34,7 @@ export default function CategoryShow() {
                 />
             )}
 
-            {category.description && <div className="prose dark:text-[#FFF]" dangerouslySetInnerHTML={{ __html: category.description }} />}
+            {category.description && <div className="prose dark:text-[#FFF]">{parse(category.description)}</div>}
 
             <List categories={category.children as Categories} basePath={category_path} />
 

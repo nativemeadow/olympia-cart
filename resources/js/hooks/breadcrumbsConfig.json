@@ -1,0 +1,9 @@
+{
+    "filters": [
+        {
+            "title": "Products",
+            "url": "/products"
+        }
+    ],
+    "exclude": ["Products"]
+}

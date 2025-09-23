@@ -19,13 +19,13 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
                 <div className={classes.gallery_grid}>
                     {categories.map((cat) => (
                         <div key={cat.id} className={` ${classes[`gallery_${cat.slug}`]}`}>
-                            <div className={classes.gallery_item}>
-                                <RenderImage src={`category_images/${cat.image}`} alt={cat.title} className={classes.gallery_image} />
+                            <Link href={`/categories/${cat.slug}`}>
+                                <div className={classes.gallery_item}>
+                                    <RenderImage src={`category_images/${cat.image}`} alt={cat.title} className={classes.gallery_image} />
 
-                                <Link href={`/categories/${cat.slug}`}>
                                     <span className={`${classes.gallery_card} ${classes['gallery_category-title']}`}>{cat.title}</span>
-                                </Link>
-                            </div>
+                                </div>
+                            </Link>
                         </div>
                     ))}
                 </div>

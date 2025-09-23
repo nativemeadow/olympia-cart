@@ -5,7 +5,7 @@ type Props = {
 };
 
 const ImageRender = ({ src, alt, className }: Props) => {
-    const imagePath = `storage/${src}`;
+    const imagePath = `${src}`;
     return <img className={className} src={imagePath} alt={alt} />;
 };
 

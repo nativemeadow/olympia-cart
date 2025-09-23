@@ -87,3 +87,14 @@ export type Images = {
     created_at: string;
     updated_at: string;
 };
+
+export type PriceProps = {
+    sku: string;
+    price: number;
+    units: string;
+    description: string;
+    image: string;
+    coverage: string;
+    coverage_value: number;
+    online_minimum: number;
+};
