@@ -24,8 +24,7 @@ export const useShoppingCartStore = create(
             });
         },
         cartCount: () => {
-            const { items } = get();
-            return items.reduce((total, item) => total + item.quantity, 0);
+            return get().items.length;
         },
     })),
 );

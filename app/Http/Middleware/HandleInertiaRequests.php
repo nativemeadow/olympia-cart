@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use App\Models\Cart;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
@@ -52,6 +53,10 @@ class HandleInertiaRequests extends Middleware
                     // Add any other user fields you need on the frontend
                 ] : null,
             ],
+            'cart' => function () {
+                // Eager load items and their associated product for efficiency
+                return Cart::with('items.product')->where('session_id', session()->getId())->first();
+            },
             'ziggy' => fn(): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),

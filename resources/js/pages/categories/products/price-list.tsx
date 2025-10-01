@@ -35,6 +35,9 @@ const PriceList = ({ categorySlug }: Props) => {
         };
 
         router.post(route('cart.items.add'), newItem, {
+            preserveScroll: true,
+            preserveState: true,
+            only: ['cart', 'flash'],
             onSuccess: (page) => {
                 const { props } = page;
                 // @ts-expect-error - flash is not in the type
