@@ -1,49 +1,61 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import classes from './show.module.css';
 import { useProductViewStore } from '@/zustand/productViewStore';
+import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 import NumberInputSpinner from '@/components/NumberInputSpinner';
+import AddToCartDModal from '@/components/AddToCartModal';
+import { router } from '@inertiajs/react';
 
-const PriceList = () => {
-    const { product, selectedPriceIndex, selectedPrice, setSelectedPrice, setProductQty, productQty } = useProductViewStore();
-    const [selectDetails, setSelectDetails] = useState(<></>);
+type Props = {
+    categorySlug: string;
+};
 
-    const handleUpdateQty = useCallback(
-        (value: number) => {
-            setProductQty(value);
-        },
-        [setProductQty],
-    );
+const PriceList = ({ categorySlug }: Props) => {
+    const { product, selectedPriceIndex, selectedPrice, setSelectedPrice, productQty, setProductQty } = useProductViewStore();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
-    useEffect(() => {
-        let selection = <></>;
-        selection = (
-            <div className={classes.detail_quantity_selection}>
-                <NumberInputSpinner
-                    disabled={!selectedPrice?.unit || selectedPrice.unit.length <= 0}
-                    value={productQty}
-                    step={1}
-                    onChange={(newValue) => handleUpdateQty(newValue)}
-                />
+    const handleAddToCart = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!product || !selectedPrice) {
+            return;
+        }
 
-                <div className={classes['quantity_selection_units']}></div>
-                <div className={classes['quantity_selection_button']}>
-                    <button className="button" type="submit" disabled={!selectedPrice?.unit || selectedPrice.unit.length <= 0}>
-                        Add to Cart
-                    </button>
-                </div>
-            </div>
-        );
-        setSelectDetails(selection);
-    }, [selectedPrice?.unit, productQty, selectedPrice?.image, setProductQty, handleUpdateQty]);
+        const newItem = {
+            product_id: product.id,
+            item_id: selectedPrice.id,
+            sku: selectedPrice.sku || product.sku,
+            title: selectedPrice.title || product.title,
+            price: selectedPrice.price,
+            quantity: productQty,
+            unit: selectedPrice.unit,
+            image: selectedPrice.image || product.image,
+            product_slug: product.slug,
+            category_slug: categorySlug || '',
+        };
 
+        router.post(route('cart.items.add'), newItem, {
+            onSuccess: (page) => {
+                const { props } = page;
+                // @ts-expect-error - flash is not in the type
+                const message = props.flash?.success || 'Item added to cart!';
+                setSuccessMessage(message);
+                setIsModalOpen(true);
+            },
+            onError: () => {
+                setSuccessMessage('Failed to add item. Please try again.');
+                setIsModalOpen(true);
+            },
+        });
+    };
     return (
         <>
             {product && (
-                <form name="addToCart" onSubmit={(e) => e.preventDefault()} className={classes.price_list}>
+                <form name="addToCart" onSubmit={handleAddToCart} className={classes.price_list}>
                     <div className={classes['detail_selection']}>
-                        <h4>Please Select Product Options</h4>
+                        {product.prices && product.prices.length > 1 && <h4>Please Select Product Options</h4>}
                         <div className={classes.price_option}>
-                            {product.prices && product.prices.length! > 1 && (
+                            {product.prices && product.prices.length > 1 && (
                                 <>
                                     <label className={classes.detail_select_label} htmlFor="price-option">
                                         Select size
@@ -67,7 +79,7 @@ const PriceList = () => {
                                     </select>
                                 </>
                             )}
-                            {selectedPrice && (
+                            {selectedPrice ? (
                                 <div className={classes.selected_price_details}>
                                     <p>
                                         {selectedPrice.title} -
@@ -76,12 +88,33 @@ const PriceList = () => {
                                         </span>
                                     </p>
                                 </div>
+                            ) : (
+                                <div className={classes.selected_price_details}>
+                                    <p>Please select a price option to see details</p>
+                                </div>
                             )}
                         </div>
                     </div>
-                    {selectDetails}
+                    <div className={classes.detail_quantity_selection}>
+                        <NumberInputSpinner
+                            disabled={!selectedPrice?.unit || selectedPrice.unit.length <= 0}
+                            value={productQty}
+                            step={1}
+                            onChange={(newValue) => setProductQty(newValue)}
+                        />
+
+                        <div className={classes['quantity_selection_units']}></div>
+                        <div className={classes['quantity_selection_button']}>
+                            <button className="button" type="submit" disabled={!selectedPrice?.unit || selectedPrice.unit.length <= 0}>
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
                 </form>
             )}
+            <AddToCartDModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onViewCart={() => router.visit('/shopping-cart')}>
+                <p>{successMessage}</p>
+            </AddToCartDModal>
         </>
     );
 };

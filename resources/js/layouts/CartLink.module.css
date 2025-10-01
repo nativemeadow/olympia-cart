@@ -1,0 +1,219 @@
+.header {
+    color: var(--site-font-color);
+    background-color: var(--header-background-color) !important;
+    height: 4rem;
+}
+
+.header h1 {
+    font-size: 1.8em;
+    color: var(--site-font-color);
+}
+
+.site-logo {
+    width: 100%;
+    max-width: 290px;
+    transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+    -moz-transition: all 0.5s;
+    -o-transition: all 0.5s;
+}
+
+.site-log a {
+    color: var(--site-font-color);
+}
+
+.site_logo:hover {
+    transform: scale(1.1);
+}
+
+.site-logo-text {
+    color: var(--site-font-color);
+    font-size: 1.2rem;
+}
+
+.site-logo {
+    flex: 1 1 auto;
+    margin-left: 1rem;
+}
+
+.site-logo > a {
+    display: block;
+}
+
+.site-logo-image {
+    width: 100%;
+    max-width: 208px;
+    transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+    -moz-transition: all 0.5s;
+    -o-transition: all 0.5s;
+}
+
+.main-header {
+    padding-top: 1.3rem;
+    padding-bottom: 1.3rem;
+    border-bottom: solid 1px var(----light-gray-color);
+    background: var(--light-brown-color);
+    transition-property: all;
+    transition-duration: 0.5s;
+    transition-timing-function: ease;
+    transition-delay: 0;
+}
+
+.main-header-container {
+    max-width: 1250px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.main-responsive-nav {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+    margin-right: 0.4rem;
+}
+
+.shopping-cart {
+    margin-left: 1rem;
+}
+
+.shopping-cart-link {
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+.shopping-cart-link img {
+    width: 2.2rem;
+}
+
+.shopping-cart-link .shopping-cart-count {
+    margin-left: 0.5rem;
+    background: var(--color-red-500);
+    color: var(--site-font-color);
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 0.2rem 0.4rem;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-nav {
+    display: none;
+}
+
+.main-responsive-menu-hide {
+    display: none;
+}
+
+.main-responsive-menu {
+    width: 75%;
+    background-color: var(--site-background-color);
+    z-index: 999;
+    overflow: auto;
+    display: block;
+    margin-top: 0.3rem;
+    position: fixed;
+    left: 0;
+    /* height: 100vh; */
+}
+
+.main-responsive__menu .main-nav-items {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.main-responsive__menu .main-nav-item {
+    margin-left: 1.5rem;
+}
+
+.main-responsive__menu .main-nav-item a {
+    text-transform: uppercase;
+    background-color: var(--site-font-color);
+    color: #333;
+    font-size: 1rem;
+    display: block;
+    font-family: inherit;
+    font-weight: 400;
+    font-weight: bold;
+}
+
+.item {
+    color: text-gray-300;
+}
+
+@media screen and (min-width: 1023px) {
+    .main-header-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 98%;
+        margin: 0 auto;
+    }
+
+    .site-logo {
+        width: 100%;
+        max-width: 290px;
+        text-wrap: nowrap;
+        transition: all 0.5s;
+        -webkit-transition: all 0.5s;
+        -moz-transition: all 0.5s;
+        -o-transition: all 0.5s;
+    }
+
+    .main-responsive-nav {
+        display: none;
+    }
+
+    .main-responsive-menu {
+        display: none;
+    }
+
+    .main-nav {
+        display: flex;
+        align-items: center;
+    }
+
+    .main-nav-items {
+        list-style: none;
+        color: #fff;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .main-responsive-menu .main-nav-items {
+        flex-direction: column;
+        gap: 1.5rem;
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+
+    .main-responsive-menu .main-nav-item {
+        margin-left: 1.5rem;
+    }
+
+    .main-responsive-menu .main-nav-item a {
+        text-transform: uppercase;
+        background-color: var(--site-background-color);
+        color: var(--dark-gray-color);
+        font-size: 1rem;
+        display: block;
+        font-family: inherit;
+        font-weight: 400;
+        font-weight: bold;
+    }
+
+    .shopping-cart {
+        margin-left: 2rem;
+    }
+
+    .shopping-cart-link img {
+        width: 1.7rem;
+    }
+}

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Address;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -59,5 +60,10 @@ class User extends Authenticatable
     function addresses(): HasMany
     {
         return $this->hasMany(Address::class);
+    }
+
+    function customers(): HasOne
+    {
+        return $this->hasOne(Customer::class);
     }
 }

@@ -15,7 +15,11 @@ export default function PageTransition({ children }: PageTransitionProps) {
             return;
         }
 
-        const handleStart = () => {
+        const handleStart = (event: any) => {
+            // Don't apply transition on partial reloads
+            if (event.detail.visit.only.length > 0) {
+                return;
+            }
             if (pageWrapperRef.current) {
                 pageWrapperRef.current.classList.add('opacity-0', 'translate-y-4');
             }

@@ -1,5 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 import type { Config } from 'ziggy-js';
+import { Cart, User } from './model-types';
 
 export interface Auth {
     user: User;
@@ -25,7 +26,11 @@ export interface NavItem {
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
-    auth: Auth;
+    //auth: Auth;
+    auth: {
+        user: User | null;
+    };
+    cart: Cart | null;
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
     [key: string]: unknown;

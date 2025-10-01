@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import RenderImage from '@/components/render-image';
-import { Product, Price } from '@/types/model-types';
+import { Product } from '@/types/model-types';
 import { Head, Link } from '@inertiajs/react';
-import parse, { DOMNode, Element } from 'html-react-parser';
-import type { PriceProps } from '@/types/model-types';
+import parse from 'html-react-parser';
 import PriceList from './price-list';
-import classes from './show.module.css';
+import ThumbImages from './thumb-images';
+
 import { useProductViewStore } from '@/zustand/productViewStore';
+
+import classes from './show.module.css';
 
 type Props = {
     categorySlug: string;
@@ -16,35 +18,15 @@ type Props = {
 const productLabelMessage = 'Please Select Product Options';
 
 const ProductDetail = ({ categorySlug, product }: Props) => {
-    // const [pricingProps, setPricingProps] = useState(
-    //     product.prices?.map((price) => ({
-    //         // was selectList
-    //         sku: price.sku,
-    //         price: price.price,
-    //         description: price.description || '',
-    //         image: price.image ?? '',
-    //         currency: price.currency,
-    //         unit: price.unit,
-    //         coverage: price.coverage,
-    //         coverage_value: price.coverage_value,
-    //         online_minimum: price.online_minimum,
-    //     })) || [],
-    // );
-    // const [productUOM, setProductUOM] = useState(product && product.prices?.length === 1 ? product.prices[0].unit || '' : '');
-    // const [productSizeMessage, setProductSizeMessage] = useState<string>(productLabelMessage);
-    // const [productSku, setProductSku] = useState(product.sku || '');
-    // const [productSkuMessage, setProductSkuMessage] = useState<string>(productLabelMessage);
-
-    // const [productQty, setProductQty] = useState<number>(1);
-    // const [productImage, setProductImage] = useState<string>(product.image ?? '');
-    // const [selectedThumb, setSelectedThumb] = useState<string>();
-    // const [productThumbs, setProductThumbs] = useState<Price[] | undefined>([]);
-
-    const { setProduct } = useProductViewStore();
+    const { setProduct, productImage, hasMultipleImages } = useProductViewStore();
 
     React.useEffect(() => {
-        setProduct(product);
-    }, [product]);
+        setProduct(categorySlug, product);
+
+        return () => {
+            setProduct(null, null);
+        };
+    }, [product, setProduct]);
 
     return (
         <>
@@ -52,23 +34,17 @@ const ProductDetail = ({ categorySlug, product }: Props) => {
             <div className={classes.detail_container}>
                 <div className={classes.detail_image}>
                     <div className={classes.main_image_container}>
-                        <RenderImage src={`/products/${product.image}`} alt={product.title} />
+                        <RenderImage src={`/products/${productImage}`} alt={product.title} />
                     </div>
+                    <div className={classes.attribute_label}>{hasMultipleImages && <span>Select Size</span>}</div>
+                    {product.prices && product.prices.length > 1 && <ThumbImages />}
                 </div>
+
                 <div className={classes.detail}>
                     <h1 className={classes.title}>{parse(product.title)}</h1>
                     <div className={classes.product_pricing}>
                         {product.prices && product.prices.length > 0 ? (
-                            // <ul>
-                            //     {product.prices.map((price) => (
-                            //         <li key={price.id} className={classes.price_item}>
-                            //             {price.title && <strong>{price.title}: </strong>}
-                            //             {price.price} {price.currency}
-                            //             {price.unit && ` per ${price.unit}`}
-                            //         </li>
-                            //     ))}
-                            // </ul>
-                            <PriceList />
+                            <PriceList categorySlug={categorySlug} />
                         ) : (
                             <p>No pricing information available.</p>
                         )}

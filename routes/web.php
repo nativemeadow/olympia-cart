@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ContactUsController;
+use App\Http\Controllers\CartController;
 use Inertia\Inertia;
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -15,11 +16,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // The homepage shows the category index.
 Route::get('/', [CategoryController::class, 'index'])->name('home');
+
+use App\Http\Controllers\CartItemController;
+
+// ... other routes
+
+Route::patch('/cart/items/{cartItem}', [CartItemController::class, 'update'])->name('cart.items.update');
+Route::delete('/cart/items/{cartItem}', [CartItemController::class, 'destroy'])->name('cart.items.destroy');
+
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
 Route::get('/categories/products/{categorySlug}/{slug}', [ProductController::class, 'show'])->where('categorySlug', '.*')->name('products.show');
 Route::get('/categories/{categorySlug}', [CategoryController::class, 'show'])->where('categorySlug', '.*')->name('categories.show');
 
+
+Route::post('/cart/items', [CartController::class, 'addItem'])->name('cart.items.add');
+
+Route::get('/shopping-cart', [CartController::class, 'index'])->name('shopping-cart.show');
 
 Route::inertia('/resources', 'resources/index')->name('resources');
 Route::inertia('/sustainability', 'sustainability/index')->name('sustainability');

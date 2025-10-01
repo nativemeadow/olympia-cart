@@ -1,3 +1,4 @@
+import CartSync from '@/components/CartSync';
 import PublicLayout from '@/layouts/public-layout';
 import { createInertiaApp } from '@inertiajs/react';
 import createServer from '@inertiajs/react/server';
@@ -35,7 +36,21 @@ createServer((page) =>
                 });
             /* eslint-enable */
 
-            return <App {...props} />;
+            return (
+                <App
+                    {...props}
+                    children={({ Component, key, props: pageProps }) => {
+                        const getLayout = (Component as any).layout || ((page: ReactNode) => page);
+                        const page = <Component {...pageProps} key={key} />;
+
+                        return (
+                            <>
+                                <CartSync /> {getLayout(page)}
+                            </>
+                        );
+                    }}
+                />
+            );
         },
     }),
 );

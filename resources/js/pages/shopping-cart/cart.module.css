@@ -1,0 +1,223 @@
+.cart-title {
+    font-family: Aleo, sans-serif;
+    font-size: 43px;
+    font-weight: 700;
+    line-height: 64px;
+    margin: 0 2rem;
+}
+
+.cart-grid {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: 2fr;
+    grid-template-areas: 'leftSide' 'rightSide';
+    margin: 0 2rem;
+}
+
+#rightCart {
+    grid-area: rightSide;
+}
+
+#leftCart {
+    grid-area: leftSide;
+}
+
+.checkout-options {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.checkout-options img {
+    width: 33%;
+    margin-right: 15px;
+}
+
+#leftCart h2 {
+    font-size: 1.875rem;
+    font-weight: 400;
+    line-height: 1.875rem;
+    margin: 1.5rem 0 1.5rem 0;
+}
+
+.options_box {
+    border: 2px solid var(--color-gray-300);
+    background-color: var(--background);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.031372549);
+    border-radius: 7px;
+    padding: 20px;
+    display: flex;
+}
+
+.options_box .options_details {
+    color: var(--body-text-color);
+}
+
+.options_box .options_details .options_title {
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 35px;
+    display: block;
+}
+
+.options_box .options_details .options_meta {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 25px;
+}
+
+.options_box:visited .options_box:focus,
+.options_box:hover,
+.options_box:active {
+    text-decoration: none;
+    border-color: var(--color-red-750);
+}
+
+.options_box.selected {
+    border: 2px solid var(--color-red-750);
+}
+
+.cart_totals h5 {
+    color: var(--body-text-color);
+    font-size: 30px;
+    line-height: 30px;
+    border-bottom: 1px solid var(--color-gray-300);
+    padding-bottom: 30px;
+    margin-bottom: 30px;
+}
+
+.summary {
+    width: 100%;
+    height: 10rem;
+}
+
+.summary {
+    width: 100%;
+    height: 10rem;
+}
+
+.order-summary {
+    border: 2px solid var(--color-gray-400);
+    padding: 20px;
+    border-radius: 7px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.031372549);
+}
+
+.order-summary h5 {
+    font-family: Aleo;
+    font-size: 1.875rem;
+    font-weight: 500;
+}
+
+.cart-items-container {
+    /* min-height: 100px;
+	position: relative;
+	/* Force hardware acceleration in Chrome */
+    /* transform: translateZ(0);
+	backface-visibility: hidden; */
+    contain: layout;
+    will-change: transform;
+}
+
+/* Force stable container bounds */
+.order-summary {
+    transition:
+        opacity 0.3s ease-out,
+        transform 0.3s ease-out;
+    transform: translate3d(0, 0, 0); /* Force GPU rendering */
+    will-change: contents; /* Hint to browser about changes */
+}
+
+/* Loading spinner for overall cart */
+.loadingSpinner {
+    width: 32px;
+    height: 32px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color, #3498db);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.under_line {
+    border-bottom: 1px solid var(--color-gray-300);
+    padding-bottom: 30px;
+    margin-bottom: 30px;
+}
+
+.set_instructions,
+.set_total {
+    display: flex;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 30px;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.checkout_option {
+    font-weight: 400;
+}
+
+.summary_font {
+    font-family: 'Raleway', sans-serif;
+    font-size: 22px;
+    font-weight: 400;
+    padding: 20px 0;
+}
+
+.currency {
+    font-family: 'Raleway', sans-serif;
+}
+
+.checkout_button {
+}
+
+@media screen and (min-width: 1023px) {
+    .cart-grid {
+        display: grid;
+        gap: 0.5rem;
+        grid-template-columns: 2fr 1fr;
+        grid-template-areas: 'leftSide rightSide';
+        margin: 0 0 0 0;
+    }
+
+    .cart-title {
+        margin: 0 0 0 0;
+    }
+}
+
+/* Add to your cart.module.css */
+.order-summary {
+    transition: all 0.2s ease-in-out;
+}
+
+/* .cart-items-container {
+	min-height: 100px;
+	position: relative;
+} */
+
+.deleting {
+    opacity: 0;
+    transform: translateX(10px);
+}
+
+.adding {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

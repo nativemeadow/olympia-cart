@@ -1,5 +1,6 @@
 import '../css/app.css';
 
+import CartSync from '@/components/CartSync';
 import PublicLayout from '@/layouts/public-layout';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -24,7 +25,21 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        root.render(
+            <App
+                {...props}
+                children={({ Component, key, props: pageProps }) => {
+                    const getLayout = (Component as any).layout || ((page: ReactNode) => page);
+                    const page = <Component {...pageProps} key={key} />;
+
+                    return (
+                        <>
+                            <CartSync /> {getLayout(page)}
+                        </>
+                    );
+                }}
+            />,
+        );
     },
     progress: {
         color: '#4B5563',

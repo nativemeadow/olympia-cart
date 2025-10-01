@@ -88,13 +88,32 @@ export type Images = {
     updated_at: string;
 };
 
-export type PriceProps = {
-    sku: string;
+export type CartItem = {
+    id?: number | undefined;
+    product_id: number | undefined;
+    category_slug?: string | undefined;
+    product_slug?: string | undefined;
+    cart_id?: number | undefined;
+    item_id?: number | undefined;
+    sku: string | undefined;
+    title: string | undefined;
+    image: string | undefined;
     price: number;
-    units: string;
-    description: string;
-    image: string;
-    coverage: string;
-    coverage_value: number;
-    online_minimum: number;
+    quantity: number;
+    unit: string | undefined;
+    color?: string | undefined;
+};
+
+export type Cart = {
+    id: number;
+    user_id: number;
+    cart_uuid: string;
+    session_id: string;
+    total: number;
+    created_at: string;
+    updated_at: string;
+    category_slug?: string | undefined;
+    product_slug?: string | undefined;
+    // Relationships
+    items?: CartItem[];
 };

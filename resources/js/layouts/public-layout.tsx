@@ -5,6 +5,7 @@ import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ReactNode } from 'react';
 import NavLinks from './NavLinks';
+import CartLink from './CartLink';
 import Footer from './Footer';
 import PageTransition from '@/components/page-transition';
 
@@ -44,11 +45,14 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                         </>
                     )}
                 </nav>
-                <div className="site_menu flex h-[64px] w-full items-center justify-start bg-[#1914001a] px-4 text-[#1b1b18] dark:bg-[#3E3E3A] dark:text-[#fff]">
+                <div className="site_menu flex h-[64px] w-full items-center bg-[#1914001a] px-4 text-[#1b1b18] dark:bg-[#3E3E3A] dark:text-[#fff]">
                     <Link href="/categories">
                         <OMG_Logo className="logo" />
                     </Link>
                     <NavLinks />
+                    <div className="ml-auto">
+                        <CartLink />
+                    </div>
                 </div>
                 <nav>
                     <PublicHeader breadcrumbs={breadcrumbs.map((b) => ({ ...b, href: b.href ?? '' }))} />
