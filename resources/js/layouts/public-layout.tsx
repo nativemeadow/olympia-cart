@@ -1,10 +1,11 @@
 import PublicHeader from '@/components/public-header';
 import { useBreadcrumbsFromPath } from '@/hooks/useBreadcrumbsFromPath';
 import OMG_Logo from '@/layouts/OGM_Logo';
-import { type SharedData } from '@/types';
+import { SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import NavLinks from './NavLinks';
+import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 import CartLink from './CartLink';
 import Footer from './Footer';
 import PageTransition from '@/components/page-transition';
@@ -14,8 +15,14 @@ type PublicLayoutProps = {
 };
 
 export default function PublicLayout({ children }: PublicLayoutProps) {
-    const { auth } = usePage<SharedData>().props;
+    const { auth, cart } = usePage<SharedData>().props;
     const breadcrumbs = useBreadcrumbsFromPath();
+    const syncCart = useShoppingCartStore((state) => state.syncCart);
+
+    // Sync the Zustand store with the cart data from the server on every page load/navigation.
+    useEffect(() => {
+        syncCart(cart);
+    }, [cart, syncCart]);
 
     return (
         <>

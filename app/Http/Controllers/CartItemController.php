@@ -6,19 +6,17 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CartItemController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Update the specified cart item in storage.
      */
     public function update(Request $request, CartItem $cartItem)
     {
-        // Ensure the item belongs to the current user's cart
-        $cart = Cart::getFromSession();
-        if (!$cart || $cartItem->cart_id !== $cart->id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('update', $cartItem);
 
         $validated = $request->validate([
             'quantity' => ['required', 'integer', 'min:1', 'max:99'],
@@ -27,7 +25,7 @@ class CartItemController extends Controller
         $cartItem->update($validated);
 
         // Recalculate the total from all items to ensure accuracy
-        $cart->recalculateTotal();
+        $cartItem->cart->recalculateTotal();
 
         return Redirect::back()->with('success', 'Cart updated successfully.');
     }
@@ -37,16 +35,12 @@ class CartItemController extends Controller
      */
     public function destroy(CartItem $cartItem)
     {
-        // Ensure the item belongs to the current user's cart
-        $cart = Cart::getFromSession();
-        if (!$cart || $cartItem->cart_id !== $cart->id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('delete', $cartItem);
 
         $cartItem->delete();
 
         // Recalculate the total from all items to ensure accuracy
-        $cart->recalculateTotal();
+        $cartItem->cart->recalculateTotal();
 
         return Redirect::back()->with('success', 'Item removed from cart.');
     }

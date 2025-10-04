@@ -19,7 +19,11 @@ const CartItem = ({ item }: Props) => {
 
     const updateQuantity = useCallback(
         (newQuantity: number) => {
-            router.patch(route('cart.items.update', { cartItem: item.id }), { quantity: newQuantity }, { preserveScroll: true, only: ['cart'] });
+            router.patch(
+                route('cart.items.update', { cartItem: item.id }),
+                { quantity: newQuantity },
+                { preserveScroll: true, only: ['cart', 'flash'] },
+            );
         },
         [item.id],
     );
@@ -28,7 +32,7 @@ const CartItem = ({ item }: Props) => {
         if (!item.id) return;
         router.delete(route('cart.items.destroy', { cartItem: item.id }), {
             preserveScroll: true,
-            only: ['cart'],
+            only: ['cart', 'flash'],
         });
     }, [item.id]);
 
