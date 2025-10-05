@@ -294,7 +294,7 @@
 }
 
 .site_menu {
-    background-color: rgb(165, 132, 75);
+    background-color: var(--color-brown-600);
 }
 
 .page-container {

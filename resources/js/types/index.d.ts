@@ -2,6 +2,10 @@ import { LucideIcon } from 'lucide-react';
 import type { Config } from 'ziggy-js';
 import { Cart, User } from './model-types';
 
+type FlashData = {
+    success?: string;
+};
+
 export interface Auth {
     user: User;
 }
@@ -29,6 +33,9 @@ export interface SharedData {
     //auth: Auth;
     auth: {
         user: User | null;
+    };
+    flash: {
+        success?: string;
     };
     cart: Cart | null;
     ziggy: Config & { location: string };

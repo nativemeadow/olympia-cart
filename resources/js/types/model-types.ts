@@ -69,10 +69,14 @@ export type Price = {
 export type Address = {
     id: number;
     user_id: number;
-    street: string;
+    street1: string;
+    street2?: string | null;
     city: string;
     state: string;
-    postal_code: string;
+    zip: string;
+    default: boolean;
+    billing: boolean;
+    phone?: string | null;
     country: string;
     created_at: string;
     updated_at: string;

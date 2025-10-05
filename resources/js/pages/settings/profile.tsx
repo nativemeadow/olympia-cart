@@ -45,7 +45,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                         <Input
                                             id="first_name"
                                             className="mt-1 block w-full"
-                                            defaultValue={auth.user.first_name as string}
+                                            defaultValue={auth.user?.first_name as string}
                                             name="first_name"
                                             required
                                             autoComplete="given-name"
@@ -58,7 +58,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                         <Input
                                             id="last_name"
                                             className="mt-1 block w-full"
-                                            defaultValue={auth.user.last_name as string}
+                                            defaultValue={auth.user?.last_name as string}
                                             name="last_name"
                                             required
                                             autoComplete="family-name"
@@ -75,7 +75,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                         id="email"
                                         type="email"
                                         className="mt-1 block w-full"
-                                        defaultValue={auth.user.email}
+                                        defaultValue={auth.user?.email ?? ''}
                                         name="email"
                                         required
                                         autoComplete="username"
@@ -85,7 +85,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     <InputError className="mt-2" message={errors.email} />
                                 </div>
 
-                                {mustVerifyEmail && auth.user.email_verified_at === null && (
+                                {mustVerifyEmail && auth.user?.email_verified_at === null && (
                                     <div>
                                         <p className="-mt-4 text-sm text-muted-foreground">
                                             Your email address is unverified.{' '}

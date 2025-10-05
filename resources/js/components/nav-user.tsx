@@ -18,7 +18,14 @@ export function NavUser() {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton size="lg" className="group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent">
-                            <UserInfo user={auth.user} />
+                            {auth.user && (
+                                <UserInfo
+                                    user={{
+                                        ...auth.user,
+                                        email_verified_at: auth.user.email_verified_at ?? null,
+                                    }}
+                                />
+                            )}
                             <ChevronsUpDown className="ml-auto size-4" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
@@ -27,7 +34,14 @@ export function NavUser() {
                         align="end"
                         side={isMobile ? 'bottom' : state === 'collapsed' ? 'left' : 'bottom'}
                     >
-                        <UserMenuContent user={auth.user} />
+                        {auth.user && (
+                            <UserMenuContent
+                                user={{
+                                    ...auth.user,
+                                    email_verified_at: auth.user.email_verified_at ?? null,
+                                }}
+                            />
+                        )}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>
