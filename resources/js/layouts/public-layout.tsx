@@ -1,7 +1,8 @@
 import PublicHeader from '@/components/public-header';
 import { useBreadcrumbsFromPath } from '@/hooks/useBreadcrumbsFromPath';
 import OMG_Logo from '@/layouts/OGM_Logo';
-import { SharedData } from '@/types';
+import { type SharedData } from '@/types';
+import { UserNav } from '@/components/user-nav';
 import { Link, usePage } from '@inertiajs/react';
 import { ReactNode, useEffect } from 'react';
 import NavLinks from './NavLinks';
@@ -29,12 +30,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
             <header className="sticky top-0 z-10 w-full bg-[#FDFDFC] text-sm text-[#1b1b18] not-has-[nav]:hidden lg:justify-center dark:bg-[#0a0a0a] dark:text-[#EDEDEC]">
                 <nav className="mr-1.5 flex h-12 items-center justify-end gap-4">
                     {auth.user ? (
-                        <Link
-                            href={route('dashboard')}
-                            className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-                        >
-                            Dashboard
-                        </Link>
+                        <UserNav />
                     ) : (
                         <>
                             <Link
