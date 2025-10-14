@@ -16,6 +16,8 @@
     }
 }
 
+@import './fonts.css';
+
 @import 'tailwindcss';
 
 @plugin 'tailwindcss-animate';
@@ -26,8 +28,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-    --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-serif: 'Aleo', serif;
+    --font-raleway: 'Raleway', sans-serif;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -315,7 +318,7 @@ body.contact-us-page-body .page-container {
     max-width: var(--max-container-size);
     min-width: var(--min-container-size);
     margin: auto;
-    padding: 5rem 0 6.25rem 0;
+    padding: 1rem 0 6.25rem 0;
     min-height: calc(100vh - 7rem);
 }
 

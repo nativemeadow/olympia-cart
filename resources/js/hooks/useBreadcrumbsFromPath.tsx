@@ -1,6 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import { useMemo } from 'react';
-import breadcrumbsConfig from './breadcrumbsConfig.json';
+import breadcrumbsConfig from './useBreadcrumbsConfig.json';
 
 type Breadcrumb = {
     title: string;
@@ -36,6 +36,9 @@ export function useBreadcrumbsFromPath(): Breadcrumb[] {
         let currentPath = '';
         // Build breadcrumbs from the filtered segments, which corrects the hrefs for subsequent crumbs.
         filteredSegments.forEach((segment) => {
+            if (segment.includes('?term=')) {
+                segment = segment.split('?term=')[1];
+            }
             currentPath += '/' + segment;
             breadcrumbs.push({
                 title: segment

@@ -5,5 +5,5 @@
             "url": "/products"
         }
     ],
-    "exclude": ["Products"]
+    "exclude": ["Products", "Search"]
 }

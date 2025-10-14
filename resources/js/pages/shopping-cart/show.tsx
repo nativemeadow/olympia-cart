@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import DeliveryOptions from '@/components/checkout/delivery-options';
+import PickupOptions from '@/components/checkout/pickup-options';
 import { Cart, CartItem } from '@/types/model-types';
 import ShoppingCartItem from '@/components/shopping-cart';
 
@@ -24,7 +26,8 @@ const ShoppingCart = ({ cart }: Props) => {
                 <div id={classes.leftCart}>
                     <h2>Choose Checkout Options:</h2>
                     <div className={classes['checkout-options']}>
-                        <p>Checkout options will be available soon.</p>
+                        <DeliveryOptions />
+                        <PickupOptions />
                     </div>
                     <div className={`${classes['order-summary']} ${classes['cart-items-container']}`}>
                         {cart?.items && cart.items.length > 0 ? (

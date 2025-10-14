@@ -1,0 +1,47 @@
+@font-face {
+    font-family: 'Aleo';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('../fonts/aleo/Aleo-VariableFont_wght.ttf') format('truetype-variations');
+}
+
+@font-face {
+    font-family: 'Aleo';
+    font-style: italic;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('../fonts/aleo/Aleo-Italic-VariableFont_wght.ttf') format('truetype-variations');
+}
+
+@font-face {
+    font-family: 'Hanken Grotesk';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('../fonts/hanken-grotesk/HankenGrotesk-VariableFont_wght.ttf') format('truetype-variations');
+}
+
+@font-face {
+    font-family: 'Hanken Grotesk';
+    font-style: italic;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('../fonts/hanken-grotesk/HankenGrotesk-Italic-VariableFont_wght.ttf') format('truetype-variations');
+}
+
+@font-face {
+    font-family: 'Raleway';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('../fonts/raleway/Raleway-VariableFont_wght.ttf') format('truetype-variations');
+}
+
+@font-face {
+    font-family: 'Raleway';
+    font-style: italic;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('../fonts/raleway/Raleway-Italic-VariableFont_wght.ttf') format('truetype-variations');
+}

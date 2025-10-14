@@ -54,3 +54,17 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export type Checkout = {
+    id: number;
+    cart_id: number;
+    is_pickup: boolean;
+    is_delivery: boolean;
+    pickup_date: string | null;
+    pickup_time: string | null;
+    delivery_date: string | null;
+    delivery_time: string | null;
+    delivery_address_id: number | null;
+    billing_address_id: number | null;
+    instructions: string | null;
+};

@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ContactUsController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\SearchIndexController;
 use Inertia\Inertia;
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -41,6 +42,8 @@ Route::inertia('/services', 'services/index')->name('services');
 
 Route::get('/contact-us', [ContactUsController::class, 'index'])->name('contact-us');
 Route::post('/contact-us', [ContactUsController::class, 'store'])->name('contact-us.store');
+
+Route::get('/search/{searchTerm?}', [SearchIndexController::class, 'index'])->name('search.index');
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

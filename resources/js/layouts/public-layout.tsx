@@ -10,6 +10,7 @@ import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 import CartLink from './CartLink';
 import Footer from './Footer';
 import PageTransition from '@/components/page-transition';
+import SearchProducts from './SearchProducts';
 
 type PublicLayoutProps = {
     children: ReactNode;
@@ -53,6 +54,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                         <OMG_Logo className="logo" />
                     </Link>
                     <NavLinks />
+                    <SearchProducts />
                     <div className="ml-auto">
                         <CartLink />
                     </div>

@@ -11,7 +11,11 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    //
+    public function index($product_id = null)
+    {
+        $products = Product::where('id', $product_id)->with('prices')->get();
+        return response()->json($products);
+    }
 
     public function show($categorySlug, $slug)
     {

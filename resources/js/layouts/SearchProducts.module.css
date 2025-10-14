@@ -1,0 +1,17 @@
+.search-products {
+    background-color: var(--color-gray-200);
+    border-radius: 8px;
+    padding: 8px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 300px;
+}
+
+.search-button {
+    margin-left: 1rem;
+    border-radius: 8px;
+    border-color: black;
+    background-color: var(--color-yellow-500);
+    border-color: coral;
+}
