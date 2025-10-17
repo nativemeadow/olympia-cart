@@ -1,0 +1,10 @@
+.main-nav-item a {
+    font-family: Aleo, serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--main-nav-item);
+}
+
+.main-nav-item a.active {
+    color: var(--main-nav-item-active);
+}

@@ -4,13 +4,23 @@ import OMG_Logo from '@/layouts/OGM_Logo';
 import { type SharedData } from '@/types';
 import { UserNav } from '@/components/user-nav';
 import { Link, usePage } from '@inertiajs/react';
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import NavLinks from './NavLinks';
 import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 import CartLink from './CartLink';
 import Footer from './Footer';
 import PageTransition from '@/components/page-transition';
 import SearchProducts from './SearchProducts';
+import {
+    Navbar,
+    NavbarBrand,
+    NavbarContent,
+    NavbarItem,
+    NavbarMenuToggle,
+    NavbarMenu,
+    NavbarMenuItem,
+    // Spinner component might be useful here too if there's a loading state to show
+} from '@heroui/react';
 
 type PublicLayoutProps = {
     children: ReactNode;
@@ -20,6 +30,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
     const { auth, cart } = usePage<SharedData>().props;
     const breadcrumbs = useBreadcrumbsFromPath();
     const syncCart = useShoppingCartStore((state) => state.syncCart);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // Sync the Zustand store with the cart data from the server on every page load/navigation.
     useEffect(() => {

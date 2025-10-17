@@ -30,7 +30,7 @@ const SearchProducts = () => {
                 name="term"
                 value={data.term}
                 onChange={(e) => setData('term', e.target.value)}
-                placeholder="Search products..."
+                placeholder="Product search..."
                 disabled={processing}
                 size="sm"
             />

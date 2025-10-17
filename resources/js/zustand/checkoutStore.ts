@@ -8,10 +8,12 @@ interface CheckoutState {
     getCheckout: () => Checkout | null;
 }
 
-export const useCheckoutStore = create<CheckoutState>()(
+const useCheckoutStore = create<CheckoutState>()(
     devtools((set, get) => ({
         checkout: null,
         setCheckout: (checkout) => set({ checkout }),
         getCheckout: () => get().checkout,
     })),
 );
+
+export default useCheckoutStore;
