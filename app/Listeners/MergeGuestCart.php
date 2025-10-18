@@ -35,47 +35,35 @@ class MergeGuestCart
      */
     public function handle(Login $event)
     {
-        // The session has been regenerated, but the cookie for the old session ID might still be in the request.
-        // However, a more reliable method is to handle this before session regeneration.
-        // Since the logic was moved from the controller, let's assume the session ID in the request is the new one.
-        // The old logic was flawed. Let's fix it here.
-        // We can't reliably get the old session ID after the Login event.
-        // The logic should be in the controller before `regenerate()`.
-        // But to keep it in the listener as intended, we need to adjust the login flow slightly.
-
-        // The provided code has logic in both AuthenticatedSessionController and this listener.
-        // Let's consolidate it here, assuming the controller logic is removed.
-
         $user = $event->user;
         $newSessionId = $this->request->session()->getId();
+
+        // The 'old_session_id' should be stored in the session before it's regenerated during login.
         $oldSessionId = $this->request->session()->pull('old_session_id');
 
-        // Find a cart for the guest session, if one exists.
+        // Find the guest cart from before the login.
         $guestCart = $oldSessionId ? Cart::with('items')->where('session_id', $oldSessionId)->first() : null;
 
-        // Find or create a cart for the logged-in user.
-        $userCart = Cart::with('items')->firstOrCreate(['user_id' => $user->id, 'status' => 'active']);
+        // Find the user's existing cart, if any.
+        $userCart = Cart::with('items')->where('user_id', $user->id)->where('status', 'active')->first();
 
-        // If a guest cart exists and it's different from the user's cart, merge them.
-        if ($guestCart && $guestCart->id !== $userCart->id) {
-            foreach ($guestCart->items as $guestItem) {
-                $userItem = $userCart->items()->where('sku', $guestItem->sku)->where('unit', $guestItem->unit)->first();
-
-                if ($userItem) {
-                    $userItem->quantity += $guestItem->quantity;
-                    $userItem->save();
-                } else {
-                    // Re-associate the guest item with the user's cart.
-                    $guestItem->cart_id = $userCart->id;
-                    $guestItem->save();
-                }
+        if ($guestCart) {
+            if ($userCart) {
+                // Both a guest cart and a user cart exist. Merge guest items into the user's cart.
+                $guestCart->items()->update(['cart_id' => $userCart->id]);
+                $userCart->recalculateTotal();
+                $guestCart->delete();
+            } else {
+                // Only a guest cart exists. Assign it to the user.
+                $guestCart->user_id = $user->id;
+                $userCart = $guestCart; // The guest cart is now the user's cart.
             }
-            // The guest cart has been merged, so we can delete it.
-            $guestCart->delete();
         }
 
-        // Associate the user's cart with the current session and recalculate totals.
-        $userCart->update(['session_id' => $newSessionId]);
-        $userCart->recalculateTotal();
+        // Ensure the user's cart (either existing or newly assigned) is associated with the new session.
+        if ($userCart) {
+            $userCart->session_id = $newSessionId;
+            $userCart->save();
+        }
     }
 }

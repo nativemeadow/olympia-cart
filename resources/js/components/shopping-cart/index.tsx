@@ -4,6 +4,7 @@ import { Link, router } from '@inertiajs/react';
 import { CartItem as CartItemType } from '@/types/model-types';
 import InputNumberSpinner from '../NumberInputSpinner';
 import { formatCurrency } from '@/lib/utils';
+import parse from 'html-react-parser';
 
 import classes from './cart.module.css';
 
@@ -48,7 +49,7 @@ const CartItem = ({ item }: Props) => {
                     </div>
                     {/* Title and quantity cell */}
                     <div className={`${classes.title_cell} ${classes.store_cart_description}`}>
-                        <div className={classes.title_text}>{item.title}</div>
+                        <div className={classes.title_text}>{parse(item.title || '')}</div>
 
                         <InputNumberSpinner
                             disabled={false}

@@ -73,20 +73,17 @@ class CartController extends Controller
     private function getOrCreateCart(Request $request): Cart
     {
         $user = Auth::user();
-
-        $cartAttributes = [
-            'cart_uuid' => Str::uuid(),
-            'session_id' => $request->session()->getId(),
-            'active' => true,
-            'status' => 'active',
-            'total' => 0,
-        ];
+        $sessionId = $request->session()->getId();
 
         if ($user) {
-            // If a user is logged in, first check for a cart by session ID to merge guest cart.
-            $sessionCart = Cart::where('session_id', $request->session()->getId())->whereNull('user_id')->first();
-            $userCart = Cart::firstOrCreate(['user_id' => $user->id, 'status' => 'active'], $cartAttributes);
+            // Find or create a cart for the logged-in user.
+            $userCart = Cart::firstOrCreate(
+                ['user_id' => $user->id, 'status' => 'active'],
+                ['cart_uuid' => Str::uuid(), 'session_id' => $sessionId]
+            );
 
+            // Check for a guest cart from the current session to merge.
+            $sessionCart = Cart::where('session_id', $sessionId)->whereNull('user_id')->first();
             if ($sessionCart) {
                 // Merge items from guest cart to user cart and delete guest cart
                 $sessionCart->items()->update(['cart_id' => $userCart->id]);
@@ -96,14 +93,18 @@ class CartController extends Controller
             }
 
             // Ensure session_id is always associated with the user's cart
-            if ($userCart->session_id !== $request->session()->getId()) {
-                $userCart->session_id = $request->session()->getId();
+            if ($userCart->session_id !== $sessionId) {
+                $userCart->session_id = $sessionId;
                 $userCart->save();
             }
 
             return $userCart;
         }
 
-        return Cart::firstOrCreate(['session_id' => $request->session()->getId(), 'status' => 'active'], $cartAttributes);
+        // For guest users, find or create a cart based on the session ID.
+        return Cart::firstOrCreate(
+            ['session_id' => $sessionId, 'status' => 'active', 'user_id' => null],
+            ['cart_uuid' => Str::uuid()]
+        );
     }
 }

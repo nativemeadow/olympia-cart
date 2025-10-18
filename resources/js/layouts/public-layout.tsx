@@ -11,16 +11,6 @@ import CartLink from './CartLink';
 import Footer from './Footer';
 import PageTransition from '@/components/page-transition';
 import SearchProducts from './SearchProducts';
-import {
-    Navbar,
-    NavbarBrand,
-    NavbarContent,
-    NavbarItem,
-    NavbarMenuToggle,
-    NavbarMenu,
-    NavbarMenuItem,
-    // Spinner component might be useful here too if there's a loading state to show
-} from '@heroui/react';
 
 type PublicLayoutProps = {
     children: ReactNode;

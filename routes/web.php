@@ -45,5 +45,12 @@ Route::post('/contact-us', [ContactUsController::class, 'store'])->name('contact
 
 Route::get('/search/{searchTerm?}', [SearchIndexController::class, 'index'])->name('search.index');
 
+Route::get('/checkout', [App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout.index');
+Route::get('/checkout/create', [App\Http\Controllers\CheckoutController::class, 'create'])->name('checkout.create');
+Route::post('/checkout', [App\Http\Controllers\CheckoutController::class, 'store'])->name('checkout.store');
+Route::get('/checkout/{id}', [App\Http\Controllers\CheckoutController::class, 'show'])->name('checkout.show');
+Route::patch('/checkout/{id}', [App\Http\Controllers\CheckoutController::class, 'update'])->name('checkout.update');
+
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

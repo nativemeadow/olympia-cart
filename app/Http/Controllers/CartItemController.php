@@ -37,10 +37,18 @@ class CartItemController extends Controller
     {
         $this->authorize('delete', $cartItem);
 
+        $cart = $cartItem->cart;
+
         $cartItem->delete();
 
-        // Recalculate the total from all items to ensure accuracy
-        $cartItem->cart->recalculateTotal();
+        // After deleting, check if the cart has any items left.
+        if ($cart->items()->count() === 0) {
+            $cart->delete();
+            return Redirect::back()->with('success', 'Cart has been cleared.');
+        }
+
+        // If items remain, just recalculate the total.
+        $cart->recalculateTotal();
 
         return Redirect::back()->with('success', 'Item removed from cart.');
     }
