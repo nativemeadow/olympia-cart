@@ -39,4 +39,12 @@ class Checkout extends Model
     {
         return $this->belongsTo(Address::class, 'billing_address_id');
     }
+
+    /**
+     * Get the cart associated with the checkout.
+     */
+    public function cart(): BelongsTo
+    {
+        return $this->belongsTo(Cart::class);
+    }
 }

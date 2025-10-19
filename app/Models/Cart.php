@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\CartItem;
+use App\Models\Checkout;
+
 
 class Cart extends Model
 {
@@ -43,5 +45,10 @@ class Cart extends Model
             return $item->price * $item->quantity;
         });
         $this->save();
+    }
+
+    public function checkout()
+    {
+        return $this->hasOne(Checkout::class, 'cart_id');
     }
 }

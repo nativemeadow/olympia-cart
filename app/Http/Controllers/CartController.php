@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Cart;
+use App\Models\Category;
 
 class CartController extends Controller
 {
@@ -21,8 +22,13 @@ class CartController extends Controller
             $cart = Cart::with('items.product')->where('session_id', session()->getId())->first();
         }
 
+        /* get the checkout information if it exists, may not exist so check for that as well */
+
+        $checkout = $cart ? $cart->checkout : null;
+
         return Inertia::render('shopping-cart/show', [
             'cart' => $cart,
+            'checkout' => $checkout,
         ]);
     }
 
