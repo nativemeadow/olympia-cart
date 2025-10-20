@@ -1,6 +1,6 @@
 import CartSync from '@/components/CartSync';
 import PublicLayout from '@/layouts/public-layout';
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -24,6 +24,17 @@ createInertiaApp({
     },
     setup({ el, App, props }) {
         const root = createRoot(el);
+
+        // This logic checks if the page was reloaded. If so, it makes a fresh
+        // visit to get the latest data from the server, preventing stale data.
+        const navigationEntry = window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        if (navigationEntry && navigationEntry.type === 'reload') {
+            router.visit(window.location.href, {
+                replace: true,
+                preserveState: true,
+                preserveScroll: true,
+            });
+        }
 
         root.render(
             <HeroUIProvider>

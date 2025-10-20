@@ -1,22 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import DeliveryOptions from '@/components/checkout/delivery-options';
 import PickupOptions from '@/components/checkout/pickup-options';
+import useCheckoutStore from '@/zustand/checkoutStore';
 import { Cart, CartItem } from '@/types/model-types';
+import { type Checkout } from '@/types';
 import ShoppingCartItem from '@/components/shopping-cart';
 
 import classes from './cart.module.css';
 
 type Props = {
     cart: Cart;
+    checkout?: Checkout;
 };
 
-const ShoppingCart = ({ cart }: Props) => {
+const ShoppingCart = ({ cart, checkout }: Props) => {
     const [cartTotal, setCartTotal] = useState(cart ? cart.total : 0);
+    const { setCheckout } = useCheckoutStore();
 
     useEffect(() => {
         if (cart) {
             setCartTotal(cart.total);
         }
+        // Sync the checkout data from props with the Zustand store
+        setCheckout(checkout || null);
     }, [cart]);
 
     return (

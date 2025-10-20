@@ -29,7 +29,7 @@ class CategoryController extends Controller
         $categories = Category::doesntHave('parents')->get();
 
         return Inertia::render('categories/index', [
-            'categories' => $categories,
+            'categories' => $categories
         ]);
     }
 

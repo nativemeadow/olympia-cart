@@ -67,12 +67,12 @@ class User extends Authenticatable
         return $this->hasOne(Customer::class);
     }
 
-    function carts(): HasMany
+    function allCarts(): HasMany
     {
         return $this->hasMany(Cart::class);
     }
 
-    function currentCart(): HasOne
+    function carts(): HasOne
     {
         return $this->hasOne(Cart::class)->where('status', 'active');
     }
