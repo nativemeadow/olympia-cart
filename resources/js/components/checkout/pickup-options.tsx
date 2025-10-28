@@ -14,15 +14,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import useCheckoutStore from '@/zustand/checkoutStore';
+import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 import { getTodayDate } from '@/lib/date-util';
 import { InputError } from '@/components/ui/input-error';
 import { useForm } from '@inertiajs/react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 import classes from './options.module.css';
 
 const PickupOptions = () => {
     const [isOpen, setIsOpen] = useState(false);
     const { checkout } = useCheckoutStore();
+    const { cartCount } = useShoppingCartStore();
 
     const { data, setData, post, patch, processing, errors, reset } = useForm({
         is_pickup: true,
@@ -59,10 +70,33 @@ const PickupOptions = () => {
         });
     };
 
+    if (cartCount() < 1) {
+        return (
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <div className={classes.options_box} data-checkout-option={'pickup'} data-disabled={true}>
+                        <img height={270} width={315} alt="In-store pickup icon" src="/assets/in-store-pickup-icon.png" />
+                        <div className={classes.options_details}>
+                            <span className={classes.options_title}>Pickup</span>
+                            <span className={classes.options_meta}>Pick up your order from the store</span>
+                        </div>
+                    </div>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Your Cart is Empty</AlertDialogTitle>
+                        <AlertDialogDescription>Please add items to your shopping cart before selecting a pickup option.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogAction>OK</AlertDialogAction>
+                </AlertDialogContent>
+            </AlertDialog>
+        );
+    }
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <div className={classes.options_box} data-checkout-option={'pickup'}>
+                <div className={classes.options_box} data-checkout-option={'pickup'} onClick={openModal}>
                     <img height={270} width={315} alt="In-store pickup icon" src="/assets/in-store-pickup-icon.png" />
                     <div className={classes.options_details}>
                         <span className={classes.options_title}>Pickup</span>
@@ -77,7 +111,7 @@ const PickupOptions = () => {
                 </DialogHeader>
                 <form id="pickup-form" onSubmit={handleSubmit} className="space-y-4">
                     <InputError message={errors.cart} />
-                    <div className="mb-6 flex w-full flex-wrap items-end gap-4 md:mb-0 md:flex-nowrap">
+                    <div className="mb-6 flex w-full flex-wrap items-end gap-4 md:mb-6 md:flex-nowrap">
                         <Input
                             type="date"
                             min={getTodayDate()}

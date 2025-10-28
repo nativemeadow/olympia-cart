@@ -14,14 +14,25 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import useCheckoutStore from '@/zustand/checkoutStore';
+import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 import { getTodayDate } from '@/lib/date-util';
 import { InputError } from '@/components/ui/input-error';
 import { useForm } from '@inertiajs/react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import classes from './options.module.css';
 
 const DeliveryOptions = () => {
     const [isOpen, setIsOpen] = useState(false);
     const { checkout } = useCheckoutStore();
+    const { cartCount } = useShoppingCartStore();
 
     const { data, setData, post, patch, processing, errors, reset } = useForm({
         is_pickup: false,
@@ -58,6 +69,29 @@ const DeliveryOptions = () => {
             },
         });
     };
+
+    if (cartCount() < 1) {
+        return (
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <div className={classes.options_box} data-checkout-option={'delivery'} data-disabled={true}>
+                        <img height={270} width={315} alt="" src="/assets/delivery-icon.png" />
+                        <div className={classes.options_details}>
+                            <span className={classes.options_title}>Delivery</span>
+                            <span className={classes.options_meta}>Have your order delivery to you home</span>
+                        </div>
+                    </div>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Your Cart is Empty</AlertDialogTitle>
+                        <AlertDialogDescription>Please add items to your shopping cart before selecting a delivery option.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogAction>OK</AlertDialogAction>
+                </AlertDialogContent>
+            </AlertDialog>
+        );
+    }
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

@@ -18,6 +18,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('settings/address/{address}', [AddressController::class, 'update'])->name('address.update');
     Route::delete('settings/address/{address}', [AddressController::class, 'destroy'])->name('address.destroy');
 
+    // Add this route for setting the default address
+    Route::put('settings/address/{address:id}/set-default', [AddressController::class, 'setDefault'])->name('address.setDefault')->scopeBindings();
+
     Route::get('settings/password', [PasswordController::class, 'edit'])->name('password.edit');
 
     Route::put('settings/password', [PasswordController::class, 'update'])
