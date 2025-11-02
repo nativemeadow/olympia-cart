@@ -42,14 +42,21 @@ class CheckoutController extends Controller
         ]);
 
         $user = $request->user();
-        // Find the user's most recently updated cart. This is more reliable than a simple hasOne relationship.
-        $cart = $user->carts()->latest()->first();
+        $cart = null;
+
+        if ($user) {
+            // Find the user's most recently updated cart.
+            $cart = $user->carts()->latest()->first();
+        } else {
+            // For guests, find the cart using the session ID.
+            $cart = \App\Models\Cart::where('session_id', $request->session()->getId())->whereNull('user_id')->first();
+        }
 
         if (!$cart) {
             return back()->withErrors(['cart' => 'No active shopping cart found.'])->with('error', 'No active shopping cart found.');
         }
 
-        $billingAddress = $user->addresses()->where('billing', true)->first();
+        $billingAddress = $user?->addresses()->where('billing', true)->first();
 
         $checkoutData = [
             'cart_id' => $cart->id,
@@ -98,10 +105,7 @@ class CheckoutController extends Controller
 
         $checkout = Checkout::findOrFail($id);
 
-        // Optional: Add authorization to ensure the user owns this checkout.
-        // if ($checkout->cart->user_id !== $request->user()->id) {
-        //     abort(403);
-        // }
+        $this->authorize('update', $checkout);
 
         if ($validatedData['is_pickup']) {
             $checkout->fill([
