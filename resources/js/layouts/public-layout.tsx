@@ -11,6 +11,9 @@ import CartLink from './CartLink';
 import Footer from './Footer';
 import PageTransition from '@/components/page-transition';
 import SearchProducts from './SearchProducts';
+import cx from 'clsx';
+
+import classes from './public-layout.module.css';
 
 type PublicLayoutProps = {
     children: ReactNode;
@@ -28,8 +31,13 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
     }, [cart, syncCart]);
 
     return (
-        <>
-            <header className="sticky top-0 z-10 w-full bg-[#FDFDFC] text-sm text-[#1b1b18] not-has-[nav]:hidden lg:justify-center dark:bg-[#0a0a0a] dark:text-[#EDEDEC]">
+        <div className={classes.page_container}>
+            <header
+                className={cx(
+                    'sticky top-0 z-10 w-full bg-[#FDFDFC] text-sm text-[#1b1b18] not-has-[nav]:hidden lg:justify-center dark:bg-[#0a0a0a] dark:text-[#EDEDEC]',
+                    classes.header,
+                )}
+            >
                 <nav className="mr-1.5 flex h-12 items-center justify-end gap-4">
                     {auth.user ? (
                         <UserNav />
@@ -61,16 +69,29 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                     </div>
                 </div>
                 <nav>
-                    <PublicHeader breadcrumbs={breadcrumbs.map((b) => ({ ...b, href: b.href ?? '' }))} />
+                    <PublicHeader
+                        breadcrumbs={breadcrumbs.map((b) => ({
+                            ...b,
+                            href: b.href ?? '',
+                        }))}
+                    />
                 </nav>
             </header>
-            <div className="page-container flex min-h-screen flex-col items-center p-6 lg:justify-center lg:p-2">
-                <main className="main">
+            <div
+                className={
+                    cx(
+                        'main page-container items-center p-6 lg:justify-center lg:p-2',
+                    ) +
+                    ' ' +
+                    classes['main-content']
+                }
+            >
+                <main>
                     <PageTransition>{children}</PageTransition>
                 </main>
                 <div className="hidden h-14.5 lg:block"></div>
             </div>
-            <Footer />
-        </>
+            <Footer cssClass={classes.footer} />
+        </div>
     );
 }

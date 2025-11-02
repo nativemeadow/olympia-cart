@@ -41,7 +41,7 @@ class AddressController extends Controller
 
         $user->addresses()->create($validated);
 
-        return redirect()->route('address.index')->with('success', 'Address added successfully.');
+        return back()->with('success', 'Address added successfully.');
     }
 
     public function update(AddressRequest $request, Address $address)
@@ -63,7 +63,7 @@ class AddressController extends Controller
 
         $address->update($validated);
 
-        return redirect()->route('address.index')->with('success', 'Address updated successfully.');
+        return back()->with('success', 'Address updated successfully.');
     }
 
     public function destroy(Address $address)
@@ -72,7 +72,7 @@ class AddressController extends Controller
 
         $address->delete();
 
-        return redirect()->route('address.index')->with('success', 'Address removed successfully.');
+        return back()->with('success', 'Address removed successfully.');
     }
 
     /**

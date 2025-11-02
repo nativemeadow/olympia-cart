@@ -62,6 +62,7 @@ export type Checkout = {
     is_delivery: boolean;
     pickup_date: string | null;
     pickup_time: string | null;
+    billing_same_as_shipping: boolean;
     delivery_date: string | null;
     delivery_time: string | null;
     delivery_address_id: number | null;
