@@ -37,7 +37,8 @@ class CheckoutController extends Controller
             'pickup_date' => 'required_if:is_pickup,true|nullable|date|after_or_equal:today',
             'pickup_time' => 'required_if:is_pickup,true|nullable|date_format:H:i',
             'delivery_date' => 'required_if:is_delivery,true|nullable|date|after_or_equal:today',
-            'instructions' => 'required_if:is_delivery,true|nullable|string|max:1000'
+            'instructions' => 'required_if:is_delivery,true|nullable|string|max:1000',
+            'billing_same_as_shipping' => 'sometimes|boolean',
         ]);
 
         $user = $request->user();
@@ -55,6 +56,7 @@ class CheckoutController extends Controller
             'is_pickup' => $validatedData['is_pickup'],
             'is_delivery' => $validatedData['is_delivery'],
             'billing_address_id' => $billingAddress?->id,
+            'billing_same_as_shipping' => $validatedData['billing_same_as_shipping'] ?? false,
         ];
 
         if ($validatedData['is_pickup']) {
@@ -91,6 +93,7 @@ class CheckoutController extends Controller
             'pickup_time' => 'required_if:is_pickup,true|nullable|date_format:H:i',
             'delivery_date' => 'required_if:is_delivery,true|nullable|date|after_or_equal:today',
             'instructions' => 'required_if:is_delivery,true|nullable|string|max:1000',
+            'billing_same_as_shipping' => 'sometimes|boolean',
         ]);
 
         $checkout = Checkout::findOrFail($id);

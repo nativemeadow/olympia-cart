@@ -12,6 +12,8 @@ import type { User } from '@/types';
 import { Address } from '@/types/model-types';
 import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 
+import classes from './checkout.module.css';
+
 type CustomerData = (User & { addresses: Address[] }) | null;
 
 type Props = {
@@ -52,14 +54,15 @@ function CheckOutPage() {
     return (
         <CheckoutLayout>
             <div>
-                {currentStep === 'customerInfo' && (
-                    <StepOne customer={customer} />
-                )}
-                {currentStep === 'shippingDelivery' && <StepTwo />}
-                {currentStep === 'reviewAgreement' && <StepThree />}
-                {currentStep === 'payment' && <StepFour />}
-                {currentStep === 'confirmation' && <Confirmation />}
-
+                <div className={classes.checkout_container}>
+                    {currentStep === 'customerInfo' && (
+                        <StepOne customer={customer} />
+                    )}
+                    {currentStep === 'shippingDelivery' && <StepTwo />}
+                    {currentStep === 'reviewAgreement' && <StepThree />}
+                    {currentStep === 'payment' && <StepFour />}
+                    {currentStep === 'confirmation' && <Confirmation />}
+                </div>
                 <div className="mt-6 flex justify-between gap-3">
                     <Button
                         className="h-12 rounded bg-yellow-700 text-xl text-white"

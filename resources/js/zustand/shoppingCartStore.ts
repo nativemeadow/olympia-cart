@@ -12,23 +12,28 @@ type ShoppingCartStore = {
 };
 
 export const useShoppingCartStore = create(
-    devtools<ShoppingCartStore>((set, get) => ({
-        items: [],
-        removeItem: (itemId) =>
-            set((state) => ({
-                items: state.items.filter((item) => item.item_id !== itemId),
-            })),
-        clearCart: () => set({ items: [] }),
-        syncCart: (cart) => {
-            set({
-                items: cart?.items || [],
-            });
-        },
-        cartCount: () => {
-            return get().items.length;
-        },
-        cartId: () => {
-            return get().items[0]?.cart_id || null;
-        },
-    })),
+    devtools<ShoppingCartStore>(
+        (set, get) => ({
+            items: [],
+            removeItem: (itemId) =>
+                set((state) => ({
+                    items: state.items.filter(
+                        (item) => item.item_id !== itemId,
+                    ),
+                })),
+            clearCart: () => set({ items: [] }),
+            syncCart: (cart) => {
+                set({
+                    items: cart?.items || [],
+                });
+            },
+            cartCount: () => {
+                return get().items.length;
+            },
+            cartId: () => {
+                return get().items[0]?.cart_id || null;
+            },
+        }),
+        { name: 'ShoppingCartStore' },
+    ),
 );

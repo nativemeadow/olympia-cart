@@ -1,10 +1,14 @@
 import React from 'react';
 
-export default function Footer() {
-	return (
-		<footer className='footer'>
-			© {new Date().getFullYear()} Olympia Garden Materials. All rights
-			reserved.
-		</footer>
-	);
+type FooterProps = {
+    cssClass: string;
+};
+
+export default function Footer({ cssClass }: FooterProps) {
+    return (
+        <footer className={`{${cssClass}} footer`}>
+            © {new Date().getFullYear()} Olympia Garden Materials. All rights
+            reserved.
+        </footer>
+    );
 }

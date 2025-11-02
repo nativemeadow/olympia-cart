@@ -21,35 +21,52 @@ const formatTime = (pickupTime: string | null): string => {
 
 interface CheckoutState {
     checkout: Checkout | null;
+    billingSameAsShipping: boolean;
     setCheckout: (checkout: Checkout | null) => void;
+    setBillingSameAsShipping: (isSame: boolean) => void;
     getCheckout: () => Checkout | null;
     getFormattedDate: () => string;
     getFormattedTime: () => string;
 }
 
-const useCheckoutStepsStore = create<CheckoutState>()(
-    devtools((set, get) => ({
-        checkout: null,
-        setCheckout: (checkout) => set({ checkout }),
-        getCheckout: () => get().checkout,
-        getFormattedDate: () => {
-            const date = new Date();
-            const checkout = get().checkout;
-            if (checkout && checkout.is_pickup && checkout.pickup_date) {
-                return formatDate(new Date(checkout.pickup_date));
-            }
-            if (checkout && checkout.is_delivery && checkout.delivery_date) {
-                return formatDate(new Date(checkout.delivery_date));
-            }
-            return formatDate(date);
-        },
-        getFormattedTime: () => {
-            const checkout = get().checkout;
-            if (checkout && checkout.is_pickup && checkout.pickup_time) {
-                return formatTime(checkout.pickup_time);
-            }
-        },
-    })),
+const useCheckoutStore = create<CheckoutState>()(
+    devtools(
+        (set, get) => ({
+            checkout: null,
+            billingSameAsShipping: false,
+            setCheckout: (checkout) =>
+                set({
+                    checkout,
+                    billingSameAsShipping:
+                        checkout?.billing_same_as_shipping ?? false,
+                }),
+            setBillingSameAsShipping: (isSame) =>
+                set({ billingSameAsShipping: isSame }),
+            getCheckout: () => get().checkout,
+            getFormattedDate: () => {
+                const date = new Date();
+                const checkout = get().checkout;
+                if (checkout && checkout.is_pickup && checkout.pickup_date) {
+                    return formatDate(new Date(checkout.pickup_date));
+                }
+                if (
+                    checkout &&
+                    checkout.is_delivery &&
+                    checkout.delivery_date
+                ) {
+                    return formatDate(new Date(checkout.delivery_date));
+                }
+                return formatDate(date);
+            },
+            getFormattedTime: () => {
+                const checkout = get().checkout;
+                if (checkout && checkout.is_pickup && checkout.pickup_time) {
+                    return formatTime(checkout.pickup_time);
+                }
+            },
+        }),
+        { name: 'CheckoutStore' },
+    ),
 );
 
-export default useCheckoutStepsStore;
+export default useCheckoutStore;

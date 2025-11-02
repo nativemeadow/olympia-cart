@@ -1,6 +1,8 @@
 import useCheckOutSteps from '@/zustand/checkoutStepsStore';
 import useCheckoutStore from '@/zustand/checkoutStore';
 
+import classes from './checkout-steps.module.css';
+
 const Steps = [
     { CustomerInfo: 'Customer Info' },
     {
@@ -36,32 +38,43 @@ const CheckoutSteps = () => {
     });
 
     return (
-        <>
-            <div className="mb-20 flex h-3 w-full items-center bg-gray-200">
+        <div className={classes.checkout_steps_container}>
+            <div className="flex h-3 w-full items-center bg-gray-200">
                 <div className="flex w-full justify-evenly">
                     {currentStep.map((label, index) => {
                         return (
-                            <div key={index} className={`mt-9 flex flex-1 flex-col items-center`}>
+                            <div
+                                key={index}
+                                className={`mt-9 flex flex-1 flex-col items-center`}
+                            >
                                 <div
                                     className={`h-16 w-16 border-2 ${
-                                        index === getCurrentStepNumber() ? currentStepColor : stepColor
+                                        index === getCurrentStepNumber()
+                                            ? currentStepColor
+                                            : stepColor
                                     } flex justify-center rounded-full border-gray-200`}
                                 >
                                     <span
                                         className={`${
-                                            index === getCurrentStepNumber() ? currentStepTextColor : stepsTextColor
+                                            index === getCurrentStepNumber()
+                                                ? currentStepTextColor
+                                                : stepsTextColor
                                         } self-center font-raleway text-3xl font-bold`}
                                     >
                                         {index + 1}
                                     </span>
                                 </div>
-                                <div className={`mt-4 text-center font-raleway font-medium`}>{label}</div>
+                                <div
+                                    className={`mt-4 text-center font-raleway font-medium`}
+                                >
+                                    {label}
+                                </div>
                             </div>
                         );
                     })}
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

@@ -1,65 +1,65 @@
 .detail_heading {
-	font-size: 35px;
-	font-weight: 400;
-	padding-bottom: 45px;
+    font-size: 35px;
+    font-weight: 400;
+    padding-bottom: 45px;
 }
 
 .detail_title {
-	text-align: center;
-	font-size: 50px;
+    text-align: center;
+    font-size: 50px;
 }
 
 .detail_description > p {
-	text-align: center;
-	margin-bottom: 15px;
-	font-size: 16px;
-	line-height: 160%;
-	font-family: 'Raleway', sans-serif;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 16px;
+    line-height: 160%;
+    font-family: 'Raleway', sans-serif;
 }
 
 .products_list div {
-	margin-bottom: 11px;
-	vertical-align: top;
-	border-radius: 5px;
+    margin-bottom: 11px;
+    vertical-align: top;
+    border-radius: 5px;
 }
 
 .products_grid {
-	display: grid;
-	gap: 1rem;
-	grid-template-columns: repeat(1, 1fr);
-	max-width: 90%;
-	/* margin: 0 auto; */
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+    max-width: 100%;
+    /* margin: 0 auto; */
 }
 
 .products_grid .products_image img {
-	object-fit: cover;
-	max-height: 100px;
+    object-fit: cover;
+    max-height: 100px;
 }
 
 .products_title a {
-	font-size: 0.96rem;
-	color: rgb(26, 26, 26);
-	font-weight: 600;
+    font-size: 0.96rem;
+    color: rgb(26, 26, 26);
+    font-weight: 600;
 }
 
 .products_pricing {
-	list-style: none;
+    list-style: none;
 }
 
 .products_pricing li {
-	font-size: 0.7rem;
+    font-size: 0.7rem;
 }
 
 .products_pricing li ::before {
-	content: '$';
+    content: '$';
 }
 
 @media screen and (min-width: 768px) {
-	.products_grid {
-		display: grid;
-		gap: 1rem;
-		grid-template-columns: repeat(3, 1fr);
-		max-width: 100%;
-		margin: 0 auto;
-	}
+    .products_grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 100%;
+        margin: 0 auto;
+    }
 }

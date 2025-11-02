@@ -2,13 +2,15 @@ import { usePage } from '@inertiajs/react';
 import { Inertia } from '@inertiajs/inertia';
 import { useEffect } from 'react';
 
-interface User {
-    id: number;
-    first_name: string;
-    last_name: string;
-    email: string;
-    // Add any other user properties you expect from your Laravel User model
-}
+import { User } from '@/types/model-types';
+
+// interface User {
+//     id: number;
+//     first_name: string;
+//     last_name: string;
+//     email: string;
+//     // Add any other user properties you expect from your Laravel User model
+// }
 
 // This interface defines the shape of the `auth` prop shared from Laravel
 interface AuthProps {

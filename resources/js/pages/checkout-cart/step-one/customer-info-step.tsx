@@ -2,42 +2,69 @@ import React, { useState, useEffect } from 'react';
 import useAuth from '@/hooks/useAuth'; // Assuming you have a hook for auth status
 import useCheckoutStore from '@/zustand/checkoutStore';
 import { User } from '@/types';
-import { Address } from '@/types/model-types';
+import { Address, User as UserType } from '@/types/model-types';
+import { Checkout } from '@/types';
 
 import classes from './customer-info.module.css'; // Assuming you have some CSS modules for styling
-import { router } from '@inertiajs/react';
+import { router, useForm } from '@inertiajs/react';
 import clsx from 'clsx';
 
 // A potential new component for handling the address form itself
 // import AddressForm from './address-form';
+import AddressForm from './address-form';
+import { Button } from '@/components/ui/button';
+import { AddressDialog } from './address-dialog';
 
-type CustomerData = (User & { addresses: Address[] }) | null;
+type CustomerData = (UserType & { addresses: Address[] }) | null;
 
 const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
     const { user, isAuthenticated } = useAuth(); // Your auth hook
-    const { checkout /*, setBillingAddress, setShippingAddress */ } =
-        useCheckoutStore();
+    const {
+        checkout,
+        billingSameAsShipping,
+        setBillingSameAsShipping,
+        setCheckout,
+    } = useCheckoutStore();
 
     // Use local state to manage addresses for immediate UI updates
     const [localAddresses, setLocalAddresses] = useState<Address[]>(
         customer?.addresses || [],
     );
 
-    useEffect(() => setLocalAddresses(customer?.addresses || []), [customer]);
+    // State to control the visibility of each address form independently
+    const [showShippingForm, setShowShippingForm] = useState(false);
+    const [showBillingForm, setShowBillingForm] = useState(false);
+    const [dialogAddress, setDialogAddress] = useState<Address | 'new' | null>(
+        null,
+    );
+
+    const { delete: destroy, processing: deleting } = useForm();
+
+    useEffect(() => {
+        const addresses = customer?.addresses || [];
+        setLocalAddresses(addresses);
+
+        // Determine if shipping or billing addresses are missing
+        const hasShippingAddress = addresses.some((addr) => addr.default);
+        const hasBillingAddress = addresses.some((addr) => addr.billing);
+
+        setShowShippingForm(!hasShippingAddress);
+        setShowBillingForm(!hasBillingAddress);
+
+        // Only set the initial state from the checkout object when it's first loaded.
+        if (
+            checkout &&
+            checkout.billing_same_as_shipping !== billingSameAsShipping
+        ) {
+            setBillingSameAsShipping(checkout.billing_same_as_shipping);
+        }
+    }, [customer, checkout]); // Removed setBillingSameAsShipping from dependencies
 
     // State to manage the flow for non-authenticated users
     const [email, setEmail] = useState('');
     const [view, setView] = useState<
         'initial' | 'login' | 'register' | 'guest'
     >('initial');
-
-    const handleBillingAddressUpdate = (address: any) => {
-        // This function is now handled by handleSetDefault
-    };
-
-    const handleDeliveryAddressUpdate = (address: any) => {
-        // This function is now handled by handleSetDefault
-    };
 
     const handleEmailCheck = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -81,10 +108,44 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         );
     };
 
+    const handleDelete = (addressId: number) => {
+        if (window.confirm('Are you sure you want to delete this address?')) {
+            destroy(route('address.destroy', addressId), {
+                preserveScroll: true,
+            });
+        }
+    };
+
+    const handleBillingSameAsShippingChange = (
+        e: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+        const isChecked = e.target.checked;
+        setBillingSameAsShipping(isChecked);
+
+        if (checkout) {
+            router.patch(
+                route('checkout.update', checkout.id),
+                {
+                    ...checkout, // send existing data
+                    billing_same_as_shipping: isChecked,
+                },
+                {
+                    preserveScroll: true,
+                    onSuccess: (page) => {
+                        setCheckout(page.props.checkout as Checkout);
+                    },
+                },
+            );
+        }
+    };
+
     if (isAuthenticated && customer) {
+        const hasShippingAddress = localAddresses.some((addr) => addr.default);
+        const hasBillingAddress = localAddresses.some((addr) => addr.billing);
+
         // --- VIEW FOR LOGGED-IN USER ---
         return (
-            <div>
+            <>
                 <h2 className="text-2xl font-bold">
                     Welcome back,{' '}
                     {customer.first_name + ' ' + customer.last_name}!
@@ -95,7 +156,15 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
 
                 {/* Example of displaying addresses */}
                 <div className="mt-4 rounded border p-4">
-                    <h3 className="font-semibold">Your Addresses:</h3>
+                    <div className="mb-4 flex items-center justify-between">
+                        <h3 className="font-semibold">Your Addresses:</h3>
+                        <Button
+                            variant="outline"
+                            onClick={() => setDialogAddress('new')}
+                        >
+                            Add New Address
+                        </Button>
+                    </div>
                     {localAddresses.length > 0 ? (
                         <div className={classes.address_grid}>
                             {localAddresses.map((address) => (
@@ -150,6 +219,27 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                             Default Billing
                                         </label>
                                     </div>
+                                    <div className="mt-4 flex justify-end gap-2 border-t pt-4">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() =>
+                                                setDialogAddress(address)
+                                            }
+                                        >
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={() =>
+                                                handleDelete(address.id)
+                                            }
+                                            disabled={deleting}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -160,29 +250,75 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                     )}
                 </div>
 
+                <AddressDialog
+                    address={dialogAddress}
+                    isOpen={dialogAddress !== null}
+                    onClose={() => setDialogAddress(null)}
+                />
+
                 {/* Address Forms based on pickup/delivery */}
-                {checkout?.is_pickup ? (
+                {checkout?.is_pickup && showBillingForm ? (
                     <div>
                         <h3 className="mt-6 text-xl font-semibold">
                             Billing Information
                         </h3>
-                        {/* <AddressForm type="billing" user={user} onUpdate={handleBillingAddressUpdate} /> */}
+                        <AddressForm
+                            type="billing"
+                            user={user}
+                            onSuccess={() => setShowBillingForm(false)}
+                        />
                     </div>
-                ) : (
-                    <div>
-                        <h3 className="mt-6 text-xl font-semibold">
-                            Shipping Address
-                        </h3>
-                        {/* <AddressForm type="shipping" user={user} onUpdate={handleDeliveryAddressUpdate} /> */}
+                ) : null}
 
-                        {/* Logic for "same as" checkbox would go here */}
-                        <h3 className="mt-6 text-xl font-semibold">
-                            Billing Address
-                        </h3>
-                        {/* <AddressForm type="billing" user={user} onUpdate={handleBillingAddressUpdate} /> */}
-                    </div>
-                )}
-            </div>
+                {checkout?.is_delivery ? (
+                    <>
+                        {showShippingForm && (
+                            <div>
+                                <h3 className="mt-6 text-xl font-semibold">
+                                    Shipping Address
+                                </h3>
+                                <AddressForm
+                                    type="shipping"
+                                    user={user}
+                                    billingSameAsShipping={
+                                        billingSameAsShipping
+                                    }
+                                    onSuccess={() => setShowShippingForm(false)}
+                                />
+                            </div>
+                        )}
+
+                        {/* Only show checkbox if one or both addresses are missing */}
+                        {(!hasShippingAddress || !hasBillingAddress) && (
+                            <div className="mt-4 flex items-center">
+                                <input
+                                    id="billing-same-as-shipping"
+                                    type="checkbox"
+                                    checked={billingSameAsShipping}
+                                    onChange={handleBillingSameAsShippingChange}
+                                    className="mr-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <label htmlFor="billing-same-as-shipping">
+                                    Billing address is the same as shipping
+                                </label>
+                            </div>
+                        )}
+
+                        {!billingSameAsShipping && showBillingForm && (
+                            <div className="mt-6">
+                                <h3 className="text-xl font-semibold">
+                                    Billing Address
+                                </h3>
+                                <AddressForm
+                                    type="billing"
+                                    user={user}
+                                    onSuccess={() => setShowBillingForm(false)}
+                                />
+                            </div>
+                        )}
+                    </>
+                ) : null}
+            </>
         );
     }
 

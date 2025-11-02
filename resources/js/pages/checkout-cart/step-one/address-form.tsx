@@ -1,73 +1,148 @@
-import React from 'react';
-import { User } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { InputError } from '@/components/ui/input-error';
+import { Label } from '@/components/ui/label';
+import { User } from '@/types/model-types';
+import { states } from '@/utils/counties-locals/states';
+
+import { useForm } from '@inertiajs/react';
+import { FormEventHandler } from 'react';
+
+import classes from './address-form.module.css';
 
 type Props = {
     type: 'billing' | 'shipping';
-    user: User;
-    onUpdate: (address: any) => void; // You can replace 'any' with a more specific type for your address
+    user: User | null;
+    billingSameAsShipping?: boolean;
+    onSuccess?: () => void; // Add an onSuccess callback prop
 };
 
-const AddressForm = ({ type, user, onUpdate }: Props) => {
-    const updateAddress = (e: React.FormEvent<HTMLFormElement>) => {
+const AddressForm = ({
+    type,
+    user,
+    billingSameAsShipping = false,
+    onSuccess,
+}: Props) => {
+    const { data, setData, post, processing, errors, reset, isDirty } = useForm(
+        {
+            street1: '',
+            street2: '',
+            city: '',
+            state: '',
+            zip: '',
+            phone: '',
+            billing: type === 'billing' || billingSameAsShipping,
+            default: type === 'shipping' || billingSameAsShipping,
+        },
+    );
+
+    const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        const address = {
-            first_name: formData.get(`${type}-first-name`) as string,
-            last_name: formData.get(`${type}-last-name`) as string,
-            email: formData.get(`${type}-email`) as string,
-            // Add other address fields here
-        };
-        onUpdate(address);
+
+        data.billing = type === 'billing' || billingSameAsShipping;
+        data.default = type === 'shipping' || billingSameAsShipping;
+        console.log('Submitting address form with data:', data);
+        post(route('address.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                reset();
+                onSuccess?.(); // Call the callback if it exists
+            },
+        });
+    };
+
+    const handleStateChange = (value: string) => {
+        setData('state', value);
+        if (value === 'Washington') {
+            setData('city', 'Olympia');
+        }
     };
 
     return (
         <div>
-            <h4 className="mb-4 text-lg font-medium">
-                {type === 'billing' ? 'Billing Address' : 'Shipping Address'}
-            </h4>
-            <form onSubmit={updateAddress}>
-                {/* Form fields for address input go here */}
-                <div>
-                    <label
-                        htmlFor={`${type}-first-name`}
-                        className="block font-medium"
-                    >
-                        First Name
-                    </label>
-                    <input
-                        type="text"
-                        id={`${type}-first-name`}
-                        defaultValue={user.first_name}
-                        className="mt-1 w-full rounded border-gray-300"
+            <form onSubmit={handleSubmit} className={classes.form}>
+                <div className={classes.form_group}>
+                    <Label htmlFor={`${type}-street1`}>Street Address</Label>
+                    <Input
+                        id={`${type}-street1`}
+                        value={data.street1}
+                        onChange={(e) => setData('street1', e.target.value)}
+                        required
                     />
+                    <InputError message={errors.street1} />
                 </div>
-                <div>
-                    <label
-                        htmlFor={`${type}-last-name`}
-                        className="block font-medium"
-                    >
-                        Last Name
-                    </label>
-                    <input
-                        type="text"
-                        id={`${type}-last-name`}
-                        defaultValue={user.last_name}
-                        className="mt-1 w-full rounded border-gray-300"
+                <div className={classes.form_group}>
+                    <Label htmlFor={`${type}-street2`}>
+                        Apt, Suite, etc. (optional)
+                    </Label>
+                    <Input
+                        id={`${type}-street2`}
+                        value={data.street2}
+                        onChange={(e) => setData('street2', e.target.value)}
                     />
+                    <InputError message={errors.street2} />
                 </div>
-                <div>
-                    <label
-                        htmlFor={`${type}-email`}
-                        className="block font-medium"
-                    >
-                        Email
-                    </label>
-                    <input
-                        type="email"
-                        id={`${type}-email`}
-                        defaultValue={user.email}
-                        className="mt-1 w-full rounded border-gray-300"
-                    />
+                <div className={classes.grid}>
+                    <div className={classes.form_group}>
+                        <Label htmlFor={`${type}-city`}>City</Label>
+                        <Input
+                            id={`${type}-city`}
+                            value={data.city}
+                            onChange={(e) => setData('city', e.target.value)}
+                            required
+                        />
+                        <InputError message={errors.city} />
+                    </div>
+                </div>
+                <div className={classes.form_group}>
+                    <div className={classes.state_zip_grid}>
+                        <div className={classes.state_zip_group}>
+                            <Label htmlFor={`${type}-state`}>State</Label>
+                            <select
+                                id={`${type}-state`}
+                                value={data.state}
+                                onChange={(e) =>
+                                    handleStateChange(e.target.value)
+                                }
+                                required
+                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <option value="">Select a state</option>
+                                {states.map((s) => (
+                                    <option key={s.abbreviation} value={s.name}>
+                                        {s.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <InputError message={errors.state} />
+                        </div>
+                        <div className={classes.state_zip_group}>
+                            <Label htmlFor={`${type}-zip`}>Zip Code</Label>
+                            <Input
+                                id={`${type}-zip`}
+                                value={data.zip}
+                                onChange={(e) => setData('zip', e.target.value)}
+                                required
+                            />
+                            <InputError message={errors.zip} />
+                        </div>
+                    </div>
+                    <div className={classes.form_group}>
+                        <Label htmlFor={`${type}-phone`}>Phone Number</Label>
+                        <Input
+                            id={`${type}-phone`}
+                            type="tel"
+                            value={data.phone}
+                            onChange={(e) => setData('phone', e.target.value)}
+                            required
+                        />
+                        <InputError message={errors.phone} />
+                    </div>
+                </div>
+                <div className={classes.footer}>
+                    <Button type="submit" disabled={processing}>
+                        Save Address
+                    </Button>
                 </div>
             </form>
         </div>
