@@ -1,6 +1,12 @@
 'use client';
 
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
 type Props = {
@@ -17,7 +23,9 @@ const AddToCartDModal = ({ isOpen, onClose, onViewCart, children }: Props) => {
                 <DialogHeader>
                     <DialogTitle>Add to Cart</DialogTitle>
                 </DialogHeader>
-                <div className="p-5 text-gray-700 dark:text-gray-300">{children}</div>
+                <div className="p-5 text-gray-700 dark:text-gray-300">
+                    {children}
+                </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>
                         Continue Shopping

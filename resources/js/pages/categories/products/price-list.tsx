@@ -11,7 +11,14 @@ type Props = {
 };
 
 const PriceList = ({ categorySlug }: Props) => {
-    const { product, selectedPriceIndex, selectedPrice, setSelectedPrice, productQty, setProductQty } = useProductViewStore();
+    const {
+        product,
+        selectedPriceIndex,
+        selectedPrice,
+        setSelectedPrice,
+        productQty,
+        setProductQty,
+    } = useProductViewStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
@@ -54,13 +61,22 @@ const PriceList = ({ categorySlug }: Props) => {
     return (
         <>
             {product && (
-                <form name="addToCart" onSubmit={handleAddToCart} className={classes.price_list}>
+                <form
+                    name="addToCart"
+                    onSubmit={handleAddToCart}
+                    className={classes.price_list}
+                >
                     <div className={classes['detail_selection']}>
-                        {product.prices && product.prices.length > 1 && <h4>Please Select Product Options</h4>}
+                        {product.prices && product.prices.length > 1 && (
+                            <h4>Please Select Product Options</h4>
+                        )}
                         <div className={classes.price_option}>
                             {product.prices && product.prices.length > 1 && (
                                 <>
-                                    <label className={classes.detail_select_label} htmlFor="price-option">
+                                    <label
+                                        className={classes.detail_select_label}
+                                        htmlFor="price-option"
+                                    >
                                         Select size
                                     </label>
                                     <select
@@ -68,8 +84,16 @@ const PriceList = ({ categorySlug }: Props) => {
                                         name="price-option"
                                         value={selectedPriceIndex ?? ''}
                                         onChange={(e) => {
-                                            const selectedIndex = e.target.value;
-                                            setSelectedPrice(selectedIndex === '' ? null : parseInt(selectedIndex, 10));
+                                            const selectedIndex =
+                                                e.target.value;
+                                            setSelectedPrice(
+                                                selectedIndex === ''
+                                                    ? null
+                                                    : parseInt(
+                                                          selectedIndex,
+                                                          10,
+                                                      ),
+                                            );
                                         }}
                                         className={`form-control ${classes['detail_pricing_select']} form-select`}
                                     >
@@ -86,36 +110,62 @@ const PriceList = ({ categorySlug }: Props) => {
                                 <div className={classes.selected_price_details}>
                                     <p>
                                         {selectedPrice.title} -
-                                        <span className={classes['detail_pricing_usd_selected']}>
-                                            ${selectedPrice.price.toFixed(2)} {selectedPrice.currency}
+                                        <span
+                                            className={
+                                                classes[
+                                                    'detail_pricing_usd_selected'
+                                                ]
+                                            }
+                                        >
+                                            ${selectedPrice.price.toFixed(2)}{' '}
+                                            {selectedPrice.currency}
                                         </span>
                                     </p>
                                 </div>
                             ) : (
                                 <div className={classes.selected_price_details}>
-                                    <p>Please select a price option to see details</p>
+                                    <p>
+                                        Please select a price option to see
+                                        details
+                                    </p>
                                 </div>
                             )}
                         </div>
                     </div>
                     <div className={classes.detail_quantity_selection}>
                         <NumberInputSpinner
-                            disabled={!selectedPrice?.unit || selectedPrice.unit.length <= 0}
+                            disabled={
+                                !selectedPrice?.unit ||
+                                selectedPrice.unit.length <= 0
+                            }
                             value={productQty}
                             step={1}
                             onChange={(newValue) => setProductQty(newValue)}
                         />
 
-                        <div className={classes['quantity_selection_units']}></div>
+                        <div
+                            className={classes['quantity_selection_units']}
+                        ></div>
                         <div className={classes['quantity_selection_button']}>
-                            <button className="button" type="submit" disabled={!selectedPrice?.unit || selectedPrice.unit.length <= 0}>
+                            <button
+                                className="button"
+                                type="submit"
+                                disabled={
+                                    !selectedPrice?.unit ||
+                                    selectedPrice.unit.length <= 0
+                                }
+                            >
                                 Add to Cart
                             </button>
                         </div>
                     </div>
                 </form>
             )}
-            <AddToCartDModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onViewCart={() => router.visit('/shopping-cart')}>
+            <AddToCartDModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onViewCart={() => router.visit('/shopping-cart')}
+            >
                 <p>{successMessage}</p>
             </AddToCartDModal>
         </>

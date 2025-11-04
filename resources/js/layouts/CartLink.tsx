@@ -22,13 +22,23 @@ export default function CartLink() {
 
     // Memoize the cart count display to prevent unnecessary re-renders of the span
     const countDisplay = useMemo(() => {
-        return <span className={classes['shopping-cart-count']}>{cartCount}</span>;
+        return (
+            <span className={classes['shopping-cart-count']}>{cartCount}</span>
+        );
     }, [cartCount]);
 
     return (
         <div id="/shopping-cart">
-            <Link href="/shopping-cart" className={classes['shopping-cart-link']}>
-                <img src="/assets/icon-cart.png" alt="shop" height={24} width={24} />
+            <Link
+                href="/shopping-cart"
+                className={classes['shopping-cart-link']}
+            >
+                <img
+                    src="/assets/icon-cart.png"
+                    alt="shop"
+                    height={24}
+                    width={24}
+                />
                 {countDisplay}
             </Link>
         </div>

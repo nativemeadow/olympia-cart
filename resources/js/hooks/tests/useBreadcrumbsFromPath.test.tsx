@@ -1,6 +1,14 @@
 import { renderHook } from '@testing-library/react';
 import { useBreadcrumbsFromPath } from '../useBreadcrumbsFromPath';
-import { describe, it, expect, beforeEach, vi, afterEach, type MockInstance } from 'vitest';
+import {
+    describe,
+    it,
+    expect,
+    beforeEach,
+    vi,
+    afterEach,
+    type MockInstance,
+} from 'vitest';
 import { usePage } from '@inertiajs/react';
 import { type Page } from '@inertiajs/core';
 
@@ -59,7 +67,9 @@ describe('useBreadcrumbsFromPath', () => {
     });
 
     it('excludes segments from filters and exclude', () => {
-        mockedUsePage.mockReturnValue(mockPage('/categories/filterme/admin/soil'));
+        mockedUsePage.mockReturnValue(
+            mockPage('/categories/filterme/admin/soil'),
+        );
         const { result } = renderHook(() => useBreadcrumbsFromPath());
         expect(result.current).toEqual([
             { title: 'Home', href: '/' },
@@ -89,7 +99,12 @@ describe('useBreadcrumbsFromPath', () => {
     });
 
     it('falls back to window.location.pathname if url is not a string', () => {
-        locationSpy = vi.spyOn(window, 'location', 'get').mockReturnValue({ ...window.location, pathname: '/categories/soil' });
+        locationSpy = vi
+            .spyOn(window, 'location', 'get')
+            .mockReturnValue({
+                ...window.location,
+                pathname: '/categories/soil',
+            });
 
         mockedUsePage.mockReturnValue({ ...mockPage(''), url: {} as string }); // Force invalid URL
         const { result } = renderHook(() => useBreadcrumbsFromPath());

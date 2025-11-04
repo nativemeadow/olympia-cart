@@ -15,11 +15,21 @@ createServer((page) =>
         render: ReactDOMServer.renderToString,
         title: (title) => (title ? `${title} - ${appName}` : appName),
         resolve: async (name) => {
-            const page = await resolvePageComponent<any>(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx'));
+            const page = await resolvePageComponent<any>(
+                `./pages/${name}.tsx`,
+                import.meta.glob('./pages/**/*.tsx'),
+            );
 
             // Apply the public layout to all pages that don't have a layout defined and are not auth, settings, or dashboard pages.
-            if (page.default.layout === undefined && !name.startsWith('auth/') && !name.startsWith('settings/') && name !== 'dashboard') {
-                page.default.layout = (p: ReactNode) => <PublicLayout>{p}</PublicLayout>;
+            if (
+                page.default.layout === undefined &&
+                !name.startsWith('auth/') &&
+                !name.startsWith('settings/') &&
+                name !== 'dashboard'
+            ) {
+                page.default.layout = (p: ReactNode) => (
+                    <PublicLayout>{p}</PublicLayout>
+                );
             }
 
             return page;
@@ -40,7 +50,9 @@ createServer((page) =>
                 <App
                     {...props}
                     children={({ Component, key, props: pageProps }) => {
-                        const getLayout = (Component as any).layout || ((page: ReactNode) => page);
+                        const getLayout =
+                            (Component as any).layout ||
+                            ((page: ReactNode) => page);
                         const page = <Component {...pageProps} key={key} />;
 
                         return (

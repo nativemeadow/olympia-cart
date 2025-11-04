@@ -8,7 +8,10 @@ import ProductsList from '@/pages/categories/product-list';
 import { useEffect } from 'react';
 
 export default function CategoryShow() {
-    const { category, category_path } = usePage<{ category: Category; category_path: string }>().props;
+    const { category, category_path } = usePage<{
+        category: Category;
+        category_path: string;
+    }>().props;
 
     useEffect(() => {
         const main = document.querySelector('main');
@@ -24,7 +27,9 @@ export default function CategoryShow() {
         <div className="text-center">
             <Head title={category.title} />
 
-            <h1 className="mb-2 text-xl font-bold text-[#1b1b18] dark:text-[#EDEDEC]">{category.title}</h1>
+            <h1 className="mb-2 text-xl font-bold text-[#1b1b18] dark:text-[#EDEDEC]">
+                {category.title}
+            </h1>
 
             {category.image && (
                 <img
@@ -34,14 +39,26 @@ export default function CategoryShow() {
                 />
             )}
 
-            {category.description && <div className="prose dark:text-[#FFF]">{parse(category.description)}</div>}
+            {category.description && (
+                <div className="prose dark:text-[#FFF]">
+                    {parse(category.description)}
+                </div>
+            )}
 
-            <List categories={category.children as Categories} basePath={category_path} />
+            <List
+                categories={category.children as Categories}
+                basePath={category_path}
+            />
 
             {category.products && category.products.length > 0 && (
                 <div className="mt-8">
-                    <h2 className="mb-4 text-lg font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">Products in {category.title}</h2>
-                    <ProductsList products={category.products as Product[]} categorySlug={category_path} />
+                    <h2 className="mb-4 text-lg font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">
+                        Products in {category.title}
+                    </h2>
+                    <ProductsList
+                        products={category.products as Product[]}
+                        categorySlug={category_path}
+                    />
                 </div>
             )}
         </div>

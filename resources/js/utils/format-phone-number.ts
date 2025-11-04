@@ -18,51 +18,51 @@
  *          null/undefined/empty input, or the original string if formatting is not possible.
  */
 export const formatPhoneNumber = (
-	phoneNumber: string | null | undefined
+    phoneNumber: string | null | undefined,
 ): string => {
-	// Return an empty string for null, undefined, or empty input to avoid errors.
-	if (!phoneNumber) {
-		return '';
-	}
+    // Return an empty string for null, undefined, or empty input to avoid errors.
+    if (!phoneNumber) {
+        return '';
+    }
 
-	// First, remove all non-digit characters from the input string.
-	const digitsOnly = phoneNumber.replace(/\D/g, '');
+    // First, remove all non-digit characters from the input string.
+    const digitsOnly = phoneNumber.replace(/\D/g, '');
 
-	// Check for the North American country code '1' and remove it if present.
-	let normalizedNumber = digitsOnly;
-	if (normalizedNumber.length === 11 && normalizedNumber.startsWith('1')) {
-		normalizedNumber = normalizedNumber.substring(1);
-	}
+    // Check for the North American country code '1' and remove it if present.
+    let normalizedNumber = digitsOnly;
+    if (normalizedNumber.length === 11 && normalizedNumber.startsWith('1')) {
+        normalizedNumber = normalizedNumber.substring(1);
+    }
 
-	// If we have a 10-digit number, format it and return.
-	if (normalizedNumber.length === 10) {
-		return normalizedNumber.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
-	}
+    // If we have a 10-digit number, format it and return.
+    if (normalizedNumber.length === 10) {
+        return normalizedNumber.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+    }
 
-	// If after cleaning, the number isn't 10 digits, it's an invalid or
-	// unhandled format. Return the original input as a safe fallback.
-	return phoneNumber;
+    // If after cleaning, the number isn't 10 digits, it's an invalid or
+    // unhandled format. Return the original input as a safe fallback.
+    return phoneNumber;
 };
 
 // --- Example Usage ---
 // You can run this file with a TypeScript runner (like ts-node) to see the output.
 
 const numbersToTest = [
-	'+12223334444',
-	'5556667777',
-	'(888) 999-0000',
-	'12345',
-	'not a phone number',
-	null,
-	'999-888-7777',
-	'111 222 3333',
+    '+12223334444',
+    '5556667777',
+    '(888) 999-0000',
+    '12345',
+    'not a phone number',
+    null,
+    '999-888-7777',
+    '111 222 3333',
 ];
 
 console.log('--- Phone Number Formatting Test ---');
 numbersToTest.forEach((num) => {
-	console.log(
-		`Input: ${String(num).padEnd(20)} Output: "${formatPhoneNumber(
-			num as string
-		)}"`
-	);
+    console.log(
+        `Input: ${String(num).padEnd(20)} Output: "${formatPhoneNumber(
+            num as string,
+        )}"`,
+    );
 });

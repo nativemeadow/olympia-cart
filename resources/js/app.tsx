@@ -13,11 +13,21 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: async (name) => {
-        const page = await resolvePageComponent<any>(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx'));
+        const page = await resolvePageComponent<any>(
+            `./pages/${name}.tsx`,
+            import.meta.glob('./pages/**/*.tsx'),
+        );
 
         // Apply the public layout to all pages that don't have a layout defined and are not auth, settings, or dashboard pages.
-        if (page.default.layout === undefined && !name.startsWith('auth/') && !name.startsWith('settings/') && name !== 'dashboard') {
-            page.default.layout = (p: ReactNode) => <PublicLayout>{p}</PublicLayout>;
+        if (
+            page.default.layout === undefined &&
+            !name.startsWith('auth/') &&
+            !name.startsWith('settings/') &&
+            name !== 'dashboard'
+        ) {
+            page.default.layout = (p: ReactNode) => (
+                <PublicLayout>{p}</PublicLayout>
+            );
         }
 
         return page;
@@ -27,7 +37,9 @@ createInertiaApp({
 
         // This logic checks if the page was reloaded. If so, it makes a fresh
         // visit to get the latest data from the server, preventing stale data.
-        const navigationEntry = window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        const navigationEntry = window.performance.getEntriesByType(
+            'navigation',
+        )[0] as PerformanceNavigationTiming;
         if (navigationEntry && navigationEntry.type === 'reload') {
             router.visit(window.location.href, {
                 replace: true,
@@ -41,7 +53,9 @@ createInertiaApp({
                 <App
                     {...props}
                     children={({ Component, key, props: pageProps }) => {
-                        const getLayout = (Component as any).layout || ((page: ReactNode) => page);
+                        const getLayout =
+                            (Component as any).layout ||
+                            ((page: ReactNode) => page);
                         const page = <Component {...pageProps} key={key} />;
 
                         return (

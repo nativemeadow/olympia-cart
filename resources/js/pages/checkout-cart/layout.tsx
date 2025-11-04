@@ -1,6 +1,10 @@
 import CheckoutSteps from './checkout-steps';
 
-export default function CheckoutLayout({ children }: { children: React.ReactNode }) {
+export default function CheckoutLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return (
         <>
             <CheckoutSteps />

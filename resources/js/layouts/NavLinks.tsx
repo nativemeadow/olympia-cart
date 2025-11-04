@@ -20,9 +20,15 @@ const NavLinks = () => {
     };
 
     return (
-        <div className={`flex items-center space-x-6 ${classes['main-nav-item']}`}>
+        <div
+            className={`flex items-center space-x-6 ${classes['main-nav-item']}`}
+        >
             {MainNavData().map((item: NavData, index: number) => (
-                <Link key={item.title} href={item.route} className={`text-sm font-semibold ${isActive(item) ? classes.active : ''}`}>
+                <Link
+                    key={item.title}
+                    href={item.route}
+                    className={`text-sm font-semibold ${isActive(item) ? classes.active : ''}`}
+                >
                     {item.title}
                 </Link>
             ))}

@@ -25,11 +25,18 @@ export function useBreadcrumbsFromPath(): Breadcrumb[] {
 
         // Combine titles from `filters` and `exclude` to get a list of segments to remove from the path.
         const titlesFromFilters = filters.map((filter) => filter.title);
-        const allExcludedTitles = [...new Set([...titlesFromFilters, ...exclude])];
-        const lowerCaseExcludedTitles = allExcludedTitles.map((title) => title.toLowerCase());
+        const allExcludedTitles = [
+            ...new Set([...titlesFromFilters, ...exclude]),
+        ];
+        const lowerCaseExcludedTitles = allExcludedTitles.map((title) =>
+            title.toLowerCase(),
+        );
 
         // Filter out segments that should be excluded from the URL path.
-        const filteredSegments = originalSegments.filter((segment) => !lowerCaseExcludedTitles.includes(segment.toLowerCase()));
+        const filteredSegments = originalSegments.filter(
+            (segment) =>
+                !lowerCaseExcludedTitles.includes(segment.toLowerCase()),
+        );
 
         const breadcrumbs: Breadcrumb[] = [{ title: 'Home', href: '/' }];
 

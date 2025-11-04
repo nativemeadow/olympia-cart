@@ -21,7 +21,10 @@ export default function PageTransition({ children }: PageTransitionProps) {
                 return;
             }
             if (pageWrapperRef.current) {
-                pageWrapperRef.current.classList.add('opacity-0', 'translate-y-4');
+                pageWrapperRef.current.classList.add(
+                    'opacity-0',
+                    'translate-y-4',
+                );
             }
         };
 
@@ -29,7 +32,14 @@ export default function PageTransition({ children }: PageTransitionProps) {
             if (pageWrapperRef.current) {
                 // Use a timeout to ensure the browser has a chance to apply the
                 // 'opacity-0' class before we remove it, making the transition reliable.
-                setTimeout(() => pageWrapperRef.current?.classList.remove('opacity-0', 'translate-y-4'), 10);
+                setTimeout(
+                    () =>
+                        pageWrapperRef.current?.classList.remove(
+                            'opacity-0',
+                            'translate-y-4',
+                        ),
+                    10,
+                );
             }
         };
 
@@ -46,7 +56,10 @@ export default function PageTransition({ children }: PageTransitionProps) {
     }, []);
 
     return (
-        <div ref={pageWrapperRef} className="page-wrapper w-full translate-y-4 opacity-0">
+        <div
+            ref={pageWrapperRef}
+            className="page-wrapper w-full translate-y-4 opacity-0"
+        >
             {children}
         </div>
     );

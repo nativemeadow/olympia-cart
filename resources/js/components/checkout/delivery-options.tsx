@@ -59,7 +59,9 @@ const DeliveryOptions = () => {
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
         console.log('Submitting data:', data);
-        const submissionRoute = checkout ? route('checkout.update', checkout.id) : route('checkout.store');
+        const submissionRoute = checkout
+            ? route('checkout.update', checkout.id)
+            : route('checkout.store');
         const httpMethod = checkout ? patch : post;
 
         httpMethod(submissionRoute, {
@@ -74,18 +76,34 @@ const DeliveryOptions = () => {
         return (
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <div className={classes.options_box} data-checkout-option={'delivery'} data-disabled={true}>
-                        <img height={270} width={315} alt="" src="/assets/delivery-icon.png" />
+                    <div
+                        className={classes.options_box}
+                        data-checkout-option={'delivery'}
+                        data-disabled={true}
+                    >
+                        <img
+                            height={270}
+                            width={315}
+                            alt=""
+                            src="/assets/delivery-icon.png"
+                        />
                         <div className={classes.options_details}>
-                            <span className={classes.options_title}>Delivery</span>
-                            <span className={classes.options_meta}>Have your order delivery to you home</span>
+                            <span className={classes.options_title}>
+                                Delivery
+                            </span>
+                            <span className={classes.options_meta}>
+                                Have your order delivery to you home
+                            </span>
                         </div>
                     </div>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Your Cart is Empty</AlertDialogTitle>
-                        <AlertDialogDescription>Please add items to your shopping cart before selecting a delivery option.</AlertDialogDescription>
+                        <AlertDialogDescription>
+                            Please add items to your shopping cart before
+                            selecting a delivery option.
+                        </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogAction>OK</AlertDialogAction>
                 </AlertDialogContent>
@@ -96,33 +114,57 @@ const DeliveryOptions = () => {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <div className={classes.options_box} data-checkout-option={'delivery'} onClick={openModal}>
-                    <img height={270} width={315} alt="" src="/assets/delivery-icon.png" />
+                <div
+                    className={classes.options_box}
+                    data-checkout-option={'delivery'}
+                    onClick={openModal}
+                >
+                    <img
+                        height={270}
+                        width={315}
+                        alt=""
+                        src="/assets/delivery-icon.png"
+                    />
                     <div className={classes.options_details}>
                         <span className={classes.options_title}>Delivery</span>
-                        <span className={classes.options_meta}>Have your order delivery to you home</span>
+                        <span className={classes.options_meta}>
+                            Have your order delivery to you home
+                        </span>
                     </div>
                 </div>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Delivery</DialogTitle>
-                    <DialogDescription>Your order will be delivered to your home.</DialogDescription>
+                    <DialogDescription>
+                        Your order will be delivered to your home.
+                    </DialogDescription>
                 </DialogHeader>
-                <form id="delivery-form" onSubmit={handleSubmit} className="space-y-4">
+                <form
+                    id="delivery-form"
+                    onSubmit={handleSubmit}
+                    className="space-y-4"
+                >
                     <InputError message={errors.cart} />
                     <div className="grid gap-2">
-                        <Label htmlFor="pickup_time">Delivery instructions are required to proceed to checkout:</Label>
+                        <Label htmlFor="pickup_time">
+                            Delivery instructions are required to proceed to
+                            checkout:
+                        </Label>
                         <Textarea
                             id="instructions"
                             value={data.instructions}
-                            onChange={(e) => setData('instructions', e.target.value)}
+                            onChange={(e) =>
+                                setData('instructions', e.target.value)
+                            }
                             placeholder="Delivery Instructions"
                         />
                         <InputError message={errors.instructions} />
                         <p>
-                            Please Note: Our delivery trucks will not be able to go off pavement. We can either dump on your driveway or on the street
-                            (customer must be present to dump on public streets).
+                            Please Note: Our delivery trucks will not be able to
+                            go off pavement. We can either dump on your driveway
+                            or on the street (customer must be present to dump
+                            on public streets).
                         </p>
                     </div>
                     <div className="mb-6 flex w-full flex-wrap items-end gap-4 md:mb-0 md:flex-nowrap">
@@ -130,19 +172,26 @@ const DeliveryOptions = () => {
                             type="date"
                             min={getTodayDate()}
                             value={data.delivery_date}
-                            onChange={(e) => setData('delivery_date', e.target.value)}
+                            onChange={(e) =>
+                                setData('delivery_date', e.target.value)
+                            }
                             className="w-60 rounded-md border border-transparent bg-gray-100 p-2"
                         />
                         <InputError message={errors.delivery_date} />
                     </div>
 
                     <p className="text-sm text-gray-500">
-                        We try our very best to accommodate your requested delivery date, however, due to traffic conditions, weather, etc., we do not
-                        guarantee any delivery dates or times. Often times, we are able to deliver before your requested date. Our staff will contact
-                        you to confirm your delivery date and time within 1 business day. No deliveries will be made on weekends and Holidays.
+                        We try our very best to accommodate your requested
+                        delivery date, however, due to traffic conditions,
+                        weather, etc., we do not guarantee any delivery dates or
+                        times. Often times, we are able to deliver before your
+                        requested date. Our staff will contact you to confirm
+                        your delivery date and time within 1 business day. No
+                        deliveries will be made on weekends and Holidays.
                     </p>
                     <p className="font- text-sm font-bold text-gray-500">
-                        Please Note: All deliveries will have a 48-hour lead up and delivery will only be available Monday - Friday.
+                        Please Note: All deliveries will have a 48-hour lead up
+                        and delivery will only be available Monday - Friday.
                     </p>
                 </form>
                 <DialogFooter>

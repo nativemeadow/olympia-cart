@@ -36,8 +36,15 @@ const ContactUsPage = () => {
     if (success) {
         return (
             <>
-                <div className={classes['content-wrapper'] + ' inline-flex flex-col items-center justify-center self-center text-center'}>
-                    <h2 className="mb-4 text-3xl dark:text-white">Thank you for contacting us</h2>
+                <div
+                    className={
+                        classes['content-wrapper'] +
+                        ' inline-flex flex-col items-center justify-center self-center text-center'
+                    }
+                >
+                    <h2 className="mb-4 text-3xl dark:text-white">
+                        Thank you for contacting us
+                    </h2>
                     <p className="dark:text-white">{success}</p>
                 </div>
             </>
@@ -48,10 +55,16 @@ const ContactUsPage = () => {
         <>
             <div className={`${classes['content-wrapper']} `}>
                 <h2 className="mb-4 text-3xl dark:text-white">Contact Us</h2>
-                <form onSubmit={handleSubmit} className={classes['form-control']}>
+                <form
+                    onSubmit={handleSubmit}
+                    className={classes['form-control']}
+                >
                     <div className="grid grid-cols-2 gap-4">
                         <div className="">
-                            <label className={`${classes['form-field-label']} ${classes.label}`} htmlFor="name">
+                            <label
+                                className={`${classes['form-field-label']} ${classes.label}`}
+                                htmlFor="name"
+                            >
                                 Name:
                             </label>
                             <Input
@@ -65,10 +78,17 @@ const ContactUsPage = () => {
                                 type="text"
                                 placeholder="Your name"
                             />
-                            {errors.name && <p className={classes.error}>{`${errors.name}`}</p>}
+                            {errors.name && (
+                                <p
+                                    className={classes.error}
+                                >{`${errors.name}`}</p>
+                            )}
                         </div>
                         <div className="">
-                            <label className={`${classes['form-field-label']} ${classes.label}`} htmlFor="email">
+                            <label
+                                className={`${classes['form-field-label']} ${classes.label}`}
+                                htmlFor="email"
+                            >
                                 Email:
                             </label>
                             <Input
@@ -82,10 +102,17 @@ const ContactUsPage = () => {
                                 type="email"
                                 placeholder="Your email address"
                             />
-                            {errors.email && <p className={classes.error}>{`${errors.email}`}</p>}
+                            {errors.email && (
+                                <p
+                                    className={classes.error}
+                                >{`${errors.email}`}</p>
+                            )}
                         </div>
                         <div className="">
-                            <label className={`${classes['form-field-label']} ${classes.label}`} htmlFor="phone">
+                            <label
+                                className={`${classes['form-field-label']} ${classes.label}`}
+                                htmlFor="phone"
+                            >
                                 Phone:
                             </label>
                             <Input
@@ -99,10 +126,17 @@ const ContactUsPage = () => {
                                 type="text"
                                 placeholder="Phone"
                             />
-                            {errors.phone && <p className={classes.error}>{`${errors.phone}`}</p>}
+                            {errors.phone && (
+                                <p
+                                    className={classes.error}
+                                >{`${errors.phone}`}</p>
+                            )}
                         </div>
                         <div className="">
-                            <label className={`${classes['form-field-label']} ${classes.label}`} htmlFor="subject">
+                            <label
+                                className={`${classes['form-field-label']} ${classes.label}`}
+                                htmlFor="subject"
+                            >
                                 Subject:
                             </label>
                             <Input
@@ -116,10 +150,17 @@ const ContactUsPage = () => {
                                 type="text"
                                 placeholder="Subject"
                             />
-                            {errors.subject && <p className={classes.error}>{`${errors.subject}`}</p>}
+                            {errors.subject && (
+                                <p
+                                    className={classes.error}
+                                >{`${errors.subject}`}</p>
+                            )}
                         </div>
                         <div className="col-span-2">
-                            <label className={`${classes['form-field-label']} ${classes.label}`} htmlFor="message">
+                            <label
+                                className={`${classes['form-field-label']} ${classes.label}`}
+                                htmlFor="message"
+                            >
                                 Message:
                             </label>
                             <Textarea
@@ -134,10 +175,18 @@ const ContactUsPage = () => {
                                 id="message"
                                 placeholder="Message"
                             />
-                            {errors.message && <p className={classes.error}>{`${errors.message}`}</p>}
+                            {errors.message && (
+                                <p
+                                    className={classes.error}
+                                >{`${errors.message}`}</p>
+                            )}
                         </div>
                         <div className="col-span-2">
-                            <Button type="submit" className={classes.contact_button} disabled={processing}>
+                            <Button
+                                type="submit"
+                                className={classes.contact_button}
+                                disabled={processing}
+                            >
                                 {processing ? 'Sending...' : 'Send Message'}
                             </Button>
                         </div>

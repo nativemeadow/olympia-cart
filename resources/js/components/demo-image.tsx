@@ -12,6 +12,13 @@ const DemoImages: React.FC<DemoImagesProps> = ({
     alt = 'Demo Image',
     className = '',
     size = 100,
-}) => <img src={`${src}/${size}/${size}`} alt={alt} className={className} style={{ width: size, height: size }} />;
+}) => (
+    <img
+        src={`${src}/${size}/${size}`}
+        alt={alt}
+        className={className}
+        style={{ width: size, height: size }}
+    />
+);
 
 export default DemoImages;

@@ -28,7 +28,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-    --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans:
+        'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
     --font-serif: 'Aleo', serif;
     --font-raleway: 'Raleway', sans-serif;
 
@@ -308,7 +311,8 @@
 
 /* Styles for the contact us page body */
 body.contact-us-page-body {
-    background: url(/storage/assets/Redwoods-One-4.jpeg) no-repeat center center fixed;
+    background: url(/storage/assets/Redwoods-One-4.jpeg) no-repeat center center
+        fixed;
     background-size: cover;
 }
 
