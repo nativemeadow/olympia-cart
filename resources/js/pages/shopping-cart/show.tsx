@@ -17,7 +17,8 @@ type Props = {
 
 const ShoppingCart = ({ cart, checkout }: Props) => {
     const [cartTotal, setCartTotal] = useState(cart ? cart.total : 0);
-    const { setCheckout, getFormattedDate, getFormattedTime } = useCheckoutStore();
+    const { setCheckout, getFormattedDate, getFormattedTime } =
+        useCheckoutStore();
 
     useEffect(() => {
         if (cart) {
@@ -41,27 +42,45 @@ const ShoppingCart = ({ cart, checkout }: Props) => {
                         <DeliveryOptions />
                         <PickupOptions />
                     </div>
-                    <div className={`${classes['order-summary']} ${classes['cart-items-container']}`}>
+                    <div
+                        className={`${classes['order-summary']} ${classes['cart-items-container']}`}
+                    >
                         {cart?.items && cart.items.length > 0 ? (
-                            cart.items.map((item: CartItem) => <ShoppingCartItem key={item.id} item={item} />)
+                            cart.items.map((item: CartItem) => (
+                                <ShoppingCartItem key={item.id} item={item} />
+                            ))
                         ) : (
                             <p>Your cart is empty.</p>
                         )}
                     </div>
                 </div>
                 <div id={classes.rightCart}>
-                    <div className={`${classes['order-summary']} ${classes.cart_totals}`}>
+                    <div
+                        className={`${classes['order-summary']} ${classes.cart_totals}`}
+                    >
                         <h5>Order Summary</h5>
                         <div className={`${classes.set_instructions}`}>
                             <span>Checkout Option: </span>
-                            <span className={`text-xl text-red-700 ${classes.checkout_option}`}>
-                                {checkout?.is_pickup ? 'In Store Pickup' : checkout?.is_delivery ? 'Delivery' : 'N/A'}
+                            <span
+                                className={`text-xl text-red-700 ${classes.checkout_option}`}
+                            >
+                                {checkout?.is_pickup
+                                    ? 'In Store Pickup'
+                                    : checkout?.is_delivery
+                                      ? 'Delivery'
+                                      : 'N/A'}
                             </span>
                         </div>
                         <div className={classes.set_instructions}>
                             {checkout && (
                                 <>
-                                    <span>{checkout.is_pickup ? 'Pickup Date:' : checkout.is_delivery ? 'Delivery Date:' : ' '}</span>
+                                    <span>
+                                        {checkout.is_pickup
+                                            ? 'Pickup Date:'
+                                            : checkout.is_delivery
+                                              ? 'Delivery Date:'
+                                              : ' '}
+                                    </span>
                                     <span>{getFormattedDate()}</span>
                                 </>
                             )}
@@ -80,11 +99,14 @@ const ShoppingCart = ({ cart, checkout }: Props) => {
                         <div className={classes.dividers} />
                         <div className={classes.set_total}>
                             <span className={classes.summary_font}>Total </span>
-                            <span className={classes.summary_font}>${cartTotal.toFixed(2)}</span>
+                            <span className={classes.summary_font}>
+                                ${cartTotal.toFixed(2)}
+                            </span>
                         </div>
                         <div className={classes.dividers} />
                         <div className="mt-5 w-full">
-                            {checkout && (checkout.is_pickup || checkout.is_delivery) ? (
+                            {checkout &&
+                            (checkout.is_pickup || checkout.is_delivery) ? (
                                 <Button
                                     onClick={handleCheckout}
                                     color="primary"
@@ -93,7 +115,10 @@ const ShoppingCart = ({ cart, checkout }: Props) => {
                                     Proceed to Checkout
                                 </Button>
                             ) : (
-                                <p className="mt-2 text-sm text-red-500">Please select a pickup or delivery option to continue</p>
+                                <p className="mt-2 text-sm text-red-500">
+                                    Please select a pickup or delivery option to
+                                    continue
+                                </p>
                             )}
                         </div>
                     </div>

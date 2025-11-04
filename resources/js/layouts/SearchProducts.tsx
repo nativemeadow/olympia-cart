@@ -18,7 +18,11 @@ const SearchProducts = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit} aria-label="search from products" className="flex items-center gap-2">
+        <form
+            onSubmit={handleSubmit}
+            aria-label="search from products"
+            className="flex items-center gap-2"
+        >
             <Input
                 classNames={{
                     base: 'max-w-full sm:max-w-[10rem] h-8',

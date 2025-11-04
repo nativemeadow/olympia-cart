@@ -1,7 +1,15 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { LayoutGrid } from 'lucide-react';
@@ -21,7 +29,11 @@ export function AppSidebar() {
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild className={`site_menu h-auto justify-center p-0 text-[#1b1b18] dark:text-[#fff]`}>
+                        <SidebarMenuButton
+                            size="lg"
+                            asChild
+                            className={`site_menu h-auto justify-center p-0 text-[#1b1b18] dark:text-[#fff]`}
+                        >
                             <Link href="/" prefetch>
                                 <OMG_Logo className="size-full" scale="0.3" />
                             </Link>

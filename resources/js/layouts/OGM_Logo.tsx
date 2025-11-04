@@ -8,14 +8,21 @@ type Props = {
 const LogoPage = ({ className, scale = '0.5' }: Props) => {
     return (
         <div style={{ transform: `scale(${scale})` }} className={className}>
-            <svg width="429" height="77.84480371064029" viewBox="0 0 370.3448275862069 67.201446174124">
+            <svg
+                width="429"
+                height="77.84480371064029"
+                viewBox="0 0 370.3448275862069 67.201446174124"
+            >
                 <defs id="SvgjsDefs2694"></defs>
                 <g
                     id="SvgjsG2695"
                     transform="matrix(0.10718346387147903,0,0,0.10718346387147903,308.2932332087449,1.7737803015436637)"
                     fill="#ffffff"
                 >
-                    <metadata xmlns="http://www.w3.org/2000/svg">Created by potrace 1.14, written by Peter Selinger 2001-2017</metadata>
+                    <metadata xmlns="http://www.w3.org/2000/svg">
+                        Created by potrace 1.14, written by Peter Selinger
+                        2001-2017
+                    </metadata>
                     <g
                         xmlns="http://www.w3.org/2000/svg"
                         transform="translate(0.000000,600.000000) scale(0.100000,-0.100000)"

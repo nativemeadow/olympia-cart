@@ -38,18 +38,34 @@ const CartItem = ({ item }: Props) => {
     }, [item.id]);
 
     return (
-        <div key={item.id || `temp-${item.sku}-${item.unit}`} className={`${classes['order-summary']}`}>
+        <div
+            key={item.id || `temp-${item.sku}-${item.unit}`}
+            className={`${classes['order-summary']}`}
+        >
             <div className={classes.store_cart_thumbnail_wrapper}>
                 <div className={classes.row}>
                     {/* Image cell */}
-                    <div className={`${classes.image_cell} ${classes.image_wrapper}`}>
-                        <Link className={classes.store_cart_thumbnail_link} href={productLink}>
-                            <img className={classes.image} src={`/products/${item.image}`} alt={item.title} />
+                    <div
+                        className={`${classes.image_cell} ${classes.image_wrapper}`}
+                    >
+                        <Link
+                            className={classes.store_cart_thumbnail_link}
+                            href={productLink}
+                        >
+                            <img
+                                className={classes.image}
+                                src={`/products/${item.image}`}
+                                alt={item.title}
+                            />
                         </Link>
                     </div>
                     {/* Title and quantity cell */}
-                    <div className={`${classes.title_cell} ${classes.store_cart_description}`}>
-                        <div className={classes.title_text}>{parse(item.title || '')}</div>
+                    <div
+                        className={`${classes.title_cell} ${classes.store_cart_description}`}
+                    >
+                        <div className={classes.title_text}>
+                            {parse(item.title || '')}
+                        </div>
 
                         <InputNumberSpinner
                             disabled={false}
@@ -61,18 +77,26 @@ const CartItem = ({ item }: Props) => {
                         />
                     </div>
                     {/* Price and subtotal cell */}
-                    <div className={`${classes.cost_cell} ${classes.item_cost} `}>
+                    <div
+                        className={`${classes.cost_cell} ${classes.item_cost} `}
+                    >
                         <div className={classes.item_cost_detail}>
                             <div>{formatCurrency(item.price)}</div>
                             <span>/</span>
                             <div>{item.unit}</div>
                         </div>
                         <div className={classes.item_subtotal}>
-                            Subtotal: $<span className={classes.currency}>{formatCurrency(item.price * item.quantity)}</span>
+                            Subtotal: $
+                            <span className={classes.currency}>
+                                {formatCurrency(item.price * item.quantity)}
+                            </span>
                         </div>
                     </div>
                     {/* Delete button cell */}
-                    <div className={`${classes.delete_cell} `} onClick={handleDelete}>
+                    <div
+                        className={`${classes.delete_cell} `}
+                        onClick={handleDelete}
+                    >
                         <ImCross />
                     </div>
                 </div>

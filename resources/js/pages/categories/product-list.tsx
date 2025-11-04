@@ -13,7 +13,10 @@ const Products = ({ products, categorySlug }: Props) => {
         <div className={classes.products_grid}>
             {products.map((product) => (
                 <div key={product.id} className={classes.card_width}>
-                    <ProductCard product={product} categorySlug={categorySlug} />
+                    <ProductCard
+                        product={product}
+                        categorySlug={categorySlug}
+                    />
                 </div>
             ))}
         </div>

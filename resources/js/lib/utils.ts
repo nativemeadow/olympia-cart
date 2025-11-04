@@ -15,7 +15,9 @@ export function formatCurrency(
 
     // Check if the input is a valid number
     if (isNaN(numericValue)) {
-        throw new Error('Invalid input: The value must be a valid number or numeric string.');
+        throw new Error(
+            'Invalid input: The value must be a valid number or numeric string.',
+        );
     }
 
     // Use Intl.NumberFormat to format the number as localized currency

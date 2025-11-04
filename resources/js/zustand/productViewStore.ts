@@ -52,15 +52,29 @@ export const useProductViewStore = create(
         setSelectedPrice: (index: number | null) => {
             set((state) => {
                 if (index === null) {
-                    return { selectedPriceIndex: undefined, selectedPrice: null };
+                    return {
+                        selectedPriceIndex: undefined,
+                        selectedPrice: null,
+                    };
                 }
-                if (state.product && Array.isArray(state.product.prices) && state.product.prices[index]) {
-                    state.productImage = state.product.prices[index].image || state.product.image || null;
+                if (
+                    state.product &&
+                    Array.isArray(state.product.prices) &&
+                    state.product.prices[index]
+                ) {
+                    state.productImage =
+                        state.product.prices[index].image ||
+                        state.product.image ||
+                        null;
                 }
                 return {
                     selectedPriceIndex: index,
                     selectedPrice:
-                        state.product && Array.isArray(state.product.prices) && state.product.prices[index] ? state.product.prices[index] : null,
+                        state.product &&
+                        Array.isArray(state.product.prices) &&
+                        state.product.prices[index]
+                            ? state.product.prices[index]
+                            : null,
                 };
             });
         },

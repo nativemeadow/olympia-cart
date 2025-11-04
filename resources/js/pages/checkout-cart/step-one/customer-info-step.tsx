@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import useAuth from '@/hooks/useAuth'; // Assuming you have a hook for auth status
+import React, { useState, useEffect, FormEventHandler } from 'react';
+import useAuth from '@/hooks/useAuth';
 import useCheckoutStore from '@/zustand/checkoutStore';
 import { User } from '@/types';
 import { Address, User as UserType } from '@/types/model-types';
@@ -8,12 +8,31 @@ import { Checkout } from '@/types';
 import classes from './customer-info.module.css'; // Assuming you have some CSS modules for styling
 import { router, useForm } from '@inertiajs/react';
 import clsx from 'clsx';
-
-// A potential new component for handling the address form itself
-// import AddressForm from './address-form';
 import AddressForm from './address-form';
+import Register from './register';
 import { Button } from '@/components/ui/button';
 import { AddressDialog } from './address-dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { InputError } from '@/components/ui/input-error';
+import axios from 'axios';
 
 type CustomerData = (UserType & { addresses: Address[] }) | null;
 
@@ -25,6 +44,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         setBillingSameAsShipping,
         setCheckout,
     } = useCheckoutStore();
+    const [isGuest, setIsGuest] = useState(false);
 
     // Use local state to manage addresses for immediate UI updates
     const [localAddresses, setLocalAddresses] = useState<Address[]>(
@@ -39,6 +59,38 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
     );
 
     const { delete: destroy, processing: deleting } = useForm();
+
+    const {
+        data: loginData,
+        setData: setLoginData,
+        post: loginPost,
+        processing: loginProcessing,
+        errors: loginErrors,
+        setError,
+    } = useForm({
+        email: '',
+        password: '',
+        remember: false,
+    });
+
+    const handleLogin: FormEventHandler = (e) => {
+        e.preventDefault();
+        // We use axios here to prevent Inertia's automatic redirect handling.
+        axios
+            .post(route('checkout.login'), loginData)
+            .then(() => {
+                // On success, we visit the current page to get the new props
+                // for the authenticated user, which re-renders the component.
+                router.visit(window.location.href, { preserveState: false });
+            })
+            .catch((error) => {
+                // If the login fails (e.g., 422 validation error),
+                // we can manually set the errors on the Inertia form hook.
+                if (error.response && error.response.status === 422) {
+                    setError(error.response.data.errors);
+                }
+            });
+    };
 
     useEffect(() => {
         const addresses = customer?.addresses || [];
@@ -60,44 +112,30 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         }
     }, [customer, checkout]); // Removed setBillingSameAsShipping from dependencies
 
-    // State to manage the flow for non-authenticated users
-    const [email, setEmail] = useState('');
-    const [view, setView] = useState<
-        'initial' | 'login' | 'register' | 'guest'
-    >('initial');
-
-    const handleEmailCheck = async (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log('Checking email:', email);
-        // API call to check if email exists in your users table
-        // const response = await axios.post('/api/checkout/check-email', { email });
-
-        // Based on the response, update the view
-        // if (response.data.exists) {
-        //     setView('login');
-        // } else {
-        //     setView('guest'); // Default to guest, with an option to switch to register
-        // }
-    };
-
     const handleSetDefault = (
         addressId: number,
         type: 'shipping' | 'billing',
+        isChecked: boolean,
     ) => {
         // Optimistically update the UI
+        const key = type === 'shipping' ? 'default' : 'billing';
         const updatedAddresses = localAddresses.map((addr) => {
-            const key = type === 'shipping' ? 'default' : 'billing';
             if (addr.id === addressId) {
-                return { ...addr, [key]: true };
+                // Set the state of the toggled checkbox
+                return { ...addr, [key]: isChecked };
             }
-            return { ...addr, [key]: false };
+            // If we are setting a new default, unset it for all other addresses
+            if (isChecked) {
+                return { ...addr, [key]: false };
+            }
+            return addr;
         });
         setLocalAddresses(updatedAddresses);
 
         // Make the API call to persist the change
         router.put(
             route('address.setDefault', { address: addressId }),
-            { type },
+            { type, state: isChecked },
             {
                 preserveScroll: true,
                 onError: () => {
@@ -109,11 +147,9 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
     };
 
     const handleDelete = (addressId: number) => {
-        if (window.confirm('Are you sure you want to delete this address?')) {
-            destroy(route('address.destroy', addressId), {
-                preserveScroll: true,
-            });
-        }
+        destroy(route('address.destroy', addressId), {
+            preserveScroll: true,
+        });
     };
 
     const handleBillingSameAsShippingChange = (
@@ -122,11 +158,16 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         const isChecked = e.target.checked;
         setBillingSameAsShipping(isChecked);
 
-        if (checkout) {
+        // Only send the update if a checkout record exists AND
+        // there is a default shipping address selected.
+        // If no shipping address is selected, the backend would reject the request
+        // because it can't set the billing address to a non-existent shipping address.
+        const hasShippingAddress = localAddresses.some((addr) => addr.default);
+
+        if (checkout && hasShippingAddress) {
             router.patch(
                 route('checkout.update', checkout.id),
                 {
-                    ...checkout, // send existing data
                     billing_same_as_shipping: isChecked,
                 },
                 {
@@ -195,10 +236,11 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                                 type="checkbox"
                                                 className="mr-2"
                                                 checked={!!address.default}
-                                                onChange={() =>
+                                                onChange={(e) =>
                                                     handleSetDefault(
                                                         address.id,
                                                         'shipping',
+                                                        e.target.checked,
                                                     )
                                                 }
                                             />
@@ -209,10 +251,11 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                                 type="checkbox"
                                                 className="mr-2"
                                                 checked={!!address.billing}
-                                                onChange={() =>
+                                                onChange={(e) =>
                                                     handleSetDefault(
                                                         address.id,
                                                         'billing',
+                                                        e.target.checked,
                                                     )
                                                 }
                                             />
@@ -229,16 +272,44 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                         >
                                             Edit
                                         </Button>
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            onClick={() =>
-                                                handleDelete(address.id)
-                                            }
-                                            disabled={deleting}
-                                        >
-                                            Delete
-                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    disabled={deleting}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>
+                                                        Are you sure?
+                                                    </AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This action cannot be
+                                                        undone. This will
+                                                        permanently delete this
+                                                        address.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>
+                                                        Cancel
+                                                    </AlertDialogCancel>
+                                                    <AlertDialogAction
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                address.id,
+                                                            )
+                                                        }
+                                                    >
+                                                        Continue
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                     </div>
                                 </div>
                             ))}
@@ -325,77 +396,96 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
     // --- VIEWS FOR NON-LOGGED-IN USER ---
     return (
         <div>
-            <h2 className="text-2xl font-bold">Customer Information</h2>
+            <h2 className="mb-4 text-2xl font-bold">Customer Information</h2>
 
-            {/* 1. Initial Email Input */}
-            {view === 'initial' && (
-                <form onSubmit={handleEmailCheck} className="mt-4">
-                    <label htmlFor="email" className="block font-medium">
-                        Email Address
-                    </label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="mt-1 w-full rounded border-gray-300"
-                        required
-                    />
-                    <button
-                        type="submit"
-                        className="mt-4 rounded bg-blue-600 px-4 py-2 text-white"
-                    >
-                        Continue
-                    </button>
-                </form>
-            )}
-
-            {/* 2. Login prompt if user exists */}
-            {view === 'login' && (
-                <div>
-                    <p>Welcome back! Please log in to continue.</p>
-                    {/* Your Login Form Component would go here */}
-                </div>
-            )}
-
-            {/* 3. Guest/Register form if user is new */}
-            {(view === 'guest' || view === 'register') && (
-                <div className="mt-6">
-                    <div className="flex items-center gap-6 border-b pb-4">
-                        <button
-                            onClick={() => setView('guest')}
-                            className={`border-b-2 pb-1 text-lg ${view === 'guest' ? 'border-yellow-700 font-semibold' : 'border-transparent'}`}
-                        >
-                            Checkout as Guest
-                        </button>
-                        <button
-                            onClick={() => setView('register')}
-                            className={`border-b-2 pb-1 text-lg ${view === 'register' ? 'border-yellow-700 font-semibold' : 'border-transparent'}`}
-                        >
-                            Create an Account
-                        </button>
-                    </div>
-
-                    <div className="mt-4">
-                        {/* Basic form fields for name, etc. would go here */}
-                        {view === 'register' && (
-                            <div className="mt-4">
-                                <label className="block font-medium">
-                                    Create a Password
-                                </label>
-                                <input
-                                    type="password"
-                                    className="mt-1 w-full rounded border-gray-300"
+            <Accordion
+                type="single"
+                collapsible
+                className="w-full"
+                defaultValue="item-2"
+            >
+                <AccordionItem value="item-1">
+                    <AccordionTrigger>
+                        Already have an account? Log In
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <form onSubmit={handleLogin} className="space-y-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="login-email">Email</Label>
+                                <Input
+                                    id="login-email"
+                                    type="email"
+                                    value={loginData.email}
+                                    onChange={(e) =>
+                                        setLoginData('email', e.target.value)
+                                    }
+                                    required
                                 />
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Save your information for next time.
-                                </p>
+                                <InputError message={loginErrors.email} />
                             </div>
-                        )}
-                        {/* Address forms would follow here */}
-                    </div>
-                </div>
-            )}
+                            <div className="grid gap-2">
+                                <Label htmlFor="login-password">Password</Label>
+                                <Input
+                                    id="login-password"
+                                    type="password"
+                                    value={loginData.password}
+                                    onChange={(e) =>
+                                        setLoginData('password', e.target.value)
+                                    }
+                                    required
+                                />
+                                <InputError message={loginErrors.password} />
+                            </div>
+                            <Button
+                                type="submit"
+                                className="w-full"
+                                disabled={loginProcessing}
+                            >
+                                Log In
+                            </Button>
+                        </form>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-2">
+                    <AccordionTrigger>
+                        Create an Account or Checkout as Guest
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <p className="mb-4 text-sm text-gray-600">
+                            Create an account to save your information for next
+                            time, or continue as a guest.
+                        </p>
+                        {/* The registration and address forms will go here.
+                            For now, this is a placeholder.
+                            You would integrate your registration form and AddressForm components here.
+                        */}
+                        <div className="text-center">
+                            <div className="mt-4 flex items-center justify-center">
+                                <Input
+                                    type="checkbox"
+                                    name="isGuest"
+                                    checked={isGuest}
+                                    onChange={(e) =>
+                                        setIsGuest(e.target.checked)
+                                    }
+                                    className="mr-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                />
+
+                                <Label htmlFor="isGuest">
+                                    Continue without creating an account (as
+                                    Guest)
+                                </Label>
+                            </div>
+                            <div className="mt-6 text-left">
+                                <h2 className="mt-4 mb-2 font-semibold">
+                                    Login Information
+                                </h2>
+                                <Register isGuest={isGuest} />
+                            </div>
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
         </div>
     );
 };

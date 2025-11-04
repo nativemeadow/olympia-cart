@@ -18,7 +18,8 @@ type Props = {
 const productLabelMessage = 'Please Select Product Options';
 
 const ProductDetail = ({ categorySlug, product }: Props) => {
-    const { setProduct, productImage, hasMultipleImages } = useProductViewStore();
+    const { setProduct, productImage, hasMultipleImages } =
+        useProductViewStore();
 
     React.useEffect(() => {
         setProduct(categorySlug, product);
@@ -34,10 +35,17 @@ const ProductDetail = ({ categorySlug, product }: Props) => {
             <div className={classes.detail_container}>
                 <div className={classes.detail_image}>
                     <div className={classes.main_image_container}>
-                        <RenderImage src={`/products/${productImage}`} alt={product.title} />
+                        <RenderImage
+                            src={`/products/${productImage}`}
+                            alt={product.title}
+                        />
                     </div>
-                    <div className={classes.attribute_label}>{hasMultipleImages && <span>Select Size</span>}</div>
-                    {product.prices && product.prices.length > 1 && <ThumbImages />}
+                    <div className={classes.attribute_label}>
+                        {hasMultipleImages && <span>Select Size</span>}
+                    </div>
+                    {product.prices && product.prices.length > 1 && (
+                        <ThumbImages />
+                    )}
                 </div>
 
                 <div className={classes.detail}>
@@ -50,15 +58,21 @@ const ProductDetail = ({ categorySlug, product }: Props) => {
                         )}
                     </div>
                     <div className={classes.back_link}>
-                        <Link href={`/categories/${categorySlug}`}>Back to Category</Link>
+                        <Link href={`/categories/${categorySlug}`}>
+                            Back to Category
+                        </Link>
                     </div>
                 </div>
             </div>
-            <div className={`${classes.detail_description} ${classes.detail_description_row}`}>
+            <div
+                className={`${classes.detail_description} ${classes.detail_description_row}`}
+            >
                 <div className={classes.title}>
                     <h2 className={classes.info_title}>Product Information</h2>
                 </div>
-                <div className={classes.descr}>{parse(product.description || '')}</div>
+                <div className={classes.descr}>
+                    {parse(product.description || '')}
+                </div>
             </div>
         </>
     );
