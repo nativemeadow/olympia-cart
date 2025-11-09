@@ -2,20 +2,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InputError } from '@/components/ui/input-error';
 import { Label } from '@/components/ui/label';
-import { User } from '@/types/model-types';
-import { states } from '@/utils/counties-locals/states';
 
 import { router, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 import axios from 'axios';
 
 import classes from './register.module.css';
+import LoginCodeInput from '@/components/login-code-input';
 
 type Props = {
     isGuest: boolean;
 };
 
 const RegisterOnCheckout = ({ isGuest }: Props) => {
+    // 'form', 'code', or 'success'
+    const [view, setView] = useState('form');
+    const [resendStatus, setResendStatus] = useState('');
+
     const {
         data,
         setData,
@@ -31,18 +34,29 @@ const RegisterOnCheckout = ({ isGuest }: Props) => {
         email: '',
         password: '',
         password_confirmation: '',
+        code: '',
     });
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
 
+        const routeName = isGuest
+            ? 'checkout.register.guest'
+            : 'checkout.register';
+
         // We use axios to prevent Inertia's automatic redirect handling.
         axios
-            .post(route('checkout.register'), data)
-            .then(() => {
-                // On success, we visit the current page to get the new props
-                // for the authenticated user, which re-renders the component.
-                router.visit(window.location.href, { preserveState: false });
+            .post(route(routeName), data)
+            .then((response) => {
+                if (response.data.status === 'code_sent') {
+                    setView('code');
+                } else {
+                    // On success, we visit the current page to get the new props
+                    // for the authenticated user, which re-renders the component.
+                    router.visit(window.location.href, {
+                        preserveState: false,
+                    });
+                }
             })
             .catch((error) => {
                 // If registration fails (e.g., 422 validation error),
@@ -52,6 +66,74 @@ const RegisterOnCheckout = ({ isGuest }: Props) => {
                 }
             });
     };
+
+    const handleVerifyCode: FormEventHandler = (e) => {
+        e.preventDefault();
+        axios
+            .post(route('checkout.verify.guest'), {
+                email: data.email,
+                code: data.code,
+            })
+            .then(() => {
+                router.visit(window.location.href, { preserveState: false });
+            })
+            .catch((error) => {
+                if (error.response && error.response.status === 422) {
+                    setError(error.response.data.errors);
+                }
+            });
+    };
+
+    const handleResendCode = () => {
+        setResendStatus('Sending...');
+        axios
+            .post(route('checkout.resend.guest'), { email: data.email })
+            .then(() => {
+                setResendStatus('A new code has been sent.');
+                setTimeout(() => setResendStatus(''), 3000);
+            })
+            .catch(() => {
+                setResendStatus('Failed to send code. Please try again.');
+            });
+    };
+
+    if (view === 'code') {
+        return (
+            <div className="text-center">
+                <p className="mb-4">
+                    We found an account with that email. A 6-digit code has been
+                    sent to <strong>{data.email}</strong>. Please enter it
+                    below.
+                </p>
+                <form onSubmit={handleVerifyCode} className="space-y-4">
+                    <LoginCodeInput
+                        value={data.code}
+                        onChange={(value) => setData('code', value)}
+                        error={errors.code}
+                    />
+                    <Button
+                        type="submit"
+                        disabled={processing}
+                        className="w-full"
+                    >
+                        Verify and Continue
+                    </Button>
+                </form>
+                <div className="mt-4 text-sm">
+                    <button
+                        onClick={handleResendCode}
+                        className="text-indigo-600 hover:underline"
+                        disabled={
+                            !!resendStatus && resendStatus === 'Sending...'
+                        }
+                    >
+                        Resend Code
+                    </button>
+                    {resendStatus && <p className="mt-2">{resendStatus}</p>}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <form onSubmit={handleSubmit} className={classes.form}>
@@ -161,7 +243,7 @@ const RegisterOnCheckout = ({ isGuest }: Props) => {
                     disabled={processing || !isDirty}
                     className="w-full"
                 >
-                    Register Account
+                    {isGuest ? 'Continue as Guest' : 'Register Account'}
                 </Button>
             </div>
         </form>

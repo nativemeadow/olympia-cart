@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 import classes from './options.module.css';
+import clsx from 'clsx';
 
 const PickupOptions = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -77,7 +78,10 @@ const PickupOptions = () => {
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <div
-                        className={classes.options_box}
+                        className={clsx(
+                            classes.options_box,
+                            checkout?.is_pickup && classes.selected,
+                        )}
                         data-checkout-option={'pickup'}
                         data-disabled={true}
                     >
@@ -115,7 +119,10 @@ const PickupOptions = () => {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <div
-                    className={classes.options_box}
+                    className={clsx(
+                        classes.options_box,
+                        checkout?.is_pickup && classes.selected,
+                    )}
                     data-checkout-option={'pickup'}
                     onClick={openModal}
                 >

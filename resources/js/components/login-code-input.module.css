@@ -1,0 +1,18 @@
+.loginCodeInput {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.digitContainer {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.digitInput {
+    width: 2.5rem;
+    text-align: center;
+    font-size: 1.25rem;
+    background-color: var(--color-input);
+}
