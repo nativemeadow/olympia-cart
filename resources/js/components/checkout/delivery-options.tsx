@@ -27,6 +27,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import clsx from 'clsx';
 import classes from './options.module.css';
 
 const DeliveryOptions = () => {
@@ -77,7 +78,10 @@ const DeliveryOptions = () => {
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <div
-                        className={classes.options_box}
+                        className={clsx(
+                            classes.options_box,
+                            checkout?.is_delivery && classes.selected,
+                        )}
                         data-checkout-option={'delivery'}
                         data-disabled={true}
                     >
@@ -115,7 +119,10 @@ const DeliveryOptions = () => {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <div
-                    className={classes.options_box}
+                    className={clsx(
+                        classes.options_box,
+                        checkout?.is_delivery && classes.selected,
+                    )}
                     data-checkout-option={'delivery'}
                     onClick={openModal}
                 >

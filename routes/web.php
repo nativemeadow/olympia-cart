@@ -56,7 +56,7 @@ Route::patch('/checkout/{id}', [App\Http\Controllers\CheckoutController::class, 
 // Note: The 'auth' middleware has been removed to allow guest checkout.
 Route::prefix('checkout-cart')->name('checkout-cart.')->group(function () {
     Route::get('/', [App\Http\Controllers\CheckoutController::class, 'showCartCheckout'])->name('index');
-    Route::post('/step-one', [App\Http\Controllers\CheckoutController::class, 'processStepOne'])->name('step-one');
+    Route::patch('/step-one/{id}', [App\Http\Controllers\CheckoutController::class, 'processStepOne'])->name('processStepOne');
     Route::post('/step-two', [App\Http\Controllers\CheckoutController::class, 'processStepTwo'])->name('step-two');
     Route::post('/step-three', [App\Http\Controllers\CheckoutController::class, 'processStepThree'])->name('step-three');
     Route::post('/payment', [App\Http\Controllers\CheckoutController::class, 'processPayment'])->name('payment');

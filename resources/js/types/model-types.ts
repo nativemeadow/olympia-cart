@@ -1,3 +1,5 @@
+import { User as UserType } from '@/types/model-types';
+
 export type User = {
     id: number;
     first_name: string;
@@ -121,3 +123,5 @@ export type Cart = {
     // Relationships
     items?: CartItem[];
 };
+
+export type CustomerData = (UserType & { addresses: Address[] }) | null;

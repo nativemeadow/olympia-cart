@@ -1,8 +1,9 @@
 import React, { useState, useEffect, FormEventHandler } from 'react';
 import useAuth from '@/hooks/useAuth';
 import useCheckoutStore from '@/zustand/checkoutStore';
+import useCheckoutStepsStore from '@/zustand/checkoutStepsStore';
 import { User } from '@/types';
-import { Address, User as UserType } from '@/types/model-types';
+import { Address, CustomerData } from '@/types/model-types';
 import { Checkout } from '@/types';
 
 import classes from './customer-info.module.css'; // Assuming you have some CSS modules for styling
@@ -34,7 +35,7 @@ import { Label } from '@/components/ui/label';
 import { InputError } from '@/components/ui/input-error';
 import axios from 'axios';
 
-type CustomerData = (UserType & { addresses: Address[] }) | null;
+//type CustomerData = (UserType & { addresses: Address[] }) | null;
 
 const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
     const { user, isAuthenticated } = useAuth(); // Your auth hook
@@ -45,6 +46,15 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         setCheckout,
     } = useCheckoutStore();
     const [isGuest, setIsGuest] = useState(false);
+
+    const {
+        currentStep,
+        nextStep,
+        previousStep,
+        setCurrentStep,
+        setStepCompleted,
+        setStepCanProceed,
+    } = useCheckoutStepsStore();
 
     // Use local state to manage addresses for immediate UI updates
     const [localAddresses, setLocalAddresses] = useState<Address[]>(
@@ -176,6 +186,38 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                         setCheckout(page.props.checkout as Checkout);
                     },
                 },
+            );
+        }
+    };
+    ``;
+
+    const handleContinueToShipping = () => {
+        if (checkout?.billing_address_id && checkout?.delivery_address_id) {
+            const deliverPlusBilling = {
+                delivery_address_id: checkout.delivery_address_id,
+                billing_address_id: checkout.billing_same_as_shipping
+                    ? checkout.delivery_address_id
+                    : checkout.billing_address_id,
+            };
+
+            router.patch(
+                route('checkout-cart.processStepOne', checkout.id),
+                deliverPlusBilling,
+                {
+                    preserveScroll: true,
+                    onSuccess: (page) => {
+                        setCheckout(page.props.checkout as Checkout);
+                    },
+                },
+            );
+
+            setStepCanProceed('customerInfo', true);
+            setStepCompleted('customerInfo', true);
+            nextStep();
+        } else {
+            // You might want to show an error message here
+            alert(
+                'Please ensure both shipping and billing addresses are set before continuing.',
             );
         }
     };
@@ -387,6 +429,22 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                 />
                             </div>
                         )}
+
+                        {checkout.delivery_address_id ||
+                        checkout.billing_address_id ? (
+                            <div className="mt-6 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+                                <Button
+                                    onClick={handleContinueToShipping}
+                                    color="primary"
+                                    className="h-12 w-full rounded bg-green-600 text-xl text-white sm:w-auto"
+                                    // Ensure this button is prominent
+                                >
+                                    {checkout?.is_pickup
+                                        ? 'Continue to Pickup Options'
+                                        : 'Continue to Shipping Options'}
+                                </Button>
+                            </div>
+                        ) : null}
                     </>
                 ) : null}
             </>

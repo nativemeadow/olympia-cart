@@ -128,6 +128,13 @@ class CheckoutController extends Controller
     public function destroy(Request $request, $id)
     {
         // Handle checkout deletion logic here
+        $checkout = Checkout::findOrFail($id);
+
+        $this->authorize('delete', $checkout);
+
+        $checkout->delete();
+
+        return to_route('home')->with('success', 'Checkout deleted successfully.');
     }
 
     /**
@@ -149,9 +156,20 @@ class CheckoutController extends Controller
     /**
      * Process Step 1: Customer Information.
      */
-    public function processStepOne(Request $request)
+    public function processStepOne(Request $request, $id): RedirectResponse
     {
         // Add validation and logic for customer info (Step 1)
+        $validated = $request->validate([
+            'delivery_address_id' => 'nullable|exists:addresses,id',
+            'billing_address_id' => 'nullable|exists:addresses,id',
+        ]);
+
+        $checkout = Checkout::findOrFail($id);
+
+        $this->authorize('update', $checkout);
+
+        $checkout->update($validated);
+
         // For guests, you might store this info in the session.
         return back()->with('success', 'Customer information saved.');
     }

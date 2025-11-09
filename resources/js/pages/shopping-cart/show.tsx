@@ -106,7 +106,10 @@ const ShoppingCart = ({ cart, checkout }: Props) => {
                         <div className={classes.dividers} />
                         <div className="mt-5 w-full">
                             {checkout &&
-                            (checkout.is_pickup || checkout.is_delivery) ? (
+                            (checkout.is_pickup ||
+                                (checkout.is_delivery &&
+                                    cart?.items &&
+                                    cart.items.length > 0)) ? (
                                 <Button
                                     onClick={handleCheckout}
                                     color="primary"

@@ -18,6 +18,18 @@ Route::middleware('guest')->group(function () {
         ->middleware('guest')
         ->name('checkout.register');
 
+    Route::post('/checkout/register-guest', [RegisteredUserController::class, 'checkoutGuestStore'])
+        ->middleware('guest')
+        ->name('checkout.register.guest');
+
+    Route::post('/checkout/verify-guest-code', [RegisteredUserController::class, 'verifyGuestCode'])
+        ->middleware('guest')
+        ->name('checkout.verify.guest');
+
+    Route::post('/checkout/resend-guest-code', [RegisteredUserController::class, 'resendGuestCode'])
+        ->middleware('guest')
+        ->name('checkout.resend.guest');
+
     Route::post('register', [RegisteredUserController::class, 'store']);
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])

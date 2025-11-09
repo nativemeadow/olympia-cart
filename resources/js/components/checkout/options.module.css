@@ -33,7 +33,7 @@
 }
 
 .options_box.selected {
-    border: 2px solid #a6081e;
+    border: 0.3rem solid #a6081e;
 }
 
 .bolded-text {
