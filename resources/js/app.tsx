@@ -1,4 +1,5 @@
 import CartSync from '@/components/CartSync';
+import CheckoutSync from '@/components/CheckoutSync';
 import PublicLayout from '@/layouts/public-layout';
 import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -60,7 +61,9 @@ createInertiaApp({
 
                         return (
                             <>
-                                <CartSync /> {getLayout(page)}
+                                <CartSync />
+                                <CheckoutSync />
+                                {getLayout(page)}
                             </>
                         );
                     }}

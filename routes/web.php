@@ -55,12 +55,12 @@ Route::patch('/checkout/{id}', [App\Http\Controllers\CheckoutController::class, 
 // New Inertia-based Multi-Step Checkout Flow
 // Note: The 'auth' middleware has been removed to allow guest checkout.
 Route::prefix('checkout-cart')->name('checkout-cart.')->group(function () {
-    Route::get('/', [App\Http\Controllers\CheckoutController::class, 'showCartCheckout'])->name('index');
-    Route::patch('/step-one/{id}', [App\Http\Controllers\CheckoutController::class, 'processStepOne'])->name('processStepOne');
-    Route::post('/step-two', [App\Http\Controllers\CheckoutController::class, 'processStepTwo'])->name('step-two');
-    Route::post('/step-three', [App\Http\Controllers\CheckoutController::class, 'processStepThree'])->name('step-three');
-    Route::post('/payment', [App\Http\Controllers\CheckoutController::class, 'processPayment'])->name('payment');
-    Route::post('/step-five', [App\Http\Controllers\CheckoutController::class, 'processStepFive'])->name('step-five');
+    Route::get('/', [App\Http\Controllers\CheckoutStepsController::class, 'showCartCheckout'])->name('index');
+    Route::patch('/step-one/{id}', [App\Http\Controllers\CheckoutStepsController::class, 'processStepOne'])->name('processStepOne');
+    Route::post('/step-two', [App\Http\Controllers\CheckoutStepsController::class, 'processStepTwo'])->name('step-two');
+    Route::post('/step-three', [App\Http\Controllers\CheckoutStepsController::class, 'processStepThree'])->name('step-three');
+    Route::post('/payment', [App\Http\Controllers\CheckoutStepsController::class, 'processPayment'])->name('payment');
+    Route::post('/step-five', [App\Http\Controllers\CheckoutStepsController::class, 'processStepFive'])->name('step-five');
 });
 
 

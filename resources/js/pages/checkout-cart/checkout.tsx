@@ -53,17 +53,25 @@ function CheckOutPage() {
 
     return (
         <CheckoutLayout>
-            <div>
+            <>
                 <div className={classes.checkout_container}>
                     {currentStep === 'customerInfo' && (
                         <StepOne customer={customer} />
                     )}
-                    {currentStep === 'shippingDelivery' && <StepTwo />}
-                    {currentStep === 'reviewAgreement' && <StepThree />}
-                    {currentStep === 'payment' && <StepFour />}
-                    {currentStep === 'confirmation' && <Confirmation />}
+                    {currentStep === 'shippingDelivery' && (
+                        <StepTwo customer={customer} />
+                    )}
+                    {currentStep === 'reviewAgreement' && (
+                        <StepThree customer={customer} />
+                    )}
+                    {currentStep === 'payment' && (
+                        <StepFour customer={customer} />
+                    )}
+                    {currentStep === 'confirmation' && (
+                        <Confirmation customer={customer} />
+                    )}
                 </div>
-                <div className="mt-6 flex justify-between gap-3">
+                <div className={classes.checkout_button_group}>
                     <Button
                         className="h-12 rounded bg-yellow-700 text-xl text-white"
                         onClick={handlePreviousStep}
@@ -100,7 +108,7 @@ function CheckOutPage() {
                         ),
                     )}
                 </div>
-            </div>
+            </>
         </CheckoutLayout>
     );
 }
