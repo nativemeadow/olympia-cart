@@ -55,6 +55,8 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
+import type { Address } from './';
+
 export type Checkout = {
     id: number;
     cart_id: number;
@@ -66,6 +68,8 @@ export type Checkout = {
     delivery_date: string | null;
     delivery_time: string | null;
     delivery_address_id: number | null;
+    delivery_address: Address | null;
     billing_address_id: number | null;
+    billing_address: Address | null;
     instructions: string | null;
 };

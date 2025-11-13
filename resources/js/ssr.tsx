@@ -1,4 +1,5 @@
 import CartSync from '@/components/CartSync';
+import CheckoutSync from '@/components/CheckoutSync';
 import PublicLayout from '@/layouts/public-layout';
 import { createInertiaApp } from '@inertiajs/react';
 import createServer from '@inertiajs/react/server';
@@ -57,7 +58,9 @@ createServer((page) =>
 
                         return (
                             <>
-                                <CartSync /> {getLayout(page)}
+                                <CartSync />
+                                <CheckoutSync />
+                                {getLayout(page)}
                             </>
                         );
                     }}

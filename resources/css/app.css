@@ -321,9 +321,10 @@ body.contact-us-page-body .page-container {
 }
 
 .main {
-    max-width: var(--max-container-size);
     min-width: var(--min-container-size);
-    margin: auto;
+    width: 100%;
+    max-width: 80%;
+    margin: 0 auto;
     padding: 1rem 0 6.25rem 0;
     min-height: calc(100vh - 7rem);
 }
@@ -341,6 +342,12 @@ body.contact-us-page-body .page-container {
     justify-content: center;
     align-items: center;
     padding-right: 1rem;
+}
+
+.main.full-width {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
 }
 
 /* resources/css/app.css or a dedicated transition.css file */

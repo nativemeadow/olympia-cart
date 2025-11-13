@@ -93,32 +93,40 @@ class CheckoutController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Validate only the fields that are present in the request.
         $validatedData = $request->validate([
-            'is_pickup' => 'required|boolean',
-            'is_delivery' => 'required|boolean',
+            'is_pickup' => 'sometimes|boolean',
+            'is_delivery' => 'sometimes|boolean',
             'pickup_date' => 'required_if:is_pickup,true|nullable|date|after_or_equal:today',
             'pickup_time' => 'required_if:is_pickup,true|nullable|date_format:H:i',
             'delivery_date' => 'required_if:is_delivery,true|nullable|date|after_or_equal:today',
             'instructions' => 'required_if:is_delivery,true|nullable|string|max:1000',
             'billing_same_as_shipping' => 'sometimes|boolean',
+            'delivery_address_id' => 'nullable|exists:addresses,id',
+            'billing_address_id' => 'nullable|exists:addresses,id',
         ]);
 
         $checkout = Checkout::findOrFail($id);
 
         $this->authorize('update', $checkout);
 
-        if ($validatedData['is_pickup']) {
-            $checkout->fill([
-                'pickup_date' => $validatedData['pickup_date'],
-                'pickup_time' => $validatedData['pickup_time'],
-                'delivery_date' => null,
-                'instructions' => null,
-                'is_pickup' => true,
-                'is_delivery' => false,
-            ]);
-        } else { // is_delivery
-            $checkout->fill($validatedData);
+        // Handle pickup/delivery toggle logic if those fields are present
+        if (isset($validatedData['is_pickup'])) {
+            if ($validatedData['is_pickup']) {
+                $checkout->fill([
+                    'pickup_date' => $validatedData['pickup_date'] ?? $checkout->pickup_date,
+                    'pickup_time' => $validatedData['pickup_time'] ?? $checkout->pickup_time,
+                    'delivery_date' => null,
+                    'instructions' => null,
+                    'is_pickup' => true,
+                    'is_delivery' => false,
+                ]);
+            }
         }
+
+        // Fill the model with any other validated data from the request.
+        // This will handle address ID updates and other partial updates.
+        $checkout->fill($validatedData);
 
         $checkout->save();
 
@@ -128,6 +136,7 @@ class CheckoutController extends Controller
     public function destroy(Request $request, $id)
     {
         // Handle checkout deletion logic here
+        /** @disregard p10008  */
         $checkout = Checkout::findOrFail($id);
 
         $this->authorize('delete', $checkout);
@@ -135,82 +144,5 @@ class CheckoutController extends Controller
         $checkout->delete();
 
         return to_route('home')->with('success', 'Checkout deleted successfully.');
-    }
-
-    /**
-     * Display the Inertia-based multi-step checkout page.
-     */
-    public function showCartCheckout(Request $request): Response
-    {
-        /** @var ?User $user */
-        $user = $request->user();
-
-        // Eager load addresses if the user is authenticated
-        $user?->load('addresses');
-
-        return Inertia::render('checkout-cart/index', [
-            'customer' => $user,
-        ]);
-    }
-
-    /**
-     * Process Step 1: Customer Information.
-     */
-    public function processStepOne(Request $request, $id): RedirectResponse
-    {
-        // Add validation and logic for customer info (Step 1)
-        $validated = $request->validate([
-            'delivery_address_id' => 'nullable|exists:addresses,id',
-            'billing_address_id' => 'nullable|exists:addresses,id',
-        ]);
-
-        $checkout = Checkout::findOrFail($id);
-
-        $this->authorize('update', $checkout);
-
-        $checkout->update($validated);
-
-        // For guests, you might store this info in the session.
-        return back()->with('success', 'Customer information saved.');
-    }
-
-    /**
-     * Process Step 2: Shipping & Delivery.
-     */
-    public function processStepTwo(Request $request)
-    {
-        // This can use logic similar to your existing `store` method,
-        // but adapted for guest users (e.g., using session for cart).
-        return back()->with('success', 'Shipping & Delivery information saved.');
-    }
-
-    /**
-     * Process Step 3: Review.
-     */
-    public function processStepThree(Request $request)
-    {
-        // This step might not need a POST if it's just for review.
-        // If it does (e.g., final confirmation before payment), add logic here.
-        return back()->with('success', 'Order reviewed.');
-    }
-
-    /**
-     * Process Step 4: Payment.
-     */
-    public function processPayment(Request $request)
-    {
-        // Add validation and logic for payment processing (Step 4)
-        // This will likely involve a payment gateway integration and creating the final Order.
-        return back()->with('success', 'Payment processed successfully.');
-    }
-
-    /**
-     * Process Step 5: Order Confirmation.
-     */
-    public function processStepFive(Request $request)
-    {
-        // This is likely the final step to create the order record after successful payment.
-        // It might redirect to a "Thank You" page.
-        return to_route('home')->with('success', 'Your order has been placed!');
     }
 }

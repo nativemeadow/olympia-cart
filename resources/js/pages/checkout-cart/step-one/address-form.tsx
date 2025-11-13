@@ -2,8 +2,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InputError } from '@/components/ui/input-error';
 import { Label } from '@/components/ui/label';
+import { Checkout } from '@/types';
 import { User } from '@/types/model-types';
 import { states } from '@/utils/counties-locals/states';
+import useCheckoutStore from '@/zustand/checkoutStore';
 
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -23,6 +25,7 @@ const AddressForm = ({
     billingSameAsShipping = false,
     onSuccess,
 }: Props) => {
+    const { setCheckout } = useCheckoutStore();
     const { data, setData, post, processing, errors, reset, isDirty } = useForm(
         {
             street1: '',
@@ -44,8 +47,9 @@ const AddressForm = ({
         console.log('Submitting address form with data:', data);
         post(route('address.store'), {
             preserveScroll: true,
-            onSuccess: () => {
+            onSuccess: (page) => {
                 reset();
+                setCheckout(page.props.checkout as Checkout);
                 onSuccess?.(); // Call the callback if it exists
             },
         });

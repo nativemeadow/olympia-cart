@@ -47,6 +47,8 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
     } = useCheckoutStore();
     const [isGuest, setIsGuest] = useState(false);
 
+    console.log('CustomerInfoStep render - checkout:', checkout);
+
     const {
         currentStep,
         nextStep,
@@ -110,17 +112,10 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         const hasShippingAddress = addresses.some((addr) => addr.default);
         const hasBillingAddress = addresses.some((addr) => addr.billing);
 
-        setShowShippingForm(!hasShippingAddress);
+        // The form visibility should be based on whether addresses exist for the customer.
+        setShowShippingForm(!hasShippingAddress && !!checkout?.is_delivery);
         setShowBillingForm(!hasBillingAddress);
-
-        // Only set the initial state from the checkout object when it's first loaded.
-        if (
-            checkout &&
-            checkout.billing_same_as_shipping !== billingSameAsShipping
-        ) {
-            setBillingSameAsShipping(checkout.billing_same_as_shipping);
-        }
-    }, [customer, checkout]); // Removed setBillingSameAsShipping from dependencies
+    }, [customer, checkout]);
 
     const handleSetDefault = (
         addressId: number,
@@ -148,12 +143,60 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
             { type, state: isChecked },
             {
                 preserveScroll: true,
+                onSuccess: (page) => {
+                    setCheckout(page.props.checkout as Checkout);
+                    updateShippingBillingCheckout();
+                },
                 onError: () => {
                     // On error, revert to the original state from props
                     setLocalAddresses(customer?.addresses || []);
                 },
             },
         );
+    };
+
+    const updateShippingBillingCheckout = () => {
+        if (checkout) {
+            const hasShippingAddress = localAddresses.some(
+                (addr) => addr.default,
+            );
+            const hasBillingAddress = localAddresses.some(
+                (addr) => addr.billing,
+            );
+
+            const updatedData: {
+                delivery_address_id: number | null;
+                billing_address_id: number | null;
+            } = {
+                delivery_address_id: null,
+                billing_address_id: null,
+            };
+
+            if (hasShippingAddress) {
+                const shippingAddress = localAddresses.find(
+                    (addr) => addr.default,
+                );
+                updatedData.delivery_address_id = shippingAddress?.id || null;
+            }
+
+            if (hasBillingAddress) {
+                const billingAddress = localAddresses.find(
+                    (addr) => addr.billing,
+                );
+                updatedData.billing_address_id = billingAddress?.id || null;
+            }
+
+            router.patch(
+                route('checkout-cart.processStepOne', checkout.id),
+                updatedData,
+                {
+                    preserveScroll: true,
+                    onSuccess: (page) => {
+                        setCheckout(page.props.checkout as Checkout);
+                    },
+                },
+            );
+        }
     };
 
     const handleDelete = (addressId: number) => {
@@ -176,7 +219,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
 
         if (checkout && hasShippingAddress) {
             router.patch(
-                route('checkout.update', checkout.id),
+                route('checkout-cart.processStepOne', checkout.id),
                 {
                     billing_same_as_shipping: isChecked,
                 },
@@ -189,7 +232,6 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
             );
         }
     };
-    ``;
 
     const handleContinueToShipping = () => {
         if (checkout?.billing_address_id && checkout?.delivery_address_id) {
@@ -271,6 +313,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                             {address.city}, {address.state}{' '}
                                             {address.zip}
                                         </p>
+                                        <p>{address.phone}</p>
                                     </div>
                                     <div className="mt-4 space-y-2 border-t pt-2">
                                         <label className="flex items-center text-sm">

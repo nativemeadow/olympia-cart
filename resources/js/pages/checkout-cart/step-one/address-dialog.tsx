@@ -1,5 +1,6 @@
 import React, { FormEventHandler, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
+import useCheckoutStore from '@/zustand/checkoutStore';
 import { Address } from '@/types/model-types';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { InputError } from '@/components/ui/input-error';
 import { states } from '@/utils/counties-locals/states';
+import { Checkout } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface AddressDialogProps {
@@ -27,6 +29,7 @@ export function AddressDialog({
     isOpen,
     onClose,
 }: AddressDialogProps) {
+    const { setCheckout } = useCheckoutStore();
     const isNew = address === 'new';
     const formKey =
         address === null ? 'empty' : isNew ? 'new' : `address-${address.id}`;
@@ -65,7 +68,10 @@ export function AddressDialog({
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
         const options = {
-            onSuccess: () => onClose(),
+            onSuccess: (page: any) => {
+                setCheckout(page.props.checkout as Checkout);
+                onClose();
+            },
             preserveScroll: true,
         };
         if (isNew) {
