@@ -1,0 +1,47 @@
+.options_box {
+    border: 2px solid var(--sidebar);
+    background-color: var(--background);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.031372549);
+    border-radius: 7px;
+    padding: 20px;
+    width: 100%;
+    max-width: 60%;
+    display: flex;
+    cursor: pointer;
+}
+
+.options_box .options_details {
+    color: #4d4d4d;
+}
+
+.options_box .options_details .options_title {
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 35px;
+    display: block;
+}
+
+.options_box .options_details .options_meta {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 25px;
+}
+
+.options_box:visited .options_box:focus,
+.options_box:hover,
+.options_box:active {
+    text-decoration: none;
+    border-color: var(--color-red-800);
+}
+
+.options_box.selected {
+    border: 0.3rem solid var(--color-red-800);
+}
+
+.bolded-text {
+    font-weight: 700;
+}
+
+.options_box button {
+    margin-top: 15px;
+}

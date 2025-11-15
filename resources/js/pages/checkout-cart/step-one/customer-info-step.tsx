@@ -489,6 +489,17 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                             </div>
                         ) : null}
                     </>
+                ) : checkout?.is_pickup ? (
+                    <div className="mt-6 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+                        <Button
+                            onClick={handleContinueToShipping}
+                            color="primary"
+                            className="h-12 w-full rounded bg-green-600 text-xl text-white sm:w-auto"
+                            // Ensure this button is prominent
+                        >
+                            Continue to Pickup Options
+                        </Button>
+                    </div>
                 ) : null}
             </>
         );

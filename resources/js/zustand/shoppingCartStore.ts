@@ -8,6 +8,7 @@ type ShoppingCartStore = {
     clearCart: () => void;
     syncCart: (cart: Cart | null) => void;
     cartCount: () => number;
+    cartTotal: () => number;
     cartId: () => number | null;
 };
 
@@ -29,6 +30,14 @@ export const useShoppingCartStore = create(
             },
             cartCount: () => {
                 return get().items.length;
+            },
+            cartTotal: () => {
+                return get()
+                    .items.reduce(
+                        (total, item) => total + item.price * item.quantity,
+                        0,
+                    )
+                    .toFixed(2) as unknown as number;
             },
             cartId: () => {
                 return get().items[0]?.cart_id || null;
