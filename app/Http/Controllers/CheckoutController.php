@@ -145,4 +145,20 @@ class CheckoutController extends Controller
 
         return to_route('home')->with('success', 'Checkout deleted successfully.');
     }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'status' => ['required', Rule::in(['pending', 'processing', 'completed', 'cancelled'])],
+        ]);
+
+        $checkout = Checkout::findOrFail($id);
+
+        $this->authorize('update', $checkout);
+
+        $checkout->status = $validatedData['status'];
+        $checkout->save();
+
+        return back()->with('success', 'Checkout status updated successfully.');
+    }
 }

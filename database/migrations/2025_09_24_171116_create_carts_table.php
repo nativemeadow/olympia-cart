@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('cart_uuid')->unique();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->string('session_id')->nullable()->unique();
-            $table->string('status');
+            $table->string('status'); // active, ordered, abandoned
             $table->boolean('active')->default(true);
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->timestamps();

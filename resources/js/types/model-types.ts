@@ -124,4 +124,34 @@ export type Cart = {
     items?: CartItem[];
 };
 
+export type Order = {
+    id: number;
+    user_id?: number | null;
+    user: UserType | null;
+    guest_name: string;
+    guest_email: string;
+    total: number;
+    created_at: string;
+    updated_at: string;
+    // Relationships
+    items?: OrderItem[];
+    billing_address?: Address;
+    shipping_address?: Address;
+};
+
+export type OrderItem = {
+    id: number;
+    product_id: number;
+    product: Product;
+    order_id: number;
+    sku: string;
+    title: string;
+    image: string;
+    price: number;
+    quantity: number;
+    unit: string;
+    created_at: string;
+    updated_at: string;
+};
+
 export type CustomerData = (UserType & { addresses: Address[] }) | null;

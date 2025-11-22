@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ContactUsController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\SearchIndexController;
+use App\Http\Controllers\PaymentController;
 use Inertia\Inertia;
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -51,6 +52,12 @@ Route::get('/checkout/create', [App\Http\Controllers\CheckoutController::class, 
 Route::post('/checkout', [App\Http\Controllers\CheckoutController::class, 'store'])->name('checkout.store');
 Route::get('/checkout/{id}', [App\Http\Controllers\CheckoutController::class, 'show'])->name('checkout.show');
 Route::patch('/checkout/{id}', [App\Http\Controllers\CheckoutController::class, 'update'])->name('checkout.update');
+Route::patch('/checkout/{id}/status', [App\Http\Controllers\CheckoutController::class, 'updateStatus'])->name('checkout.updateStatus');
+
+Route::post('/payment/process', [App\Http\Controllers\PaymentController::class, 'processPayment'])->name('payment.process');
+Route::post('/order/store', [App\Http\Controllers\OrderController::class, 'store'])->name('order.store');
+Route::put('/order/{id}/update', [App\Http\Controllers\OrderController::class, 'update'])->name('order.update');
+
 
 // New Inertia-based Multi-Step Checkout Flow
 // Note: The 'auth' middleware has been removed to allow guest checkout.

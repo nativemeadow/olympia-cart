@@ -253,6 +253,17 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                 },
             );
 
+            router.patch(
+                route('checkout.updateStatus', checkout.id),
+                { status: 'processing' },
+                {
+                    preserveScroll: true,
+                    onSuccess: (page) => {
+                        setCheckout(page.props.checkout as Checkout);
+                    },
+                },
+            );
+
             setStepCanProceed('customerInfo', true);
             setStepCompleted('customerInfo', true);
             nextStep();
