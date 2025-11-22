@@ -5,17 +5,17 @@ import { Checkout } from '@/types';
 import useCheckout from '@/zustand/checkoutStore';
 import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 import useCheckoutStepsStore from '@/zustand/checkoutStepsStore';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { CartItem } from '@/types/model-types';
 import classes from './step-three.module.css';
 import address from '@/pages/settings/address';
-import { Link, router } from '@inertiajs/react';
+import { Link, router, useForm } from '@inertiajs/react';
 
 const categoryPath = 'categories';
 const productPath = 'products';
 
 const StepThree = ({ customer }: { customer: CustomerData }) => {
-    const { checkout } = useCheckout();
+    const { checkout, setCheckout } = useCheckout();
 
     const {
         currentStep,
@@ -25,6 +25,10 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
         setStepCompleted,
         setStepCanProceed,
     } = useCheckoutStepsStore();
+
+    const { data, post, processing, errors } = useForm({
+        ...checkout,
+    });
 
     const { delivery_address, billing_address, billing_same_as_shipping } =
         checkout || {};
@@ -40,10 +44,23 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
     );
 
     const handleContinueToPayment = () => {
-        // Add any final validation if needed for this step
-        setStepCompleted('reviewAgreement', true);
-        setStepCanProceed('reviewAgreement', true);
-        nextStep();
+        if (!checkout?.cart_id) {
+            console.error('No cart associated with checkout.');
+            return;
+        }
+
+        post(route('order.store'), {
+            preserveScroll: true,
+            onSuccess: (page: any) => {
+                setStepCompleted('reviewAgreement', true);
+                setStepCanProceed('reviewAgreement', true);
+                nextStep();
+            },
+            onError: () => {
+                setStepCompleted('reviewAgreement', false);
+                setStepCanProceed('reviewAgreement', false);
+            },
+        });
     };
 
     const handlePreviousStep = () => {
@@ -188,8 +205,9 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
                         : 'Go Back to Pickup Options'}
                 </Button>
                 <Button
+                    disabled={processing}
                     onClick={handleContinueToPayment}
-                    color="primary"
+                    // color="primary"
                     className="h-12 rounded bg-green-600 text-xl text-white"
                 >
                     Continue to Payment
