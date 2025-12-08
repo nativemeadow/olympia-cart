@@ -5,7 +5,6 @@ import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { HeroUIProvider } from '@heroui/react';
 import { initializeTheme } from './hooks/use-appearance';
 import '../css/app.css';
 
@@ -50,25 +49,23 @@ createInertiaApp({
         }
 
         root.render(
-            <HeroUIProvider>
-                <App
-                    {...props}
-                    children={({ Component, key, props: pageProps }) => {
-                        const getLayout =
-                            (Component as any).layout ||
-                            ((page: ReactNode) => page);
-                        const page = <Component {...pageProps} key={key} />;
+            <App
+                {...props}
+                children={({ Component, key, props: pageProps }) => {
+                    const getLayout =
+                        (Component as any).layout ||
+                        ((page: ReactNode) => page);
+                    const page = <Component {...pageProps} key={key} />;
 
-                        return (
-                            <>
-                                <CartSync />
-                                <CheckoutSync />
-                                {getLayout(page)}
-                            </>
-                        );
-                    }}
-                />
-            </HeroUIProvider>,
+                    return (
+                        <>
+                            <CartSync />
+                            <CheckoutSync />
+                            {getLayout(page)}
+                        </>
+                    );
+                }}
+            />,
         );
     },
     progress: {

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
@@ -43,8 +45,23 @@ class CartItemController extends Controller
 
         // After deleting, check if the cart has any items left.
         if ($cart->items()->count() === 0) {
-            $cart->delete();
-            return Redirect::back()->with('success', 'Cart has been cleared.');
+            // If the cart is empty, delete the cart and any associated checkout/order data.
+            DB::transaction(function () use ($cart) {
+                // 1. Find the associated checkout record.
+                $checkout = $cart->checkout;
+
+                if ($checkout) {
+                    // 2. Delete the associated order and its items.
+                    OrderController::deleteOrderByCheckoutId($checkout->id);
+
+                    // 3. Delete the checkout record itself.
+                    $checkout->delete();
+                }
+
+                // 4. Finally, delete the cart.
+                $cart->delete();
+            });
+            return Redirect::back()->with('success', 'Your cart is now empty.');
         }
 
         // If items remain, just recalculate the total.

@@ -18,6 +18,16 @@ class AddressFactory extends Factory
     {
         return [
             //
+            'name' => $this->faker->name(),
+            'street1' => $this->faker->streetAddress(),
+            'street2' => $this->faker->secondaryAddress(),
+            'city' => $this->faker->city(),
+            'state' => $this->faker->state(),
+            'zip' => $this->faker->postcode(),
+            'country' => $this->faker->country(),
+            'phone' => $this->faker->phoneNumber(),
+            'default' => $this->faker->boolean(),
+            'billing' => $this->faker->boolean(),
         ];
     }
 }

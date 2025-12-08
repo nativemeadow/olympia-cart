@@ -292,7 +292,6 @@
 
     body {
         @apply bg-background text-foreground;
-        @apply m-0 flex w-full flex-col p-0;
     }
 }
 
@@ -344,11 +343,11 @@ body.contact-us-page-body .page-container {
     padding-right: 1rem;
 }
 
-.main.full-width {
+/* .main.full-width {
     width: 100%;
     max-width: 100%;
     margin: 0;
-}
+} */
 
 /* resources/css/app.css or a dedicated transition.css file */
 .page-wrapper {

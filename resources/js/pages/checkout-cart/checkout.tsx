@@ -16,10 +16,6 @@ import classes from './checkout.module.css';
 
 type CustomerData = (User & { addresses: Address[] }) | null;
 
-type Props = {
-    user_session: User | null;
-};
-
 function CheckOutPage() {
     const { auth, customer } = usePage<
         SharedData & { customer: CustomerData }
@@ -55,6 +51,7 @@ function CheckOutPage() {
         <CheckoutLayout>
             <>
                 <div className={classes.checkout_container}>
+                    {/*  */}
                     {currentStep === 'customerInfo' && (
                         <StepOne customer={customer} />
                     )}
@@ -67,11 +64,9 @@ function CheckOutPage() {
                     {currentStep === 'payment' && (
                         <StepFour customer={customer} />
                     )}
-                    {currentStep === 'confirmation' && (
-                        <Confirmation customer={customer} />
-                    )}
+                    {currentStep === 'confirmation' && <Confirmation />}
                 </div>
-                <div className={classes.checkout_button_group}>
+                {/* <div className={classes.checkout_button_group}>
                     <Button
                         className="h-12 rounded bg-yellow-700 text-xl text-white"
                         onClick={handlePreviousStep}
@@ -96,9 +91,9 @@ function CheckOutPage() {
                     >
                         Reset Checkout
                     </Button>
-                </div>
+                </div> */}
                 {/* Display step status */}
-                <div>
+                <div className={classes.checkout_container}>
                     {Object.entries(steps).map(
                         ([step, { completed, canProceed }]) => (
                             <div key={step}>

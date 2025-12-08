@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Checkout;
 use App\Services\PaymentGatewayService;
+use App\Mail\PaymentConfirmationMail;
 
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-
+use App\Constants\StatusCode;
 
 class PaymentController extends Controller
 {
@@ -20,20 +24,33 @@ class PaymentController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse|\Inertia\Response
      */
-    public function process(Request $request, PaymentGatewayService $paymentGateway)
+    public function store(Request $request, PaymentGatewayService $paymentGateway)
     {
+        $orderStatus = StatusCode::getOrderStatus();
+        $paymentStatus = StatusCode::getPaymentStatus();
+        $checkoutStatus = StatusCode::getCheckoutStatus();
+        $cartStatus = StatusCode::getCartStatus();
+
         $request->validate([
-            'order_id' => 'required|exists:orders,id',
+            'checkout_id' => 'required|exists:checkouts,id',
             'payment_method' => 'required|string',
+            'card_number' => 'required_if:payment_method,credit_card|string',
+            'expiry_date' => 'required_if:payment_method,credit_card|string',
+            'card_holder_name' => 'required_if:payment_method,credit_card|string',
+            'cvv' => 'required_if:payment_method,credit_card|string',
             // Add other validation rules for card details if payment_method is 'credit_card'
         ]);
 
-        $order = Order::findOrFail($request->order_id);
+        $checkout = Checkout::findOrFail($request->checkout_id);
+        $order = Order::where('checkout_id', $checkout->id)->firstOrFail();
 
         // Ensure the order is in a state that allows payment.
-        if ($order->status !== 'pending_payment') {
+        if ($order->status !== $orderStatus['PENDING']) {
             return back()->withErrors(['error' => 'This order is not awaiting payment.']);
         }
+
+        $cart = $checkout->cart;
+        $payment = null;
 
         DB::beginTransaction();
 
@@ -47,27 +64,59 @@ class PaymentController extends Controller
 
             // 2. Create a Payment record
             $payment = Payment::create([
-                'order_id' => $order->id,
+                'checkout_id' => $checkout->id,
                 'amount' => $order->total,
                 'payment_method' => $request->payment_method,
-                'status' => 'completed',
-                'transaction_id' => $transaction->id, // From payment gateway response
+                'currency' => 'USD',
+                'status' => $paymentStatus['PAID'],
+                'payment_gateway' => 'SimulatedGateway',
+                'gateway_transaction_id' => $transaction->id, // From payment gateway response
+                'payment_method_details' => $request->except(['checkout_id', 'payment_method'])
             ]);
 
             // 3. Update the Order status
-            $order->status = 'processing'; // Or 'completed'
+            $order->status = $orderStatus['COMPLETED'];
             $order->save();
+
+            $cart->status = $cartStatus['COMPLETED'];
+            $cart->save();
+
+            $checkout->status = $checkoutStatus['COMPLETED'];
+            $checkout->save();
 
             DB::commit();
 
-            // 4. Redirect to confirmation page on success
-            return Inertia::render('CheckoutCart/StepFive/Page', [
-                'order' => $order->fresh(), // Pass fresh order data to the confirmation page
-            ]);
+            // success email to customer
+            $this->sendConfirmationEmail($order, $payment);
+
+            // After successful payment, regenerate the session ID
+            $request->session()->regenerate();
+
+            return back()->with('success', 'Payment successful.');
         } catch (Exception $e) {
             DB::rollBack();
-            // Log the exception $e->getMessage()
+            $message = $e->getMessage();
+            error_log('Payment processing failed: ' . $message);
             return back()->withErrors(['error' => 'Payment failed. Please try again.']);
+        }
+    }
+
+    public function sendConfirmationEmail(Order $order, Payment $payment)
+    {
+        $user = $order->user;
+        $mailData = [
+            'orderId' => $order->id,
+            'amount' => $payment->amount,
+            'date' => $payment->created_at->toFormattedDateString(),
+        ];
+        try {
+            Mail::to($user->email)->send(new PaymentConfirmationMail(
+                orderNumber: $mailData['orderId'],
+                amount: $mailData['amount'],
+                date: $mailData['date']
+            ));
+        } catch (\Exception $e) {
+            Log::error("Failed to send payment confirmation email: " . $e->getMessage());
         }
     }
 }

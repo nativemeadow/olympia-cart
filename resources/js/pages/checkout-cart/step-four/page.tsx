@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { User } from '@/types';
 import {
     Card,
     CardHeader,
@@ -12,13 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useForm, usePage } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';
+import { InputError } from '@/components/ui/input-error';
 import useCheckout from '@/zustand/checkoutStore';
 import useCheckoutStepsStore from '@/zustand/checkoutStepsStore';
 import useCheckoutStore from '@/zustand/checkoutStore';
 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Address, CustomerData, Order } from '@/types/model-types';
-import { Checkout } from '@/types';
+import { CustomerData, Order } from '@/types/model-types';
 
 const formatCardNumber = (value: string): string => {
     const numericValue = value.replace(/\D/g, ''); // Remove non-numeric characters
@@ -43,19 +42,13 @@ const StepFour = ({ customer }: { customer: CustomerData }) => {
     const { props } = usePage();
     const order = (props.flash as any)?.order as Order;
     const { checkout } = useCheckout();
-    const {
-        currentStep,
-        nextStep,
-        previousStep,
-        setCurrentStep,
-        setStepCompleted,
-        setStepCanProceed,
-    } = useCheckoutStepsStore();
+    const { nextStep, previousStep, setStepCompleted, setStepCanProceed } =
+        useCheckoutStepsStore();
 
     const { setCheckout } = useCheckoutStore();
 
     const { data, setData, post, processing, errors } = useForm({
-        order_id: order?.id || null,
+        checkout_id: checkout?.id || null,
         payment_method: '',
         card_number: '',
         expiry_date: '',
@@ -63,8 +56,10 @@ const StepFour = ({ customer }: { customer: CustomerData }) => {
         cvv: '',
     });
 
-    const handleContinueToConfirmation = () => {
-        post(route('payment.process'), {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        console.log('Submitting data:', data);
+        post(route('payment.store'), {
             preserveScroll: true,
             onSuccess: (page: any) => {
                 setStepCompleted('payment', true);
@@ -80,22 +75,6 @@ const StepFour = ({ customer }: { customer: CustomerData }) => {
 
     const handlePreviousStep = () => {
         previousStep();
-    };
-
-    const handlePayment = (e: React.FormEvent) => {
-        e.preventDefault();
-        post(route('payment.process'), {
-            preserveScroll: true,
-            onSuccess: (page: any) => {
-                setStepCompleted('payment', true);
-                setStepCanProceed('payment', true);
-                nextStep();
-            },
-            onError: () => {
-                setStepCompleted('payment', false);
-                setStepCanProceed('payment', false);
-            },
-        });
     };
 
     return (
@@ -146,7 +125,7 @@ const StepFour = ({ customer }: { customer: CustomerData }) => {
                     {data.payment_method === 'credit_card' && (
                         <div className="mt-1.5 w-6/12 space-y-4 rounded-md border p-4">
                             <form
-                                onSubmit={handlePayment}
+                                onSubmit={handleSubmit}
                                 className="mt-6 space-y-4"
                             >
                                 <div>
@@ -168,6 +147,7 @@ const StepFour = ({ customer }: { customer: CustomerData }) => {
                                         maxLength={19}
                                         required
                                     />
+                                    <InputError message={errors.card_number} />
                                 </div>
                                 <div>
                                     <Label htmlFor="expiry_date">
@@ -187,6 +167,7 @@ const StepFour = ({ customer }: { customer: CustomerData }) => {
                                         placeholder="MM/YY"
                                         required
                                     />
+                                    <InputError message={errors.expiry_date} />
                                 </div>
                                 <div>
                                     <Label htmlFor="card_holder_name">
@@ -203,6 +184,9 @@ const StepFour = ({ customer }: { customer: CustomerData }) => {
                                         }
                                         required
                                     />
+                                    <InputError
+                                        message={errors.card_holder_name}
+                                    />
                                 </div>
                                 <div>
                                     <Label htmlFor="cvv">CVV</Label>
@@ -214,7 +198,10 @@ const StepFour = ({ customer }: { customer: CustomerData }) => {
                                         }
                                         placeholder="123"
                                         required
+                                        maxLength={3}
+                                        minLength={3}
                                     />
+                                    <InputError message={errors.cvv} />
                                 </div>
                                 <Button
                                     disabled={processing}
@@ -248,8 +235,8 @@ const StepFour = ({ customer }: { customer: CustomerData }) => {
                         Back to Review & Agreement
                     </Button>
                     <Button
-                        onClick={handleContinueToConfirmation}
-                        disabled={data.payment_method === 'credit_card'}
+                        onClick={handleSubmit}
+                        disabled={data.payment_method !== 'credit_card'}
                         color="primary"
                         className="h-12 rounded bg-green-600 text-xl text-white"
                     >

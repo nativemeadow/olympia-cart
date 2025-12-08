@@ -39,4 +39,12 @@ class Payment extends Model
     {
         return $this->status === 'succeeded';
     }
+
+    /** 
+     * get the associated order
+     */
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'checkout_id', 'checkout_id');
+    }
 }

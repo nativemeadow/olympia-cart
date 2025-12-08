@@ -19,6 +19,7 @@ class Order extends Model
         'billing_address_id',
         'total',
         'status',
+        'checkout_id',
     ];
 
     /**
@@ -51,5 +52,13 @@ class Order extends Model
     public function billingAddress(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'billing_address_id');
+    }
+
+    /**
+     * Get the checkout associated with the order.
+     */
+    public function checkout(): BelongsTo
+    {
+        return $this->belongsTo(Checkout::class);
     }
 }

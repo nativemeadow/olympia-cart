@@ -47,4 +47,12 @@ class Checkout extends Model
     {
         return $this->belongsTo(Cart::class);
     }
+
+    /**
+     * Get the payments for the checkout.
+     */
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
 }

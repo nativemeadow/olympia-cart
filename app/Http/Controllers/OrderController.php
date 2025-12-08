@@ -7,20 +7,42 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Constants\StatusCode;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Inertia\Response;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class OrderController extends Controller
 {
     use AuthorizesRequests;
 
+    public function confirmation(Request $request): JsonResponse
+    {
+        $order = null;
+
+        if ($request->user()) {
+            $order = Order::where('user_id', $request->user()->id)
+                ->with(['items.product', 'shippingAddress', 'billingAddress', 'user'])
+                ->latest()
+                ->first();
+        } else {
+            $checkoutId = $request->session()->get('checkout_id');
+            if ($checkoutId) {
+                $order = Order::where('checkout_id', $checkoutId)
+                    ->with(['items.product', 'shippingAddress', 'billingAddress'])
+                    ->latest()
+                    ->first();
+            }
+        }
+
+        return response()->json(['order' => $order]);
+    }
+
     /**
      * Display the specified resource.
      */
-    public function show(): Response
+    public function show(): \Inertia\Response
     {
         $user = Auth::user();
 
@@ -72,16 +94,23 @@ class OrderController extends Controller
 
         $orderStatus = StatusCode::getOrderStatus();
         DB::transaction(function () use ($cart, $user, $checkout, $is_guest, $orderStatus, &$order) {
-            // Create the Order
-            $order = Order::create([
-                'user_id' => $user->id,
-                'status' => $orderStatus['PENDING'], // Set initial status to 'pending'
-                'total' => $cart->total, // Assuming cart model has a 'total' accessor
-                'guest_name' => $is_guest ? $user->first_name . ' ' . $user->last_name ?? 'Guest' : null,
-                'guest_email' => $is_guest ? $user->email ?? null : null,
-                'shipping_address_id' =>  $checkout->delivery_address_id,
-                'billing_address_id' => $checkout->billing_address_id,
-            ]);
+            // Use updateOrCreate to find an existing order for this checkout or create a new one.
+            // This handles cases where the user goes back and changes their address.
+            $order = Order::updateOrCreate(
+                ['checkout_id' => $checkout->id], // Find order by checkout_id
+                [
+                    'user_id' => $user->id,
+                    'status' => $orderStatus['PENDING'],
+                    'total' => $cart->total,
+                    'guest_name' => $is_guest ? ($user->first_name . ' ' . $user->last_name) ?? 'Guest' : null,
+                    'guest_email' => $is_guest ? $user->email ?? null : null,
+                    'shipping_address_id' =>  $checkout->delivery_address_id,
+                    'billing_address_id' => $checkout->billing_address_id,
+                    'checkout_id' => $checkout->id,
+                ]
+            );
+            // If we are updating an existing order, clear out the old items.
+            $order->items()->delete();
 
             // Create OrderItems from CartItems
             foreach ($cart->items as $cartItem) {
@@ -137,5 +166,27 @@ class OrderController extends Controller
         return response()->json([
             'message' => 'Order deleted successfully.',
         ]);
+    }
+
+    /**
+     * Deletes an order based on the checkout ID.
+     *
+     * @param int $checkoutId
+     * @return void
+     */
+    public static function deleteOrderByCheckoutId(int $checkoutId): void
+    {
+        // Find the order associated with the checkout.
+        $order = Order::where('checkout_id', $checkoutId)->first();
+
+        if ($order) {
+            // The transaction ensures that deleting items and the order happens atomically.
+            DB::transaction(function () use ($order) {
+                // Delete all associated order items.
+                $order->items()->delete();
+                // Delete the order itself.
+                $order->delete();
+            });
+        }
     }
 }

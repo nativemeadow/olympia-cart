@@ -1,4 +1,3 @@
-import React from 'react';
 import { CustomerData } from '@/types/model-types';
 import useCheckout from '@/zustand/checkoutStore';
 import useCheckoutStepsStore from '@/zustand/checkoutStepsStore';
@@ -10,14 +9,8 @@ import classes from './address-display-card.module.css';
 
 function StepTwo({ customer }: { customer: CustomerData }) {
     const { checkout } = useCheckout();
-    const {
-        currentStep,
-        nextStep,
-        previousStep,
-        setCurrentStep,
-        setStepCompleted,
-        setStepCanProceed,
-    } = useCheckoutStepsStore();
+    const { nextStep, previousStep, setStepCompleted, setStepCanProceed } =
+        useCheckoutStepsStore();
 
     console.log('StepTwo render - checkout:', checkout, 'customer:', customer);
 
