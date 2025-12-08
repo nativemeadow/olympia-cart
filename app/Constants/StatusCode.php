@@ -30,6 +30,12 @@ class StatusCode
         'REFUNDED' => 'refunded',
     ];
 
+    const CHECKOUT_STATUS = [
+        'PENDING' => 'pending',
+        'COMPLETED' => 'completed',
+        'CANCELLED' => 'cancelled',
+    ];
+
     public static function getCartStatus()
     {
         $statusCodes = env('CART_STATUS');
@@ -64,5 +70,14 @@ class StatusCode
             return json_decode($statusCodes, true);
         }
         return self::PRODUCT_STATUS;
+    }
+
+    public static function getCheckoutStatus()
+    {
+        $statusCodes = env('CHECKOUT_STATUS');
+        if ($statusCodes) {
+            return json_decode($statusCodes, true);
+        }
+        return self::CHECKOUT_STATUS;
     }
 }

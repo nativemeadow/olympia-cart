@@ -10,9 +10,9 @@ type CategoriesIndexProps = {
 
 export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
     return (
-        <>
+        <div className="flex h-full w-full flex-col">
             <Head title="Product Categories" />
-            <h2 className="mb-2 text-xl font-bold text-[#1b1b18] dark:text-[#EDEDEC]">
+            <h2 className="mb-2 px-8 text-xl font-bold text-[#1b1b18] dark:text-[#EDEDEC]">
                 Browse Our Product Categories
             </h2>
             {categories.length === 0 ? (
@@ -20,31 +20,32 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
                     No top-level categories found.
                 </div>
             ) : (
-                <div className={classes.gallery_grid}>
+                <div className={`${classes.gallery_grid} flex-grow px-8`}>
                     {categories.map((cat) => (
                         <div
                             key={cat.id}
-                            className={` ${classes[`gallery_${cat.slug}`]}`}
+                            // href={`/categories/${cat.slug}`}
+                            className={`${classes.gallery_cell} ${classes[`gallery_${cat.slug}`]}`}
                         >
-                            <Link href={`/categories/${cat.slug}`}>
-                                <div className={classes.gallery_item}>
-                                    <RenderImage
-                                        src={`category_images/${cat.image}`}
-                                        alt={cat.title}
-                                        className={classes.gallery_image}
-                                    />
+                            <div className={classes.gallery_item}>
+                                <RenderImage
+                                    src={`category_images/${cat.image}`}
+                                    alt={cat.title}
+                                    className={classes.gallery_image}
+                                />
 
-                                    <span
-                                        className={`${classes.gallery_card} ${classes['gallery_category-title']}`}
-                                    >
+                                <span
+                                    className={`${classes.gallery_card} ${classes['gallery_category-title']}`}
+                                >
+                                    <Link href={`/categories/${cat.slug}`}>
                                         {cat.title}
-                                    </span>
-                                </div>
-                            </Link>
+                                    </Link>
+                                </span>
+                            </div>
                         </div>
                     ))}
                 </div>
             )}
-        </>
+        </div>
     );
 }

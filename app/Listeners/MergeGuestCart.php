@@ -42,10 +42,10 @@ class MergeGuestCart
         $oldSessionId = $this->request->session()->pull('old_session_id');
 
         // Find the guest cart from before the login.
-        $guestCart = $oldSessionId ? Cart::with('items')->where('session_id', $oldSessionId)->first() : null;
+        $guestCart = $oldSessionId ? Cart::with('items')->where('session_id', $oldSessionId)->where('status', 'active')->first() : null;
 
         // Find the user's existing cart, if any.
-        $userCart = Cart::with('items')->where('user_id', $user->id)->where('status', 'active')->first();
+        $userCart = Cart::with('items')->where('user_id', $user->id)->where('status', 'active')->where('status', 'active')->first();
 
         if ($guestCart) {
             if ($userCart) {

@@ -1,30 +1,20 @@
-import React from 'react';
-import { User } from '@/types';
-import { Address, CustomerData } from '@/types/model-types';
-import { Checkout } from '@/types';
+import { CustomerData } from '@/types/model-types';
 import useCheckout from '@/zustand/checkoutStore';
 import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 import useCheckoutStepsStore from '@/zustand/checkoutStepsStore';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { CartItem } from '@/types/model-types';
 import classes from './step-three.module.css';
-import address from '@/pages/settings/address';
-import { Link, router, useForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 
 const categoryPath = 'categories';
 const productPath = 'products';
 
 const StepThree = ({ customer }: { customer: CustomerData }) => {
-    const { checkout, setCheckout } = useCheckout();
+    const { checkout } = useCheckout();
 
-    const {
-        currentStep,
-        nextStep,
-        previousStep,
-        setCurrentStep,
-        setStepCompleted,
-        setStepCanProceed,
-    } = useCheckoutStepsStore();
+    const { nextStep, previousStep, setStepCompleted, setStepCanProceed } =
+        useCheckoutStepsStore();
 
     const { data, post, processing, errors } = useForm({
         ...checkout,

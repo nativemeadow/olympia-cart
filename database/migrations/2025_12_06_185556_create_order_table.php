@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('guest_email')->nullable();
             $table->foreignId('shipping_address_id')->nullable()->constrained('addresses')->onDelete('set null');
             $table->foreignId('billing_address_id')->nullable()->constrained('addresses')->onDelete('set null');
+            $table->foreignId('checkout_id')->constrained('checkouts')->onDelete('cascade');
             $table->decimal('total', 10, 2);
             $table->string('status')->default('pending');
             $table->timestamps();

@@ -15,6 +15,8 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    protected $appends = ['is_guest'];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -25,6 +27,7 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
+        'email_verified_at',
     ];
     /**
      * Get the user's full name.
@@ -90,5 +93,10 @@ class User extends Authenticatable
     function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function getIsGuestAttribute()
+    {
+        return $this->is_guest ?? false;
     }
 }

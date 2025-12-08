@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Cart;
 use App\Models\Category;
+use SebastianBergmann\CodeCoverage\Report\Xml\Totals;
 
 class CartController extends Controller
 {
@@ -17,9 +18,9 @@ class CartController extends Controller
         $user = Auth::user();
         $cart = null;
         if ($user) {
-            $cart = Cart::with('items.product')->where('user_id', $user->id)->first();
+            $cart = Cart::with('items.product')->where('user_id', $user->id)->where('status', 'active')->first();
         } else {
-            $cart = Cart::with('items.product')->where('session_id', session()->getId())->first();
+            $cart = Cart::with('items.product')->where('session_id', session()->getId())->where('status', 'active')->first();
         }
 
         /* get the checkout information if it exists, may not exist so check for that as well */
@@ -84,7 +85,7 @@ class CartController extends Controller
         if ($user) {
             // Find or create a cart for the logged-in user.
             $userCart = Cart::firstOrCreate(
-                ['user_id' => $user->id, 'status' => 'active'],
+                ['user_id' => $user->id, 'status' => 'active', 'total' => 0],
                 ['cart_uuid' => Str::uuid(), 'session_id' => $sessionId]
             );
 
@@ -109,7 +110,7 @@ class CartController extends Controller
 
         // For guest users, find or create a cart based on the session ID.
         return Cart::firstOrCreate(
-            ['session_id' => $sessionId, 'status' => 'active', 'user_id' => null],
+            ['session_id' => $sessionId, 'status' => 'active', 'user_id' => null, 'total' => 0],
             ['cart_uuid' => Str::uuid()]
         );
     }

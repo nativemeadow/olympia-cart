@@ -58,7 +58,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
     return (
         <div
             ref={pageWrapperRef}
-            className="page-wrapper w-full translate-y-4 opacity-0"
+            className="page-wrapper h-full w-full transition-all duration-300 ease-in-out"
         >
             {children}
         </div>

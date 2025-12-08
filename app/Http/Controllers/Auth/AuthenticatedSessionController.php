@@ -85,7 +85,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         // Eager load items to prevent N+1 queries
-        $guestCart = Cart::with('items')->where('session_id', $oldSessionId)->whereNull('user_id')->first();
+        $guestCart = Cart::with('items')->where('session_id', $oldSessionId)->whereNull('user_id')->where('status', 'active')->first();
 
         if (! $guestCart) {
             return;
@@ -112,6 +112,13 @@ class AuthenticatedSessionController extends Controller
                 // If it doesn't exist, simply associate the guest item with the user's cart.
                 $guestItem->cart()->associate($userCart)->save();
             }
+        }
+
+        // If the guest cart had checkout data, associate it with the final cart.
+        if ($guestCart->checkout) {
+            $guestCheckout = $guestCart->checkout;
+            $guestCheckout->cart_id = $userCart->id;
+            $guestCheckout->save();
         }
 
         $userCart->recalculateTotal();

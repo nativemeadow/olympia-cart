@@ -18,7 +18,6 @@ class CartFactory extends Factory
     {
 
         return [
-            'customer_id' => \App\Models\Customer::factory(),
             'status' => $this->faker->randomElement(['active', 'inactive', 'pending', 'completed']),
             'total' => $this->faker->randomFloat(2, 0, 1000),
             'token' => $this->faker->uuid(),

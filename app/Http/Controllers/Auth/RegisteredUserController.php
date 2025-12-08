@@ -195,6 +195,12 @@ class RegisteredUserController extends Controller
             ]
         );
 
+        // Temporary debugging
+        Log::info('Attempting to send login code email to ' . $email);
+        Log::info('Mail driver: ' . config('mail.default'));
+        Log::info('Mail host: ' . config('mail.mailers.smtp.host'));
+        Log::info('Mail port: ' . config('mail.mailers.smtp.port'));
+
         try {
             Mail::to($email)->send(new LoginCodeMail((string)$code));
         } catch (\Exception $e) {
@@ -222,14 +228,14 @@ class RegisteredUserController extends Controller
             return;
         }
 
-        $guestCart = Cart::with('items')->where('session_id', $oldSessionId)->whereNull('user_id')->first();
+        $guestCart = Cart::with('items')->where('session_id', $oldSessionId)->whereNull('user_id')->where('status', 'active')->first();
 
         if (!$guestCart) {
             return;
         }
 
         // Check if the user already has an active cart.
-        $userCart = Cart::with('items')->where('user_id', $user->id)->where('status', 'active')->first();
+        $userCart = Cart::with('items')->where('user_id', $user->id)->where('status', 'active')->where('status', 'active')->first();
 
         if ($userCart) {
             // User has an existing cart, merge guest items into it.

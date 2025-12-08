@@ -18,6 +18,10 @@ class ImagesFactory extends Factory
     {
         return [
             //
+            'name' => $this->faker->word(),
+            'description' => $this->faker->sentence(),
+            'image' => $this->faker->word() . '.jpg',
+            'category' => $this->faker->randomElement(['category', 'product']),
         ];
     }
 }

@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { User } from '@/types';
-import { Address, Order, OrderItem } from '@/types/model-types';
+import axios from 'axios';
+import { Address, CustomerData, Order, OrderItem } from '@/types/model-types';
 import { Checkout } from '@/types';
+import parse from 'html-react-parser';
 import {
     Card,
     CardHeader,
@@ -10,9 +12,12 @@ import {
     CardContent,
     CardFooter,
 } from '@/components/ui/card';
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import useCheckoutStore from '@/zustand/checkoutStore';
+import { Skeleton } from '@/components/ui/skeleton';
+
+import classes from './step-five.module.css';
 
 const renderAddress = (
     address: Address | null,
@@ -43,15 +48,56 @@ const renderAddress = (
 };
 
 const StepFive = () => {
-    const { props } = usePage<{ order: Order }>();
-    const { order } = props;
+    const [order, setOrder] = useState<Order | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const { setCheckout } = useCheckoutStore();
 
-    // Clear checkout state on confirmation page
-    React.useEffect(() => {
+    useEffect(() => {
+        const fetchOrder = async () => {
+            try {
+                setLoading(true);
+                const response = await axios.get('/order/confirmation');
+                if (response.data.order) {
+                    setOrder(response.data.order);
+                } else {
+                    setError('Could not find your order.');
+                }
+            } catch (err) {
+                setError('An error occurred while fetching your order.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrder();
+    }, []);
+
+    useEffect(() => {
+        // Clear checkout state on confirmation page
         setCheckout(null);
     }, [setCheckout]);
 
+    function calculateTotal(items: OrderItem[]): number {
+        return items.reduce(
+            (total, item) => total + item.price * item.quantity,
+            0,
+        );
+    }
+
+    if (loading) {
+        return (
+            <div>
+                <Skeleton className="h-8 w-1/2" />
+                <Skeleton className="mt-4 h-64 w-full" />
+            </div>
+        );
+    }
+
+    if (error || !order) {
+        return <p className="text-red-500">{error || 'Order not found.'}</p>;
+    }
     return (
         <>
             <h1 className="text-2xl font-semibold">
@@ -74,14 +120,22 @@ const StepFive = () => {
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         {renderAddress(
                             order.billing_address || null,
-                            'Shipping',
-                            order.user?.first_name || null,
+                            'Shipping', // This should be shipping_address, but it's not in the API response
+                            order.user?.first_name +
+                                ' ' +
+                                order.user?.last_name ||
+                                order.guest_name ||
+                                null,
                             order.user?.email || null,
                         )}
                         {renderAddress(
                             order.billing_address || null,
                             'Billing',
-                            order.user?.first_name || null,
+                            order.user?.first_name +
+                                ' ' +
+                                order.user?.last_name ||
+                                order.guest_name ||
+                                null,
                             order.user?.email || null,
                         )}
                     </div>
@@ -90,31 +144,42 @@ const StepFive = () => {
                     </h3>
                     <ul className="mt-2 divide-y divide-gray-200">
                         {order.items?.map((item, index) => (
-                            <li key={`item-${index}`} className="flex py-4">
-                                <div className="ml-4 flex flex-1 flex-col">
-                                    <div>
-                                        <div className="flex justify-between text-base font-medium text-gray-900">
-                                            <h3>{item.product?.title}</h3>
-                                            <p className="ml-4">
-                                                $
-                                                {(
-                                                    item.price * item.quantity
-                                                ).toFixed(2)}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-1 items-end justify-between text-sm">
-                                        <p className="text-gray-500">
-                                            Qty {item.quantity}
+                            <div
+                                key={item.id}
+                                className="flex items-center space-x-4 border-b py-2 last:border-b-0 last:pb-0"
+                            >
+                                <div>
+                                    <img
+                                        className={classes.image}
+                                        src={`/products/${item.image}`}
+                                        alt={item.title}
+                                    />
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-base font-medium text-gray-900">
+                                        <h3>{parse(item?.title)}</h3>
+                                        <p className="ml-4">
+                                            $
+                                            {(
+                                                item.price * item.quantity
+                                            ).toFixed(2)}
                                         </p>
                                     </div>
                                 </div>
-                            </li>
+                                <div className="flex flex-1 items-end justify-between text-sm">
+                                    <p className="text-gray-500">
+                                        Qty {item.quantity}
+                                    </p>
+                                </div>
+                            </div>
                         ))}
                     </ul>
                     <div className="mt-4 border-t pt-4 text-right">
                         <p className="text-lg font-semibold">
-                            Total: ${order.total.toFixed(2)}
+                            Total:{' '}
+                            <span className="ml-4">
+                                ${calculateTotal(order.items || []).toFixed(2)}
+                            </span>
                         </p>
                     </div>
                 </CardContent>

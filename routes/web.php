@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ContactUsController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\SearchIndexController;
 use App\Http\Controllers\PaymentController;
 use Inertia\Inertia;
@@ -19,7 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // The homepage shows the category index.
 Route::get('/', [CategoryController::class, 'index'])->name('home');
 
-use App\Http\Controllers\CartItemController;
+
 
 // ... other routes
 
@@ -57,6 +58,8 @@ Route::patch('/checkout/{id}/status', [App\Http\Controllers\CheckoutController::
 Route::post('/payment/process', [App\Http\Controllers\PaymentController::class, 'processPayment'])->name('payment.process');
 Route::post('/order/store', [App\Http\Controllers\OrderController::class, 'store'])->name('order.store');
 Route::put('/order/{id}/update', [App\Http\Controllers\OrderController::class, 'update'])->name('order.update');
+Route::post('payment/store', [PaymentController::class, 'store'])->name('payment.store');
+Route::get('/order/confirmation', [App\Http\Controllers\OrderController::class, 'confirmation'])->name('order.confirmation');
 
 
 // New Inertia-based Multi-Step Checkout Flow
@@ -69,6 +72,8 @@ Route::prefix('checkout-cart')->name('checkout-cart.')->group(function () {
     Route::post('/payment', [App\Http\Controllers\CheckoutStepsController::class, 'processPayment'])->name('payment');
     Route::post('/step-five', [App\Http\Controllers\CheckoutStepsController::class, 'processStepFive'])->name('step-five');
 });
+
+Route::inertia('/session', 'session/index')->name('session.index');
 
 
 require __DIR__ . '/settings.php';

@@ -21,6 +21,7 @@ class Cart extends Model
         'cart_uuid',
         'status',
         'active',
+        'total',
     ];
 
     public function user(): BelongsTo
@@ -49,6 +50,6 @@ class Cart extends Model
 
     public function checkout()
     {
-        return $this->hasOne(Checkout::class, 'cart_id');
+        return $this->hasOne(Checkout::class);
     }
 }
