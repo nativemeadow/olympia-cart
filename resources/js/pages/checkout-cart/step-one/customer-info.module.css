@@ -9,6 +9,7 @@
         padding: 1rem;
         background-color: var(--color-gray-10); /* Tailwind's white */
         transition: border-color 0.2s ease-in-out;
+        max-width: 25%;
     }
 
     & .address_card:hover {

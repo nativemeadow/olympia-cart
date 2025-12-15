@@ -6,10 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use Inertia\Response;
 use App\Models\Cart;
-use App\Models\Category;
-use SebastianBergmann\CodeCoverage\Report\Xml\Totals;
 
 class CartController extends Controller
 {
@@ -83,11 +80,18 @@ class CartController extends Controller
         $sessionId = $request->session()->getId();
 
         if ($user) {
+            $userCart = Cart::where('user_id', $user->id)->where('session_id', $sessionId)->where('status', 'active')->first();
             // Find or create a cart for the logged-in user.
-            $userCart = Cart::firstOrCreate(
-                ['user_id' => $user->id, 'status' => 'active', 'total' => 0],
-                ['cart_uuid' => Str::uuid(), 'session_id' => $sessionId]
-            );
+            if (!$userCart) {
+                $uuid = Str::uuid();
+                $userCart = Cart::create([
+                    'user_id' => $user->id,
+                    'status' => 'active',
+                    'total' => 0,
+                    'cart_uuid' => $uuid,
+                    'session_id' => $sessionId
+                ]);
+            }
 
             // Check for a guest cart from the current session to merge.
             $sessionCart = Cart::where('session_id', $sessionId)->whereNull('user_id')->first();
@@ -108,10 +112,20 @@ class CartController extends Controller
             return $userCart;
         }
 
-        // For guest users, find or create a cart based on the session ID.
-        return Cart::firstOrCreate(
-            ['session_id' => $sessionId, 'status' => 'active', 'user_id' => null, 'total' => 0],
-            ['cart_uuid' => Str::uuid()]
-        );
+
+        $userCart = Cart::where('user_id', null)->where('session_id', $sessionId)->where('status', 'active')->first();
+        // Find or create a cart for the logged-in user.
+        if (!$userCart) {
+            $uuid = Str::uuid();
+            $userCart = Cart::create([
+                'user_id' => null,
+                'status' => 'active',
+                'total' => 0,
+                'cart_uuid' => $uuid,
+                'session_id' => $sessionId
+            ]);
+        }
+
+        return $userCart;
     }
 }

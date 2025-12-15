@@ -19,23 +19,16 @@ const RegisterOnCheckout = ({ isGuest }: Props) => {
     const [view, setView] = useState('form');
     const [resendStatus, setResendStatus] = useState('');
 
-    const {
-        data,
-        setData,
-        post,
-        processing,
-        errors,
-        reset,
-        isDirty,
-        setError,
-    } = useForm({
-        first_name: '',
-        last_name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-        code: '',
-    });
+    const { data, setData, processing, errors, isDirty, setError } = useForm(
+        () => ({
+            first_name: '',
+            last_name: '',
+            email: '',
+            password: '',
+            password_confirmation: '',
+            code: '',
+        }),
+    );
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();

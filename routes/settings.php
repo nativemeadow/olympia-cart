@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Settings\AddressController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,8 @@ Route::middleware('auth')->group(function () {
     Route::post('settings/address', [AddressController::class, 'store'])->name('address.store');
     Route::patch('settings/address/{address}', [AddressController::class, 'update'])->name('address.update');
     Route::delete('settings/address/{address}', [AddressController::class, 'destroy'])->name('address.destroy');
+
+    Route::get('settings/orders', [OrderController::class, 'index'])->name('orders.index');
 
     // Add this route for setting the default address
     Route::put('settings/address/{address:id}/set-default', [AddressController::class, 'setDefault'])->name('address.setDefault')->scopeBindings();

@@ -79,6 +79,8 @@ class PaymentController extends Controller
             $order->save();
 
             $cart->status = $cartStatus['COMPLETED'];
+            // Disassociate the session from the completed cart 
+            $cart->session_id = null;
             $cart->save();
 
             $checkout->status = $checkoutStatus['COMPLETED'];
@@ -86,11 +88,11 @@ class PaymentController extends Controller
 
             DB::commit();
 
-            // success email to customer
-            $this->sendConfirmationEmail($order, $payment);
-
             // After successful payment, regenerate the session ID
             $request->session()->regenerate();
+
+            // success email to customer
+            $this->sendConfirmationEmail($order, $payment);
 
             return back()->with('success', 'Payment successful.');
         } catch (Exception $e) {
@@ -104,6 +106,7 @@ class PaymentController extends Controller
     public function sendConfirmationEmail(Order $order, Payment $payment)
     {
         $user = $order->user;
+        $user_name = $order->user->first_name . ' ' . $order->user->last_name;
         $mailData = [
             'orderId' => $order->id,
             'amount' => $payment->amount,
@@ -113,7 +116,8 @@ class PaymentController extends Controller
             Mail::to($user->email)->send(new PaymentConfirmationMail(
                 orderNumber: $mailData['orderId'],
                 amount: $mailData['amount'],
-                date: $mailData['date']
+                date: $mailData['date'],
+                name: $user_name
             ));
         } catch (\Exception $e) {
             Log::error("Failed to send payment confirmation email: " . $e->getMessage());

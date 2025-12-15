@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { User } from '@/types';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Address, CustomerData, Order, OrderItem } from '@/types/model-types';
-import { Checkout } from '@/types';
+import { Address, Order, OrderItem } from '@/types/model-types';
+import checkoutStepsStore from '@/zustand/checkoutStepsStore';
 import parse from 'html-react-parser';
 import {
     Card,
@@ -18,6 +17,8 @@ import useCheckoutStore from '@/zustand/checkoutStore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import classes from './step-five.module.css';
+
+const categoryPath = 'categories';
 
 const renderAddress = (
     address: Address | null,
@@ -52,6 +53,7 @@ const StepFive = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { setCheckout } = useCheckoutStore();
+    const { resetCheckout } = checkoutStepsStore();
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -77,7 +79,7 @@ const StepFive = () => {
     useEffect(() => {
         // Clear checkout state on confirmation page
         setCheckout(null);
-    }, [setCheckout]);
+    }, [setCheckout, resetCheckout]);
 
     function calculateTotal(items: OrderItem[]): number {
         return items.reduce(
@@ -142,22 +144,30 @@ const StepFive = () => {
                     <h3 className="mt-6 text-xl font-semibold">
                         Order Summary
                     </h3>
-                    <ul className="mt-2 divide-y divide-gray-200">
+                    <div className="mt-2 divide-y divide-gray-200">
                         {order.items?.map((item, index) => (
                             <div
                                 key={item.id}
                                 className="flex items-center space-x-4 border-b py-2 last:border-b-0 last:pb-0"
                             >
                                 <div>
-                                    <img
-                                        className={classes.image}
-                                        src={`/products/${item.image}`}
-                                        alt={item.title}
-                                    />
+                                    <Link
+                                        href={`/${categoryPath}/products/${item.category_slug}/${item.product_slug}`}
+                                    >
+                                        <img
+                                            className={classes.image}
+                                            src={`/products/${item.image}`}
+                                            alt={item.title}
+                                        />
+                                    </Link>
                                 </div>
                                 <div>
                                     <div className="flex justify-between text-base font-medium text-gray-900">
-                                        <h3>{parse(item?.title)}</h3>
+                                        <Link
+                                            href={`/${categoryPath}/products/${item.category_slug}/${item.product_slug}`}
+                                        >
+                                            <h3>{parse(item?.title)}</h3>
+                                        </Link>
                                         <p className="ml-4">
                                             $
                                             {(
@@ -173,7 +183,7 @@ const StepFive = () => {
                                 </div>
                             </div>
                         ))}
-                    </ul>
+                    </div>
                     <div className="mt-4 border-t pt-4 text-right">
                         <p className="text-lg font-semibold">
                             Total:{' '}
@@ -185,7 +195,9 @@ const StepFive = () => {
                 </CardContent>
                 <CardFooter>
                     <Link href="/">
-                        <Button>Continue Shopping</Button>
+                        <Button className="cursor-pointer">
+                            Continue Shopping
+                        </Button>
                     </Link>
                 </CardFooter>
             </Card>

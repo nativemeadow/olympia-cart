@@ -1,0 +1,34 @@
+.image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: contain; /* Changed from 'cover' to 'contain' */
+    max-height: 30px;
+    width: 100%; /* Ensure image takes full width of container */
+    height: auto; /* Maintain aspect ratio */
+}
+
+.order {
+    display: grid;
+    grid-template-columns: 2fr;
+    padding: 20px;
+    border: 1px solid #e5e7eb; /* Tailwind's gray-200 */
+    border-radius: 8px;
+    background-color: #ffffff; /* White background */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    margin-bottom: 20px;
+}
+
+.orderItem {
+    display: flex;
+    align-items: start;
+    justify-self: start;
+    padding: 10px 0;
+    width: 100%;
+}
+
+.orderSeparator {
+    height: 1px;
+    background-color: #e5e7eb; /* Tailwind's gray-200 */
+    margin: 10px 0;
+}
