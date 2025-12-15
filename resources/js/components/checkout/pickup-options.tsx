@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 
 import useCheckoutStore from '@/zustand/checkoutStore';
 import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
+import useCheckoutStepsStore from '@/zustand/checkoutStepsStore';
 import { getTodayDate } from '@/lib/date-util';
 import { InputError } from '@/components/ui/input-error';
 import { useForm } from '@inertiajs/react';
@@ -35,6 +36,7 @@ const PickupOptions = () => {
     const [isOpen, setIsOpen] = useState(false);
     const { checkout } = useCheckoutStore();
     const { cartCount } = useShoppingCartStore();
+    const { resetCheckout } = useCheckoutStepsStore();
 
     const { data, setData, post, patch, processing, errors, reset } = useForm({
         is_pickup: true,
@@ -67,6 +69,7 @@ const PickupOptions = () => {
 
         httpMethod(submissionRoute, {
             onSuccess: () => {
+                resetCheckout();
                 closeModal();
                 reset();
             },

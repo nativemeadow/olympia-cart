@@ -31,11 +31,22 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+
+        // Capture the guest session ID before it's regenerated on login.
+        $guestSessionId = $request->session()->getId();
+
         $request->session()->put('old_session_id', $request->session()->getId());
 
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        // Merge the guest cart from before login.
+        // Now, use the old guest session ID to find and merge the cart.
+        $this->mergeGuestCart($guestSessionId, $request->user());
+
+        // Merge any other past active carts belonging to this user.
+        $this->mergePastUserCarts();
 
         return redirect()->intended(route('home', absolute: false));
     }
@@ -123,5 +134,60 @@ class AuthenticatedSessionController extends Controller
 
         $userCart->recalculateTotal();
         $guestCart->delete();
+    }
+
+    /**
+     * Merges items from a user's previous active carts into their current active cart.
+     * This is called after a user logs in to consolidate carts from different sessions/devices.
+     *
+     * @return void
+     */
+    private function mergePastUserCarts(): void
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return;
+        }
+
+        // Find all active carts for this user, with the most recently updated one first.
+        $allCarts = Cart::with('items')
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        // If there's only one or zero carts, there's nothing to merge.
+        if ($allCarts->count() <= 1) {
+            return;
+        }
+
+        // The first cart in the collection is our primary cart.
+        $primaryCart = $allCarts->shift();
+        $primaryCart->session_id = session()->getId();
+        $primaryCart->save();
+        $primaryCart->load('items'); // Ensure items are loaded for the loop.
+
+        // The rest of the carts in the collection are the old ones to be merged.
+        foreach ($allCarts as $oldCart) {
+            foreach ($oldCart->items as $itemToMerge) {
+                // Check if the same product already exists in the primary cart.
+                $existingItem = $primaryCart->items->firstWhere('product_id', $itemToMerge->product_id);
+
+                if ($existingItem) {
+                    // If it exists, update the quantity and delete the old item.
+                    $existingItem->quantity += $itemToMerge->quantity;
+                    $existingItem->save();
+                    $itemToMerge->delete();
+                } else {
+                    // If it doesn't exist, re-associate the item with the primary cart.
+                    $itemToMerge->cart()->associate($primaryCart)->save();
+                }
+            }
+            // After merging all items, delete the old, now-empty cart.
+            $oldCart->delete();
+        }
+
+        // Recalculate the total for the primary cart since items have been added.
+        $primaryCart->recalculateTotal();
     }
 }

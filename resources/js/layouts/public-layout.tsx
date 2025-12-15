@@ -10,6 +10,7 @@ import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 import CartLink from './CartLink';
 import Footer from './Footer';
 import PageTransition from '@/components/page-transition';
+import { User } from '@/types';
 import SearchProducts from './SearchProducts';
 import cx from 'clsx';
 
@@ -24,6 +25,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
     const breadcrumbs = useBreadcrumbsFromPath();
     const syncCart = useShoppingCartStore((state) => state.syncCart);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const user = auth.user as User | null;
 
     // Sync the Zustand store with the cart data from the server on every page load/navigation.
     useEffect(() => {
@@ -39,8 +41,15 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                 )}
             >
                 <nav className="mr-1.5 flex h-12 items-center justify-end gap-4">
-                    {auth.user ? (
+                    {user && user.is_guest === false ? (
                         <UserNav />
+                    ) : user && user.is_guest === true ? (
+                        <Link
+                            href={route('registration.complete')}
+                            className="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
+                        >
+                            Complete Registration
+                        </Link>
                     ) : (
                         <>
                             <Link

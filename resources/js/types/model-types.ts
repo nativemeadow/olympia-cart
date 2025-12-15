@@ -144,6 +144,8 @@ export type OrderItem = {
     product_id: number;
     product: Product;
     order_id: number;
+    category_slug: string;
+    product_slug: string;
     sku: string;
     title: string;
     image: string;

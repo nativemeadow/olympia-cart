@@ -1,15 +1,14 @@
-import React, { useState, useEffect, FormEventHandler } from 'react';
+import React, { useState, useEffect, useRef, FormEventHandler } from 'react';
 import useAuth from '@/hooks/useAuth';
 import useCheckoutStore from '@/zustand/checkoutStore';
 import useCheckoutStepsStore from '@/zustand/checkoutStepsStore';
-import { User } from '@/types';
 import { Address, CustomerData } from '@/types/model-types';
 import { Checkout } from '@/types';
 
 import classes from './customer-info.module.css'; // Assuming you have some CSS modules for styling
-import { router, useForm } from '@inertiajs/react';
+import { router, useForm, Link } from '@inertiajs/react';
 import clsx from 'clsx';
-import AddressForm from './address-form';
+import AddressForm, { AddressFormHandle } from './address-form';
 import Register from './register';
 import { Button } from '@/components/ui/button';
 import { AddressDialog } from './address-dialog';
@@ -35,8 +34,6 @@ import { Label } from '@/components/ui/label';
 import { InputError } from '@/components/ui/input-error';
 import axios from 'axios';
 
-//type CustomerData = (UserType & { addresses: Address[] }) | null;
-
 const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
     const { user, isAuthenticated } = useAuth(); // Your auth hook
     const {
@@ -49,14 +46,12 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
 
     console.log('CustomerInfoStep render - checkout:', checkout);
 
-    const {
-        currentStep,
-        nextStep,
-        previousStep,
-        setCurrentStep,
-        setStepCompleted,
-        setStepCanProceed,
-    } = useCheckoutStepsStore();
+    // Create refs for the address forms
+    const shippingFormRef = useRef<AddressFormHandle>(null);
+    const billingFormRef = useRef<AddressFormHandle>(null);
+
+    const { nextStep, setStepCompleted, setStepCanProceed } =
+        useCheckoutStepsStore();
 
     // Use local state to manage addresses for immediate UI updates
     const [localAddresses, setLocalAddresses] = useState<Address[]>(
@@ -233,46 +228,121 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         }
     };
 
-    const handleContinueToShipping = () => {
-        if (checkout?.billing_address_id && checkout?.delivery_address_id) {
-            const deliverPlusBilling = {
-                delivery_address_id: checkout.delivery_address_id,
-                billing_address_id: checkout.billing_same_as_shipping
-                    ? checkout.delivery_address_id
-                    : checkout.billing_address_id,
-            };
+    const handleContinue = () => {
+        // This function is now the single source of truth for proceeding.
+        // It first ensures any visible address forms are submitted.
+        // In the onSuccess callback of the form submissions, it calls proceedToNextStep.
+        // If no forms are visible, it calls proceedToNextStep directly.
 
-            router.patch(
-                route('checkout-cart.processStepOne', checkout.id),
-                deliverPlusBilling,
-                {
-                    preserveScroll: true,
-                    onSuccess: (page) => {
-                        setCheckout(page.props.checkout as Checkout);
-                    },
-                },
-            );
-
-            router.patch(
-                route('checkout.updateStatus', checkout.id),
-                { status: 'processing' },
-                {
-                    preserveScroll: true,
-                    onSuccess: (page) => {
-                        setCheckout(page.props.checkout as Checkout);
-                    },
-                },
-            );
-
-            setStepCanProceed('customerInfo', true);
-            setStepCompleted('customerInfo', true);
-            nextStep();
-        } else {
-            // You might want to show an error message here
-            alert(
-                'Please ensure both shipping and billing addresses are set before continuing.',
-            );
+        if (!checkout) {
+            alert('Checkout information is not available. Please try again.');
+            return;
         }
+
+        const isPickup = checkout.is_pickup;
+        const isDelivery = checkout.is_delivery;
+
+        // Determine if forms are visible and need submission
+        const needsShippingFormSubmit = isDelivery && showShippingForm;
+        const needsBillingFormSubmit =
+            (isPickup && showBillingForm) ||
+            (isDelivery && !billingSameAsShipping && showBillingForm);
+
+        if (needsShippingFormSubmit) {
+            // Chain submissions: submit shipping, then billing (if needed), then proceed.
+            shippingFormRef.current?.submit({
+                onSuccess: (newCheckoutFromShipping: Checkout) => {
+                    if (needsBillingFormSubmit) {
+                        billingFormRef.current?.submit({
+                            onSuccess: () =>
+                                proceedToNextStep(newCheckoutFromShipping),
+                        });
+                    } else {
+                        proceedToNextStep(newCheckoutFromShipping);
+                    }
+                },
+            });
+        } else if (needsBillingFormSubmit) {
+            // Only billing form needs submission
+            billingFormRef.current?.submit({
+                onSuccess: (newCheckoutFromBilling) =>
+                    proceedToNextStep(newCheckoutFromBilling),
+            });
+        } else {
+            // No forms to submit, just validate and proceed
+            proceedToNextStep(checkout);
+        }
+    };
+
+    const proceedToNextStep = (updatedCheckout: Checkout | null) => {
+        // 1. Guard clause: Ensure checkout exists before proceeding.
+        if (!updatedCheckout) {
+            alert('Checkout information is not available. Please try again.');
+            return;
+        }
+
+        // 2. Determine order type and required data.
+        const isPickup = updatedCheckout.is_pickup;
+        const hasBillingAddress = !!updatedCheckout.billing_address_id;
+        const hasDeliveryAddress = !!updatedCheckout.delivery_address_id;
+
+        // 3. Centralized Validation Logic.
+        const canProceed =
+            (isPickup && hasBillingAddress) ||
+            (!isPickup && hasBillingAddress && hasDeliveryAddress);
+
+        if (!canProceed) {
+            const errorMessage = isPickup
+                ? 'Please ensure a billing address is selected before continuing.'
+                : 'Please ensure both shipping and billing addresses are selected before continuing.';
+            alert(errorMessage);
+            return;
+        }
+
+        // 4. Build the payload based on order type.
+        // This payload is for the 'processStepOne' route.
+        const payload = {
+            is_pickup: isPickup,
+            billing_address_id: updatedCheckout.billing_same_as_shipping
+                ? updatedCheckout.delivery_address_id
+                : updatedCheckout.billing_address_id,
+            delivery_address_id: isPickup
+                ? null
+                : updatedCheckout.delivery_address_id,
+        };
+
+        // 5. Execute the sequence of actions.
+        // We can chain these actions in the onSuccess callbacks for better reliability.
+        router.patch(
+            route('checkout-cart.processStepOne', updatedCheckout.id),
+            payload,
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    // This second patch runs only after the first one succeeds.
+                    router.patch(
+                        route('checkout.updateStatus', updatedCheckout.id),
+                        { status: 'processing' },
+                        {
+                            preserveScroll: true,
+                            onSuccess: (page) => {
+                                // Final state updates after all server actions are successful.
+                                setCheckout(page.props.checkout as Checkout);
+                                setStepCanProceed('customerInfo', true);
+                                setStepCompleted('customerInfo', true);
+                                nextStep();
+                            },
+                        },
+                    );
+                },
+                onError: (errors) => {
+                    console.error('Failed to process checkout step:', errors);
+                    alert(
+                        'An error occurred while saving your information. Please try again.',
+                    );
+                },
+            },
+        );
     };
 
     if (isAuthenticated && customer) {
@@ -290,7 +360,6 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                     Please confirm your details below.
                 </p>
 
-                {/* Example of displaying addresses */}
                 <div className="mt-4 rounded border p-4">
                     <div className="mb-4 flex items-center justify-between">
                         <h3 className="font-semibold">Your Addresses:</h3>
@@ -430,9 +499,9 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                             Billing Information
                         </h3>
                         <AddressForm
+                            ref={billingFormRef}
                             type="billing"
                             user={user}
-                            onSuccess={() => setShowBillingForm(false)}
                         />
                     </div>
                 ) : null}
@@ -445,12 +514,12 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                     Shipping Address
                                 </h3>
                                 <AddressForm
+                                    ref={shippingFormRef}
                                     type="shipping"
                                     user={user}
                                     billingSameAsShipping={
                                         billingSameAsShipping
                                     }
-                                    onSuccess={() => setShowShippingForm(false)}
                                 />
                             </div>
                         )}
@@ -477,9 +546,9 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                     Billing Address
                                 </h3>
                                 <AddressForm
+                                    ref={billingFormRef}
                                     type="billing"
                                     user={user}
-                                    onSuccess={() => setShowBillingForm(false)}
                                 />
                             </div>
                         )}
@@ -488,7 +557,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                         checkout.billing_address_id ? (
                             <div className="mt-6 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
                                 <Button
-                                    onClick={handleContinueToShipping}
+                                    onClick={handleContinue}
                                     color="primary"
                                     className="h-12 w-full rounded bg-green-600 text-xl text-white sm:w-auto"
                                     // Ensure this button is prominent
@@ -502,8 +571,14 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                     </>
                 ) : checkout?.is_pickup ? (
                     <div className="mt-6 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+                        {/* <Link
+                            href={route('cart.index')}
+                            className="inline-flex h-12 w-full items-center justify-center rounded border bg-transparent px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+                        >
+                            Back to My Cart
+                        </Link> */}
                         <Button
-                            onClick={handleContinueToShipping}
+                            onClick={handleContinue}
                             color="primary"
                             className="h-12 w-full rounded bg-green-600 text-xl text-white sm:w-auto"
                             // Ensure this button is prominent

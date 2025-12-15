@@ -69,6 +69,7 @@ class CheckoutStepsController extends Controller
         /** @disregard p10008  */
         $validated = $request->validate([
             'delivery_address_id' => [
+                'required_if:is_delivery,true',
                 'nullable',
                 Rule::exists('addresses', 'id')->where('user_id', $request->user()?->id),
             ],

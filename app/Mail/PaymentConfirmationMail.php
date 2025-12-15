@@ -16,7 +16,8 @@ class PaymentConfirmationMail extends Mailable
     public function __construct(
         public string $orderNumber,
         public float $amount,
-        public string $date
+        public string $date,
+        public string $name,
     ) {}
 
     public function envelope(): Envelope

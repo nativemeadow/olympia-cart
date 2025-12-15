@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import useCheckoutStore from '@/zustand/checkoutStore';
+import useCheckoutStepsStore from '@/zustand/checkoutStepsStore';
 import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 import { getTodayDate } from '@/lib/date-util';
 import { InputError } from '@/components/ui/input-error';
@@ -34,6 +35,7 @@ const DeliveryOptions = () => {
     const [isOpen, setIsOpen] = useState(false);
     const { checkout } = useCheckoutStore();
     const { cartCount } = useShoppingCartStore();
+    const { resetCheckout } = useCheckoutStepsStore();
 
     const { data, setData, post, patch, processing, errors, reset } = useForm({
         is_pickup: false,
@@ -67,6 +69,7 @@ const DeliveryOptions = () => {
 
         httpMethod(submissionRoute, {
             onSuccess: () => {
+                resetCheckout();
                 closeModal();
                 reset();
             },

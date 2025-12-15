@@ -97,7 +97,7 @@
                     </div>
                     <div class="content">
                         <h2>Thank You For Your Payment!</h2>
-                        <p>Hello,</p>
+                        <p>Hello, {{ $name }}</p>
                         <p>We''ve received your payment and your order is being processed. Here are the details of your
                             transaction:</p>
 

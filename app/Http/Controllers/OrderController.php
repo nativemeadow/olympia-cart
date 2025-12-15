@@ -65,6 +65,21 @@ class OrderController extends Controller
         ]);
     }
 
+    public function index(): \Inertia\Response
+    {
+        $user = Auth::user();
+
+        // Fetch all orders for the authenticated user
+        $orders = Order::where('user_id', $user->id)
+            ->with(['items.product', 'shippingAddress', 'billingAddress'])
+            ->latest()
+            ->get();
+
+        return Inertia::render('settings/orders', [
+            'orders' => $orders,
+        ]);
+    }
+
     /**
      * Store a newly created order in storage.
      *
