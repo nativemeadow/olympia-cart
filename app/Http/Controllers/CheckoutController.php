@@ -105,10 +105,9 @@ class CheckoutController extends Controller
             'delivery_address_id' => 'nullable|exists:addresses,id',
             'billing_address_id' => 'nullable|exists:addresses,id',
             'billing_address_id' => [
-                'required',
+                'nullable',
                 'exists:addresses,id,user_id,' . $request->user()->id,
             ],
-            //'is_pickup' => 'required|boolean',
             // The delivery_address_id is only required if is_pickup is false.
             'delivery_address_id' => [
                 'required_if:is_delivery,true',

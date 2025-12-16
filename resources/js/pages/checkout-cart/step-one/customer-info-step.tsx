@@ -206,26 +206,35 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         const isChecked = e.target.checked;
         setBillingSameAsShipping(isChecked);
 
-        // Only send the update if a checkout record exists AND
-        // there is a default shipping address selected.
-        // If no shipping address is selected, the backend would reject the request
-        // because it can't set the billing address to a non-existent shipping address.
-        const hasShippingAddress = localAddresses.some((addr) => addr.default);
-
-        if (checkout && hasShippingAddress) {
-            router.patch(
-                route('checkout-cart.processStepOne', checkout.id),
-                {
-                    billing_same_as_shipping: isChecked,
-                },
-                {
-                    preserveScroll: true,
-                    onSuccess: (page) => {
-                        setCheckout(page.props.checkout as Checkout);
-                    },
-                },
-            );
+        if (!checkout) {
+            return;
         }
+
+        // Find the current default shipping address from the local state
+        const shippingAddress = localAddresses.find((addr) => addr.default);
+
+        // Determine the correct billing_address_id for the payload
+        const newBillingAddressId =
+            isChecked && shippingAddress ? shippingAddress.id : null;
+
+        // Build the explicit payload
+        const payload = {
+            billing_same_as_shipping: isChecked,
+            billing_address_id: newBillingAddressId,
+        };
+
+        // Send the complete payload to the backend
+        router.patch(
+            route('checkout-cart.processStepOne', checkout.id),
+            payload,
+            {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    // The checkout object from the server will now have the correct state.
+                    setCheckout(page.props.checkout as Checkout);
+                },
+            },
+        );
     };
 
     const handleContinue = () => {
@@ -359,132 +368,138 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                 <p className="mt-2 text-gray-600">
                     Please confirm your details below.
                 </p>
-
-                <div className="mt-4 rounded border p-4">
-                    <div className="mb-4 flex items-center justify-between">
-                        <h3 className="font-semibold">Your Addresses:</h3>
-                        <Button
-                            variant="outline"
-                            onClick={() => setDialogAddress('new')}
-                        >
-                            Add New Address
-                        </Button>
-                    </div>
-                    {localAddresses.length > 0 ? (
-                        <div className={classes.address_grid}>
-                            {localAddresses.map((address) => (
-                                <div
-                                    key={address.id}
-                                    className={clsx(
-                                        classes.address_card,
-                                        address.default && classes.is_shipping,
-                                        address.billing && classes.is_billing,
-                                        address.default &&
-                                            address.billing &&
-                                            classes.is_both,
-                                    )}
-                                >
-                                    <div className="flex-grow">
-                                        <p>{address.street1}</p>
-                                        {address.street2 && (
-                                            <p>{address.street2}</p>
-                                        )}
-                                        <p>
-                                            {address.city}, {address.state}{' '}
-                                            {address.zip}
-                                        </p>
-                                        <p>{address.phone}</p>
-                                    </div>
-                                    <div className="mt-4 space-y-2 border-t pt-2">
-                                        <label className="flex items-center text-sm">
-                                            <input
-                                                type="checkbox"
-                                                className="mr-2"
-                                                checked={!!address.default}
-                                                onChange={(e) =>
-                                                    handleSetDefault(
-                                                        address.id,
-                                                        'shipping',
-                                                        e.target.checked,
-                                                    )
-                                                }
-                                            />
-                                            Default Shipping
-                                        </label>
-                                        <label className="flex items-center text-sm">
-                                            <input
-                                                type="checkbox"
-                                                className="mr-2"
-                                                checked={!!address.billing}
-                                                onChange={(e) =>
-                                                    handleSetDefault(
-                                                        address.id,
-                                                        'billing',
-                                                        e.target.checked,
-                                                    )
-                                                }
-                                            />
-                                            Default Billing
-                                        </label>
-                                    </div>
-                                    <div className="mt-4 flex justify-end gap-2 border-t pt-4">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() =>
-                                                setDialogAddress(address)
-                                            }
-                                        >
-                                            Edit
-                                        </Button>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    disabled={deleting}
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>
-                                                        Are you sure?
-                                                    </AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        This action cannot be
-                                                        undone. This will
-                                                        permanently delete this
-                                                        address.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>
-                                                        Cancel
-                                                    </AlertDialogCancel>
-                                                    <AlertDialogAction
-                                                        onClick={() =>
-                                                            handleDelete(
-                                                                address.id,
-                                                            )
-                                                        }
-                                                    >
-                                                        Continue
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
-                                </div>
-                            ))}
+                {localAddresses.length > 0 && (
+                    <div
+                        id="addresses-section"
+                        className="mt-4 rounded border p-4"
+                    >
+                        <div className="mb-4 flex items-center justify-between">
+                            <h3 className="font-semibold">Your Addresses:</h3>
+                            <Button
+                                variant="outline"
+                                onClick={() => setDialogAddress('new')}
+                            >
+                                Add New Address
+                            </Button>
                         </div>
-                    ) : (
-                        <p className="text-sm text-gray-500">
-                            You have no saved addresses.
-                        </p>
-                    )}
-                </div>
+                        {localAddresses.length > 0 ? (
+                            <div className={classes.address_grid}>
+                                {localAddresses.map((address) => (
+                                    <div
+                                        key={address.id}
+                                        className={clsx(
+                                            classes.address_card,
+                                            address.default &&
+                                                classes.is_shipping,
+                                            address.billing &&
+                                                classes.is_billing,
+                                            address.default &&
+                                                address.billing &&
+                                                classes.is_both,
+                                        )}
+                                    >
+                                        <div className="flex-grow">
+                                            <p>{address.street1}</p>
+                                            {address.street2 && (
+                                                <p>{address.street2}</p>
+                                            )}
+                                            <p>
+                                                {address.city}, {address.state}{' '}
+                                                {address.zip}
+                                            </p>
+                                            <p>{address.phone}</p>
+                                        </div>
+                                        <div className="mt-4 space-y-2 border-t pt-2">
+                                            <label className="flex items-center text-sm">
+                                                <input
+                                                    type="checkbox"
+                                                    className="mr-2"
+                                                    checked={!!address.default}
+                                                    onChange={(e) =>
+                                                        handleSetDefault(
+                                                            address.id,
+                                                            'shipping',
+                                                            e.target.checked,
+                                                        )
+                                                    }
+                                                />
+                                                Default Shipping
+                                            </label>
+                                            <label className="flex items-center text-sm">
+                                                <input
+                                                    type="checkbox"
+                                                    className="mr-2"
+                                                    checked={!!address.billing}
+                                                    onChange={(e) =>
+                                                        handleSetDefault(
+                                                            address.id,
+                                                            'billing',
+                                                            e.target.checked,
+                                                        )
+                                                    }
+                                                />
+                                                Default Billing
+                                            </label>
+                                        </div>
+                                        <div className="mt-4 flex justify-end gap-2 border-t pt-4">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setDialogAddress(address)
+                                                }
+                                            >
+                                                Edit
+                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        disabled={deleting}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>
+                                                            Are you sure?
+                                                        </AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This action cannot
+                                                            be undone. This will
+                                                            permanently delete
+                                                            this address.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>
+                                                            Cancel
+                                                        </AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    address.id,
+                                                                )
+                                                            }
+                                                        >
+                                                            Continue
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-gray-500">
+                                You have no saved addresses.
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 <AddressDialog
                     address={dialogAddress}
@@ -556,6 +571,12 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                         {checkout.delivery_address_id ||
                         checkout.billing_address_id ? (
                             <div className="mt-6 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+                                {/* <Link
+                                    href={route('cart.index')}
+                                    className="inline-flex h-12 w-full items-center justify-center rounded border bg-transparent px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+                                >
+                                    Back to My Cart
+                                </Link> */}
                                 <Button
                                     onClick={handleContinue}
                                     color="primary"

@@ -68,16 +68,17 @@ class CheckoutStepsController extends Controller
         // Add validation and logic for customer info (Step 1)
         /** @disregard p10008  */
         $validated = $request->validate([
-            'delivery_address_id' => [
-                'required_if:is_delivery,true',
-                'nullable',
-                Rule::exists('addresses', 'id')->where('user_id', $request->user()?->id),
-            ],
             'billing_address_id' => [
                 'nullable',
                 Rule::exists('addresses', 'id')->where('user_id', $request->user()?->id),
             ],
             'billing_same_as_shipping' => 'sometimes|boolean',
+            'delivery_address_id' => [
+                'required_if:is_pickup,false',
+                'nullable',
+                Rule::exists('addresses', 'id')->where('user_id', $request->user()?->id),
+            ],
+            'billing_same_as_shipping' => 'sometimes|required|boolean',
         ]);
 
         // Resolve checkout id from the method param, route params, or request input.
@@ -94,7 +95,8 @@ class CheckoutStepsController extends Controller
         $checkout->update($validated);
 
         // For guests, you might store this info in the session.
-        return back()->with('success', 'Customer information saved.');
+        //return back()->with('success', 'Customer information saved.');
+        return redirect()->route('checkout-cart.index');
     }
 
     /**
