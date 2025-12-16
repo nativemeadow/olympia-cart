@@ -7,7 +7,7 @@ import { User } from '@/types/model-types';
 import { states } from '@/utils/counties-locals/states';
 import useCheckoutStore from '@/zustand/checkoutStore';
 
-import { useForm } from '@inertiajs/react';
+import { router, useForm } from '@inertiajs/react';
 import {
     useRef,
     FormEventHandler,
@@ -47,14 +47,23 @@ const AddressForm = forwardRef<AddressFormHandle, Props>(
         const performSubmit = (
             onSuccessCallback?: (newCheckout: Checkout) => void,
         ) => {
-            post(route('address.store'), {
+            const addressData = {
                 ...data,
+                billing_same_as_shipping: billingSameAsShipping,
+            };
+            post(route('address.store'), {
+                ...addressData,
                 preserveScroll: true,
                 onSuccess: (page) => {
                     const newCheckout = page.props.checkout as Checkout;
                     reset();
                     setCheckout(newCheckout);
                     onSuccessCallback?.(newCheckout);
+                    // This ensures the parent component's `localAddresses` state will be updated.
+                    router.visit(window.location.href, {
+                        preserveState: true,
+                        preserveScroll: true,
+                    });
                 },
             });
         };

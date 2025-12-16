@@ -26,6 +26,7 @@ class CheckoutFactory extends Factory
             'is_pickup' => $is_pickup,
             'is_delivery' => !$is_pickup,
             'instructions' => $this->faker->optional()->sentence(),
+            'billing_same_as_shipping' => $this->faker->boolean(50),
         ];
     }
 
