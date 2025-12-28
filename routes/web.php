@@ -29,7 +29,9 @@ Route::delete('/cart/items/{cartItem}', [CartItemController::class, 'destroy'])-
 
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
+Route::get('/categories/products/{categorySlug}/{slug}/test', [ProductController::class, 'testShow'])->where('categorySlug', '.*')->name('products.testShow');
 Route::get('/categories/products/{categorySlug}/{slug}', [ProductController::class, 'show'])->where('categorySlug', '.*')->name('products.show');
+Route::get('categories/{categorySlug}/test', [CategoryController::class, 'testShow'])->where('categorySlug', '.*')->name('categories.testShow');
 Route::get('/categories/{categorySlug}', [CategoryController::class, 'show'])->where('categorySlug', '.*')->name('categories.show');
 
 

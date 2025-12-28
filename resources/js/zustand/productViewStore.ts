@@ -1,17 +1,20 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { Product, Price } from '@/types/model-types';
+import { ProductType, PriceVariantType } from '@/types';
 
 interface ProductViewState {
-    product: Product | null;
+    product: ProductType | null;
     categorySlug?: string;
     productImage: string | null;
     hasOnePrice: boolean;
     hasMultipleImages: boolean;
 
-    selectedPrice: Price | null;
+    selectedPrice: PriceVariantType | null;
     selectedPriceIndex: number | undefined;
-    setProduct: (categorySlug: string | null, product: Product | null) => void;
+    setProduct: (
+        categorySlug: string | null,
+        product: ProductType | null,
+    ) => void;
     // setProduct: (product: Product | null) => void;
     setSelectedPrice: (index: number | null) => void;
     productQty: number;
@@ -29,7 +32,10 @@ export const useProductViewStore = create(
         selectedPriceIndex: undefined,
         productQty: 1,
 
-        setProduct: (categorySlug: string | null, product: Product | null) => {
+        setProduct: (
+            categorySlug: string | null,
+            product: ProductType | null,
+        ) => {
             const hasOnePrice = product?.prices?.length === 1;
             const selectedPrice = hasOnePrice ? product!.prices![0] : null;
             const selectedPriceIndex = hasOnePrice ? 0 : undefined;
@@ -62,8 +68,9 @@ export const useProductViewStore = create(
                     Array.isArray(state.product.prices) &&
                     state.product.prices[index]
                 ) {
+                    const priceImage = state.product.prices[index].image;
                     state.productImage =
-                        state.product.prices[index].image ||
+                        (typeof priceImage === 'string' ? priceImage : null) ||
                         state.product.image ||
                         null;
                 }

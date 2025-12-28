@@ -236,7 +236,7 @@ const StepFour = ({ customer }: { customer: CustomerData }) => {
                     </Button>
                     <Button
                         onClick={handleSubmit}
-                        disabled={data.payment_method !== 'credit_card'}
+                        disabled={!data.payment_method || processing}
                         color="primary"
                         className="h-12 rounded bg-green-600 text-xl text-white"
                     >

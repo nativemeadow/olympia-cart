@@ -5,19 +5,23 @@ import { Head, Link } from '@inertiajs/react';
 import parse from 'html-react-parser';
 import PriceList from './price-list';
 import ThumbImages from './thumb-images';
+import { ProductType } from '@/types';
 
 import { useProductViewStore } from '@/zustand/productViewStore';
 
 import classes from './show.module.css';
 
 type Props = {
+    productData: {
+        data: ProductType;
+    };
     categorySlug: string;
-    product: Product;
 };
 
 const productLabelMessage = 'Please Select Product Options';
 
-const ProductDetail = ({ categorySlug, product }: Props) => {
+const ProductDetail = ({ categorySlug, productData }: Props) => {
+    const product: ProductType = productData.data;
     const { setProduct, productImage, hasMultipleImages } =
         useProductViewStore();
 

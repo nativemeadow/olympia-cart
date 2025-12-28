@@ -83,7 +83,7 @@ const StepFive = () => {
 
     function calculateTotal(items: OrderItem[]): number {
         return items.reduce(
-            (total, item) => total + item.price * item.quantity,
+            (total, item) => total + Number(item.price / 100) * item.quantity,
             0,
         );
     }
@@ -171,7 +171,8 @@ const StepFive = () => {
                                         <p className="ml-4">
                                             $
                                             {(
-                                                item.price * item.quantity
+                                                Number(item.price / 100) *
+                                                item.quantity
                                             ).toFixed(2)}
                                         </p>
                                     </div>

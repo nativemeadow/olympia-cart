@@ -18,9 +18,9 @@ const AddressDisplayCard: React.FC<AddressDisplayCardProps> = ({
     return (
         <div className={classes.address_card}>
             <h3 className={classes.card_title}>{title}</h3>
-            {isSameAsShipping && (
+            {isSameAsShipping ? (
                 <Badge className="mb-2">Same as Shipping</Badge>
-            )}
+            ) : null}
             <p>{`${address.street1}${address.street2 ? `, ${address.street2}` : ''}`}</p>
             <p>{`${address.city}, ${address.state} ${address.zip}`}</p>
             <p>{address.phone}</p>

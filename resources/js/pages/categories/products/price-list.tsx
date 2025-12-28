@@ -117,7 +117,11 @@ const PriceList = ({ categorySlug }: Props) => {
                                                 ]
                                             }
                                         >
-                                            ${selectedPrice.price.toFixed(2)}{' '}
+                                            $
+                                            {Number(
+                                                selectedPrice.price / 100,
+                                            ).toFixed(2)}{' '}
+                                            {/* {Number(price.price / 100).toFixed(2)} */}
                                             {selectedPrice.currency}
                                         </span>
                                     </p>
@@ -136,7 +140,7 @@ const PriceList = ({ categorySlug }: Props) => {
                         <NumberInputSpinner
                             disabled={
                                 !selectedPrice?.unit ||
-                                selectedPrice.unit.length <= 0
+                                String(selectedPrice.unit).length <= 0
                             }
                             value={productQty}
                             step={1}
@@ -152,7 +156,7 @@ const PriceList = ({ categorySlug }: Props) => {
                                 type="submit"
                                 disabled={
                                     !selectedPrice?.unit ||
-                                    selectedPrice.unit.length <= 0
+                                    String(selectedPrice.unit).length <= 0
                                 }
                             >
                                 Add to Cart

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\CategoryShowResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -33,14 +34,37 @@ class CategoryController extends Controller
         ]);
     }
 
+    // public function show($categorySlug): Response
+    // {
+    //     $category = Category::where('slug', $categorySlug)
+    //         ->with(['children', 'products.prices'])
+    //         ->firstOrFail();
+
+    //     return Inertia::render('categories/show', [
+    //         'category' => $category,
+    //         'category_path' => $categorySlug,
+    //     ]);
+    // }
+
     public function show($categorySlug): Response
     {
+        // THE FIX: Update the eager loading to fetch the new relationships.
+        // We load products, then for each product its variants,
+        // and for each variant its attributeValues and the parent attribute.
         $category = Category::where('slug', $categorySlug)
-            ->with(['children', 'products.prices'])
+            ->with([
+                'children',
+                'products.variants.attributeValues.attribute'
+            ])
             ->firstOrFail();
 
+        $categoryData = new CategoryShowResource($category);
+
+        error_log('Category Data: ' . print_r($categoryData->toArray(request()), true));
+
         return Inertia::render('categories/show', [
-            'category' => $category,
+            // Wrap the category model in our new resource before sending it to the view.
+            'categoryData' => $categoryData,
             'category_path' => $categorySlug,
         ]);
     }

@@ -6,13 +6,17 @@ import type { Categories } from '@/types/model-types';
 import type { Product } from '@/types/model-types';
 import ProductsList from '@/pages/categories/product-list';
 import { useEffect } from 'react';
+import { CategoryDataType, ProductType } from '@/types';
 
-export default function CategoryShow() {
-    const { category, category_path } = usePage<{
-        category: Category;
-        category_path: string;
-    }>().props;
+type Props = {
+    categoryData: {
+        data: CategoryDataType;
+    };
+    category_path: string;
+};
 
+export default function CategoryShow({ categoryData, category_path }: Props) {
+    const category: CategoryDataType = categoryData.data;
     useEffect(() => {
         const main = document.querySelector('main');
         if (main) {
@@ -56,7 +60,7 @@ export default function CategoryShow() {
                         Products in {category.title}
                     </h2>
                     <ProductsList
-                        products={category.products as Product[]}
+                        products={category.products as ProductType[]}
                         categorySlug={category_path}
                     />
                 </div>

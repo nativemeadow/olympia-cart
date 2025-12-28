@@ -1,16 +1,31 @@
+import { useEffect } from 'react';
 import RenderImage from '@/components/render-image';
 import { Category } from '@/types/model-types';
 import { Head, Link } from '@inertiajs/react';
 
 import classes from './index.module.css';
+import { user } from '@heroui/react';
 
 type CategoriesIndexProps = {
     categories: Category[];
 };
 
 export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
+    useEffect(() => {
+        document
+            .getElementById('main-content')
+            ?.classList.add('category-list-container');
+
+        // Cleanup function to remove the class when the component unmounts
+        return () => {
+            document
+                .getElementById('main-content')
+                ?.classList.remove('category-list-container');
+        };
+    }, []);
+
     return (
-        <div className="flex h-full w-full flex-col">
+        <div className="mx-auto flex h-full w-4/5 flex-col">
             <Head title="Product Categories" />
             <h2 className="mb-2 px-8 text-xl font-bold text-[#1b1b18] dark:text-[#EDEDEC]">
                 Browse Our Product Categories
@@ -22,9 +37,9 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
             ) : (
                 <div className={`${classes.gallery_grid} flex-grow px-8`}>
                     {categories.map((cat) => (
-                        <div
+                        <Link
                             key={cat.id}
-                            // href={`/categories/${cat.slug}`}
+                            href={`/categories/${cat.slug}`}
                             className={`${classes.gallery_cell} ${classes[`gallery_${cat.slug}`]}`}
                         >
                             <div className={classes.gallery_item}>
@@ -37,12 +52,10 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
                                 <span
                                     className={`${classes.gallery_card} ${classes['gallery_category-title']}`}
                                 >
-                                    <Link href={`/categories/${cat.slug}`}>
-                                        {cat.title}
-                                    </Link>
+                                    {cat.title}
                                 </span>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             )}

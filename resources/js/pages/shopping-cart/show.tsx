@@ -16,13 +16,15 @@ type Props = {
 };
 
 const ShoppingCart = ({ cart, checkout }: Props) => {
-    const [cartTotal, setCartTotal] = useState(cart ? cart.total : 0);
+    const [cartTotal, setCartTotal] = useState(
+        cart ? Number(cart.total / 100) : 0,
+    );
     const { setCheckout, getFormattedDate, getFormattedTime } =
         useCheckoutStore();
 
     useEffect(() => {
         if (cart) {
-            setCartTotal(cart.total);
+            setCartTotal(Number(cart.total / 100));
         }
         // Sync the checkout data from props with the Zustand store
         setCheckout(checkout || null);

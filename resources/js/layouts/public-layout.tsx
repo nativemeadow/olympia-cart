@@ -87,6 +87,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                 </nav>
             </header>
             <main
+                id="main-content"
                 className={
                     cx(
                         'main page-container items-center p-6 lg:justify-center lg:p-2',

@@ -35,7 +35,7 @@ const DeliveryOptions = () => {
         e.preventDefault();
         console.log('Submitting data:', data);
         const submissionRoute = checkout
-            ? route('checkout.update', checkout.id)
+            ? route('checkout.update', { ...checkout, data })
             : route('checkout.store');
         const httpMethod = checkout ? patch : post;
 
