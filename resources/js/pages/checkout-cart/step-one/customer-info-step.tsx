@@ -237,6 +237,22 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         );
     };
 
+    const nextButtonLabel = () => {
+        if (checkout?.billing_address_id && checkout?.delivery_address_id) {
+            if (checkout.is_delivery) {
+                return 'Continue to Shipping Options';
+            }
+        } else if (
+            checkout?.billing_address_id &&
+            !checkout?.delivery_address_id
+        ) {
+            if (checkout.is_pickup) {
+                return 'Continue to Pickup Options';
+            }
+        }
+        return 'Save Addresses';
+    };
+
     const handleContinue = () => {
         // This function is now the single source of truth for proceeding.
         // It first ensures any visible address forms are submitted.
@@ -568,36 +584,31 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                             </div>
                         )}
 
-                        {checkout.delivery_address_id ||
-                        checkout.billing_address_id ? (
-                            <div className="mt-6 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
-                                {/* <Link
-                                    href={route('cart.index')}
-                                    className="inline-flex h-12 w-full items-center justify-center rounded border bg-transparent px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
-                                >
-                                    Back to My Cart
-                                </Link> */}
-                                <Button
-                                    onClick={handleContinue}
-                                    color="primary"
-                                    className="h-12 w-full rounded bg-green-600 text-xl text-white sm:w-auto"
-                                    // Ensure this button is prominent
-                                >
-                                    {checkout?.is_pickup
-                                        ? 'Continue to Pickup Options'
-                                        : 'Continue to Shipping Options'}
-                                </Button>
-                            </div>
-                        ) : null}
+                        <div className="mt-6 flex justify-between">
+                            <Link
+                                href={route('shopping-cart.show')}
+                                className="inline-flex h-12 w-full items-center justify-center rounded bg-green-600 px-4 py-2 text-xl font-medium text-white ring-offset-background transition-colors hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+                            >
+                                Back to My Cart
+                            </Link>
+                            <Button
+                                onClick={handleContinue}
+                                color="primary"
+                                className="h-12 w-full rounded bg-green-600 text-xl text-white sm:w-auto"
+                                // Ensure this button is prominent
+                            >
+                                {nextButtonLabel()}
+                            </Button>
+                        </div>
                     </>
                 ) : checkout?.is_pickup ? (
                     <div className="mt-6 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
-                        {/* <Link
-                            href={route('cart.index')}
+                        <Link
+                            href={route('shopping-cart.show')}
                             className="inline-flex h-12 w-full items-center justify-center rounded border bg-transparent px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
                         >
                             Back to My Cart
-                        </Link> */}
+                        </Link>
                         <Button
                             onClick={handleContinue}
                             color="primary"

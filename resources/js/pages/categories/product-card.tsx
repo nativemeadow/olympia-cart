@@ -2,13 +2,14 @@ import { Product } from '@/types/model-types';
 import { parser } from '@/utils/html-parse';
 import { Link } from '@inertiajs/react';
 import filterPricing from './product-pricing';
+import { ProductType } from '@/types';
 
 import classes from './product-card.module.css';
 
 const categoryPath = 'categories';
 
 type Props = {
-    product: Product;
+    product: ProductType;
     categorySlug: string;
 };
 

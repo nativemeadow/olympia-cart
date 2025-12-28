@@ -37,6 +37,8 @@ const CartItem = ({ item }: Props) => {
         });
     }, [item.id]);
 
+    const price = Number(item.price / 100);
+
     return (
         <div
             key={item.id || `temp-${item.sku}-${item.unit}`}
@@ -81,14 +83,14 @@ const CartItem = ({ item }: Props) => {
                         className={`${classes.cost_cell} ${classes.item_cost} `}
                     >
                         <div className={classes.item_cost_detail}>
-                            <div>{formatCurrency(item.price)}</div>
+                            <div>{formatCurrency(price)}</div>
                             <span>/</span>
                             <div>{item.unit}</div>
                         </div>
                         <div className={classes.item_subtotal}>
                             Subtotal: $
                             <span className={classes.currency}>
-                                {formatCurrency(item.price * item.quantity)}
+                                {formatCurrency(price * item.quantity)}
                             </span>
                         </div>
                     </div>

@@ -34,7 +34,8 @@ export const useShoppingCartStore = create(
             cartTotal: () => {
                 return get()
                     .items.reduce(
-                        (total, item) => total + item.price * item.quantity,
+                        (total, item) =>
+                            total + Number(item.price / 100) * item.quantity,
                         0,
                     )
                     .toFixed(2) as unknown as number;

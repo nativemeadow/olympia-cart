@@ -27,7 +27,8 @@ const ThumbImages = () => {
                             height={70}
                             src={`/products/${price.image ? (Array.isArray(price.image) ? price.image[0] : price.image) : product.image}`}
                             alt={
-                                price.description || `Thumbnail ${price.title}`
+                                String(price.description) ||
+                                `Thumbnail ${price.title}`
                             }
                             className={`${classes['detail_variations_image']} ${selectedPrice === price ? classes['detail_variations_image_selected'] : ''}`}
                             onClick={handleThumbClick}

@@ -6,6 +6,8 @@ export type User = {
     last_name: string;
     email: string;
     email_verified_at?: string | null;
+    avatar?: string | null;
+    is_guest: boolean;
     created_at: string;
     updated_at: string;
 };

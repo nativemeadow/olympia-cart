@@ -36,4 +36,9 @@ class Product extends Model
             ->withPivot('sku', 'product_order')
             ->withTimestamps();
     }
+
+    function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
 }

@@ -113,8 +113,7 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
                                     </p>
                                     <p>
                                         Delivery Date & Time:{' '}
-                                        {checkout?.delivery_date} at{' '}
-                                        {checkout?.delivery_time}
+                                        {checkout?.delivery_date}
                                     </p>
                                 </>
                             ) : checkout?.is_pickup ? (

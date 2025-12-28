@@ -48,8 +48,8 @@ export interface User {
     first_name: string;
     last_name: string;
     email: string;
-    avatar?: string;
-    email_verified_at: string | null;
+    avatar?: string | null;
+    email_verified_at?: string | null;
     is_guest: boolean;
     created_at: string;
     updated_at: string;
@@ -73,4 +73,72 @@ export type Checkout = {
     billing_address_id: number | null;
     billing_address: Address | null;
     instructions: string | null;
+};
+
+// Type for an attribute (e.g., "Color", "Size")
+export type AttributeType = {
+    id: number;
+    name: string;
+    // Add other attribute properties if they exist
+};
+
+// Type for an attribute value (e.g., "Red", "Large")
+export type AttributeValueType = {
+    id: number;
+    value: string;
+    attribute: AttributeType;
+    // Add other attribute value properties if they exist
+};
+
+export type VariantType = {
+    id: number;
+    sku: string;
+    price: number;
+    attributeValues: AttributeValueType[];
+    // Add other variant properties if they exist
+};
+
+export type PriceVariantType = {
+    id: number;
+    sku: string;
+    price: number;
+    [key: string]: string | number | null; // Allows for dynamic properties like 'unit', 'size', etc.
+};
+
+// Type for a product
+export type ProductType = {
+    id: number;
+    title: string;
+    slug: string;
+    sku: string;
+    description?: string | null;
+    image?: string | null;
+    status: boolean;
+    prices: PriceVariantType[];
+    // Add other product properties if they exist
+};
+
+// Type for the main category data, allowing for recursive children
+export type CategoryDataType = {
+    id: number;
+    title: string;
+    slug: string;
+    image: string | null;
+    description: string | null;
+    children: CategoryDataType[];
+    children?: Category[];
+    products: ProductType[];
+    // Add other category properties if they exist
+};
+
+export type PageProps<
+    T extends Record<string, unknown> = Record<string, unknown>,
+> = T & {
+    auth: {
+        user: User;
+    };
+    flash: {
+        success: string | null;
+        error: string | null;
+    };
 };

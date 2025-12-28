@@ -85,7 +85,7 @@
 
 :root {
     /* Layout */
-    --max-container-size: 71.25rem;
+    --max-container-size: 80rem; /*71.25rem;*/
     --min-container-size: 13.5rem;
 
     --background: oklch(1 0 0);
@@ -329,7 +329,7 @@ body.contact-us-page-body .page-container {
 }
 
 .main.category-list {
-    width: 80%;
+    width: 50%;
 }
 
 .footer {
@@ -354,4 +354,12 @@ body.contact-us-page-body .page-container {
     transition:
         opacity 0.4s ease,
         transform 0.4s ease;
+}
+
+.category-list-container {
+    max-width: var(--max-container-size);
+    min-width: var(--min-container-size);
+    padding: 5rem 0 6.25rem 0;
+    min-height: calc(100vh - 7rem);
+    margin: 0 auto;
 }

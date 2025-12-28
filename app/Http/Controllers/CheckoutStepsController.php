@@ -88,6 +88,17 @@ class CheckoutStepsController extends Controller
             return back()->withErrors(['checkout' => 'Checkout id is required.']);
         }
 
+        /** @var ?User $user */
+        $user = $request->user();
+
+        $addresses = $user ? $user->addresses()->pluck('id')->toArray() : [];
+        if (isset($validated['billing_same_as_shipping']) && count($addresses) === 1) {
+            // If there's only one address, use it for both billing and shipping.
+            $validated['billing_address_id'] = $addresses[0];
+            $validated['delivery_address_id'] = $addresses[0];
+            $user->addresses()->where('id', $addresses[0])->update(['billing' => true]);
+        }
+
         $checkout = Checkout::findOrFail($checkoutId);
 
         $this->authorize('update', $checkout);
