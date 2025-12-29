@@ -12,9 +12,13 @@ class UserProfileController extends Controller
 {
     public function show(Request $request): InertiaResponse
     {
+        $user = $request->user();
+
         return Inertia::render('user-profile/show', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            'orders' => $user->orders()->with('items')->latest()->get(),
+            'addresses' => $user->addresses()->get(),
         ]);
     }
 }

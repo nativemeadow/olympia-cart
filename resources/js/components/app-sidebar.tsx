@@ -42,7 +42,7 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <NavUser />
+            {/* <NavUser /> */}
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
