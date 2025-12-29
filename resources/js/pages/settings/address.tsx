@@ -17,6 +17,7 @@ import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { type Address as AddressType } from '@/types/model-types';
+import { PageProps } from '@/types';
 import { states } from '@/utils/counties-locals/states';
 
 import { Head, useForm, usePage } from '@inertiajs/react';
@@ -193,7 +194,10 @@ function AddressForm({ address, onCancel }: AddressFormProps) {
     );
 }
 
-export default function Address({ addresses }: { addresses: AddressType[] }) {
+export default function Address() {
+    const { addresses } =
+        usePage<PageProps<{ addresses: AddressType[] }>>().props;
+
     const [editingAddress, setEditingAddress] = useState<
         AddressType | null | 'new'
     >(null);
@@ -205,95 +209,101 @@ export default function Address({ addresses }: { addresses: AddressType[] }) {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <>
+            {/** <AppLayout breadcrumbs={breadcrumbs}> */}
             <Head title="Address settings" />
-            <SettingsLayout>
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <HeadingSmall
-                            title="Your Addresses"
-                            description="Manage your billing and delivery addresses."
-                        />
-                        {editingAddress === null && (
-                            <Button onClick={() => setEditingAddress('new')}>
-                                Add New Address
-                            </Button>
-                        )}
-                    </div>
+            {/** <SettingsLayout> */}
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <HeadingSmall
+                        title="Your Addresses"
+                        description="Manage your billing and delivery addresses."
+                    />
+                    {editingAddress === null && (
+                        <Button onClick={() => setEditingAddress('new')}>
+                            Add New Address
+                        </Button>
+                    )}
+                </div>
 
-                    {/* {flash.success && (
+                {/* {flash.success && (
                         <div className="mb-4 rounded-md bg-green-100 p-4 text-sm text-green-700" role="alert">
                             {flash.success}
                         </div>
                     )} */}
 
-                    {editingAddress !== null ? (
-                        <AddressForm
-                            address={
-                                editingAddress === 'new'
-                                    ? undefined
-                                    : editingAddress
-                            }
-                            onCancel={handleCancel}
-                        />
-                    ) : (
-                        <div className="grid gap-4 md:grid-cols-2">
-                            {addresses.map((address) => (
-                                <Card key={address.id}>
-                                    <CardHeader>
-                                        <CardTitle>{address.street1}</CardTitle>
-                                        <CardDescription>
-                                            {address.street1},{' '}
-                                            {address.street2 &&
-                                                `${address.street2}, `}
-                                            {`${address.city}, ${address.state} ${address.zip}, `}
-                                            {address.phone &&
-                                                `Phone: ${address.phone}`}
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="flex gap-4 text-sm">
-                                        {address.billing ? (
-                                            <span className="rounded-full bg-blue-100 px-2 py-1 text-blue-800">
-                                                Billing
-                                            </span>
-                                        ) : null}
-                                        {address.default ? (
-                                            <span className="rounded-full bg-green-100 px-2 py-1 text-green-800">
-                                                Default Delivery
-                                            </span>
-                                        ) : null}
-                                    </CardContent>
-                                    <CardFooter className="flex justify-end gap-2">
-                                        <Button
-                                            variant="outline"
-                                            onClick={() =>
-                                                setEditingAddress(address)
-                                            }
-                                        >
-                                            Edit
-                                        </Button>
-                                        <Button
-                                            variant="destructive"
-                                            onClick={() =>
-                                                destroy(
-                                                    route(
-                                                        'address.destroy',
-                                                        address.id,
-                                                    ),
-                                                    { preserveScroll: true },
-                                                )
-                                            }
-                                            disabled={processing}
-                                        >
-                                            Delete
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </SettingsLayout>
-        </AppLayout>
+                {editingAddress !== null ? (
+                    <AddressForm
+                        address={
+                            editingAddress === 'new'
+                                ? undefined
+                                : editingAddress
+                        }
+                        onCancel={handleCancel}
+                    />
+                ) : (
+                    <div className="grid gap-4 md:grid-cols-2">
+                        {addresses.map((address) => (
+                            <Card key={address.id}>
+                                <CardHeader>
+                                    <CardTitle>{address.street1}</CardTitle>
+                                    <CardDescription>
+                                        {address.street1},{' '}
+                                        {address.street2 &&
+                                            `${address.street2}, `}
+                                        {`${address.city}, ${address.state} ${address.zip}, `}
+                                        {address.phone &&
+                                            `Phone: ${address.phone}`}
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="flex gap-4 text-sm">
+                                    {address.billing ? (
+                                        <span className="rounded-full bg-blue-100 px-2 py-1 text-blue-800">
+                                            Billing
+                                        </span>
+                                    ) : null}
+                                    {address.default ? (
+                                        <span className="rounded-full bg-green-100 px-2 py-1 text-green-800">
+                                            Default Delivery
+                                        </span>
+                                    ) : null}
+                                </CardContent>
+                                <CardFooter className="flex justify-end gap-2">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() =>
+                                            setEditingAddress(address)
+                                        }
+                                    >
+                                        Edit
+                                    </Button>
+                                    <Button
+                                        variant="destructive"
+                                        onClick={() =>
+                                            destroy(
+                                                route(
+                                                    'address.destroy',
+                                                    address.id,
+                                                ),
+                                                { preserveScroll: true },
+                                            )
+                                        }
+                                        disabled={processing}
+                                    >
+                                        Delete
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </>
     );
+    {
+        /* </SettingsLayout> */
+    }
+    {
+        /* </AppLayout> */
+    }
 }
