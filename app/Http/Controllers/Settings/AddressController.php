@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Requests\Settings\AddressRequest;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\ManagesCustomer;
 use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -17,29 +17,41 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class AddressController extends Controller
 {
     use AuthorizesRequests;
+    use ManagesCustomer;
+
     public function index(Request $request)
     {
+        $user = $request->user();
+        $customer = $user->customer;
+
         return Inertia::render('settings/address', [
-            'addresses' => $request->user()->addresses()->get(),
+            'addresses' => $customer ? $customer->addresses()->get() : collect(),
         ]);
     }
 
     public function store(AddressRequest $request)
     {
         $validated = $request->validated();
-        $user = $request->user();
+
+        $customer = $this->getCurrentCustomer();
+
+        if (!$customer) {
+            // This should theoretically not happen for a logged-in user adding an address,
+            // but it's good practice to handle it.
+            return back()->with('error', 'Could not find or create customer.');
+        }
 
         // If setting a new billing address, unset other billing addresses.
         if ($validated['billing']) {
-            $user->addresses()->where('billing', true)->update(['billing' => false]);
+            $customer->addresses()->where('billing', true)->update(['billing' => false]);
         }
 
         // If setting a new default shipping address, unset other default addresses.
         if ($validated['default']) {
-            $user->addresses()->where('default', true)->update(['default' => false]);
+            $customer->addresses()->where('default', true)->update(['default' => false]);
         }
 
-        $user->addresses()->create($validated);
+        $customer->addresses()->create($validated);
 
         return back()->with('success', 'Address added successfully.');
     }
@@ -50,15 +62,16 @@ class AddressController extends Controller
 
         $validated = $request->validated();
         $user = $request->user();
+        $customer = $user->customer;
 
         // If setting this as the billing address, unset others.
         if ($validated['billing']) {
-            $user->addresses()->where('billing', true)->where('id', '!=', $address->id)->update(['billing' => false]);
+            $customer->addresses()->where('billing', true)->where('id', '!=', $address->id)->update(['billing' => false]);
         }
 
         // If setting this as the default shipping address, unset others.
         if ($validated['default']) {
-            $user->addresses()->where('default', true)->where('id', '!=', $address->id)->update(['default' => false]);
+            $customer->addresses()->where('default', true)->where('id', '!=', $address->id)->update(['default' => false]);
         }
 
         $address->update($validated);

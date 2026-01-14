@@ -2,21 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Address;
 use App\Models\Checkout;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\User;
+use App\Http\Controllers\Traits\ManagesCustomer;
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class CheckoutController extends Controller
 {
     use AuthorizesRequests;
+    use ManagesCustomer;
+
     public function index(Request $request)
     {
         return view('checkout.index');
@@ -41,28 +38,27 @@ class CheckoutController extends Controller
             'billing_same_as_shipping' => 'sometimes|boolean',
         ]);
 
-        $user = $request->user();
+        $customer = $this->getCurrentCustomer();
+
         $cart = null;
 
-        if ($user) {
+        if ($customer) {
             // Find the user's most recently updated cart.
-            $cart = $user->carts()->latest()->first();
+            $cart = $customer->carts()->latest()->first();
         } else {
             // For guests, find the cart using the session ID.
-            $cart = \App\Models\Cart::where('session_id', $request->session()->getId())->whereNull('user_id')->first();
+            $cart = \App\Models\Cart::where('session_id', $request->session()->getId())->whereNull('customer_id')->first();
         }
 
         if (!$cart) {
             return back()->withErrors(['cart' => 'No active shopping cart found.'])->with('error', 'No active shopping cart found.');
         }
 
-        $billingAddress = $user?->addresses()->where('billing', true)->first();
-
         $checkoutData = [
             'cart_id' => $cart->id,
             'is_pickup' => $validatedData['is_pickup'],
             'is_delivery' => $validatedData['is_delivery'],
-            'billing_address_id' => $billingAddress?->id,
+            'billing_address_id' => null,
             'billing_same_as_shipping' => $validatedData['billing_same_as_shipping'] ?? false,
         ];
 
@@ -72,7 +68,7 @@ class CheckoutController extends Controller
         } else { // is_delivery
             $checkoutData['delivery_date'] = $validatedData['delivery_date'];
             $checkoutData['instructions'] = $validatedData['instructions'];
-            $checkoutData['delivery_address_id'] = $billingAddress?->id; // Default to billing address
+            $checkoutData['delivery_address_id'] = null;
         }
 
         $checkout = Checkout::create($checkoutData);
@@ -93,6 +89,7 @@ class CheckoutController extends Controller
 
     public function update(Request $request, $id)
     {
+        $customer = $this->getCurrentCustomer();
         // Validate only the fields that are present in the request.
         $validatedData = $request->validate([
             'is_pickup' => 'sometimes|boolean',
@@ -102,17 +99,14 @@ class CheckoutController extends Controller
             'delivery_date' => 'required_if:is_delivery,true|nullable|date|after_or_equal:today',
             'instructions' => 'required_if:is_delivery,true|nullable|string|max:1000',
             'billing_same_as_shipping' => 'sometimes|boolean',
-            'delivery_address_id' => 'nullable|exists:addresses,id',
-            'billing_address_id' => 'nullable|exists:addresses,id',
             'billing_address_id' => [
                 'nullable',
-                'exists:addresses,id,user_id,' . $request->user()->id,
+                'exists:addresses,id',
             ],
             // The delivery_address_id is only required if is_pickup is false.
             'delivery_address_id' => [
-                'required_if:is_delivery,true',
                 'nullable',
-                'exists:addresses,id,user_id,' . $request->user()->id,
+                'exists:addresses,id',
             ],
         ]);
 
@@ -120,23 +114,26 @@ class CheckoutController extends Controller
 
         $this->authorize('update', $checkout);
 
-        // Handle pickup/delivery toggle logic if those fields are present
-        if (isset($validatedData['is_pickup'])) {
-            if ($validatedData['is_pickup']) {
-                $checkout->fill([
-                    'pickup_date' => $validatedData['pickup_date'] ?? $checkout->pickup_date,
-                    'pickup_time' => $validatedData['pickup_time'] ?? $checkout->pickup_time,
-                    'delivery_date' => null,
-                    'instructions' => null,
-                    'is_pickup' => true,
-                    'is_delivery' => false,
-                ]);
-            }
-        }
-
-        // Fill the model with any other validated data from the request.
-        // This will handle address ID updates and other partial updates.
+        // First, fill the model with any validated data from the request.
         $checkout->fill($validatedData);
+
+        // Handle pickup/delivery toggle logic if those fields are present
+        if (isset($validatedData['is_pickup']) && $validatedData['is_pickup']) {
+            $checkout->fill([
+                'delivery_date' => null,
+                'instructions' => null,
+                'delivery_address_id' => null,
+                'is_pickup' => true,
+                'is_delivery' => false,
+            ]);
+        } elseif (isset($validatedData['is_delivery']) && $validatedData['is_delivery']) {
+            $checkout->fill([
+                'pickup_date' => null,
+                'pickup_time' => null,
+                'is_pickup' => false,
+                'is_delivery' => true,
+            ]);
+        }
 
         $checkout->save();
 

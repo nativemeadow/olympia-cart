@@ -3,6 +3,7 @@ import RenderImage from '@/components/render-image';
 import { Product } from '@/types/model-types';
 import { Head, Link } from '@inertiajs/react';
 import parse from 'html-react-parser';
+import { parser } from '@/utils/html-parse';
 import PriceList from './price-list';
 import ThumbImages from './thumb-images';
 import { ProductType } from '@/types';
@@ -33,13 +34,38 @@ const ProductDetail = ({ categorySlug, productData }: Props) => {
         };
     }, [product, setProduct]);
 
+    const filterPricing = () => {
+        const filterPrices =
+            product &&
+            product.prices.filter((value, index, array) => {
+                return (
+                    index === array.findIndex((t) => t.price === value.price)
+                );
+            });
+
+        return filterPrices?.map((price, key) => {
+            return (
+                <li
+                    key={key}
+                    id={`price-${price.id}`}
+                    className={classes.options_item}
+                >
+                    <span>${Number(price.price / 100).toFixed(2)}</span>
+                    &nbsp;/&nbsp;
+                    {parser(String(price['unit'] || 'Each'))}
+                </li>
+            );
+        });
+    };
+
     return (
-        <>
+        <div className={classes.detail}>
             <Head title={product.title} />
             <div className={classes.detail_container}>
                 <div className={classes.detail_image}>
-                    <div className={classes.main_image_container}>
+                    <div>
                         <RenderImage
+                            className={classes.main_image_container}
                             src={`/products/${productImage}`}
                             alt={product.title}
                         />
@@ -54,6 +80,9 @@ const ProductDetail = ({ categorySlug, productData }: Props) => {
 
                 <div className={classes.detail}>
                     <h1 className={classes.title}>{parse(product.title)}</h1>
+                    <ul className={classes.detail_pricing}>
+                        {filterPricing()}
+                    </ul>
                     <div className={classes.product_pricing}>
                         {product.prices && product.prices.length > 0 ? (
                             <PriceList categorySlug={categorySlug} />
@@ -78,7 +107,7 @@ const ProductDetail = ({ categorySlug, productData }: Props) => {
                     {parse(product.description || '')}
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

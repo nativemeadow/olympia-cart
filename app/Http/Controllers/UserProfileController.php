@@ -16,9 +16,9 @@ class UserProfileController extends Controller
 
         return Inertia::render('user-profile/show', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'address' => $user->customer ? $user->customer->addresses : null,
             'status' => session('status'),
             'orders' => $user->orders()->with('items')->latest()->get(),
-            'addresses' => $user->addresses()->get(),
         ]);
     }
 }

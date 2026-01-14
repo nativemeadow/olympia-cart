@@ -41,7 +41,7 @@ const DeliveryOptions = () => {
 
         httpMethod(submissionRoute, {
             onSuccess: () => {
-                reset();
+                //reset();
             },
         });
     };

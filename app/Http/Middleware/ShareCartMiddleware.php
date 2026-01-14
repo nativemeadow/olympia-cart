@@ -22,8 +22,10 @@ class ShareCartMiddleware
         $user = Auth::user();
         $cart = null;
 
+        $customer = $user?->customer;
+
         if ($user) {
-            $cart = Cart::with('items')->where('user_id', $user->id)->where('status', 'active')->first();
+            $cart = Cart::with('items')->where('customer_id', $customer->id)->where('status', 'active')->first();
         } else {
             $cart = Cart::with('items')->where('session_id', session()->getId())->where('status', 'active')->first();
         }

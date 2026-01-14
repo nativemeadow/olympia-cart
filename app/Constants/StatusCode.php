@@ -38,46 +38,26 @@ class StatusCode
 
     public static function getCartStatus()
     {
-        $statusCodes = env('CART_STATUS');
-        if ($statusCodes) {
-            return json_decode($statusCodes, true);
-        }
-        return self::CART_STATUS;
+        return config('status_codes.CART_STATUS', self::CART_STATUS);
     }
 
     public static function getOrderStatus()
     {
-        $statusCodes = env('ORDER_STATUS');
-        if ($statusCodes) {
-            return json_decode($statusCodes, true);
-        }
-        return self::ORDER_STATUS;
+        return config('status_codes.ORDER_STATUS', self::ORDER_STATUS);
     }
 
     public static function getPaymentStatus()
     {
-        $statusCodes = env('PAYMENT_STATUS');
-        if ($statusCodes) {
-            return json_decode($statusCodes, true);
-        }
-        return self::PAYMENT_STATUS;
+        return config('status_codes.PAYMENT_STATUS', self::PAYMENT_STATUS);
     }
 
     public static function getProductStatus()
     {
-        $statusCodes = env('PRODUCT_STATUS');
-        if ($statusCodes) {
-            return json_decode($statusCodes, true);
-        }
-        return self::PRODUCT_STATUS;
+        return config('status_codes.PRODUCT_STATUS', self::PRODUCT_STATUS);
     }
 
     public static function getCheckoutStatus()
     {
-        $statusCodes = env('CHECKOUT_STATUS');
-        if ($statusCodes) {
-            return json_decode($statusCodes, true);
-        }
-        return self::CHECKOUT_STATUS;
+        return config('status_codes.CHECKOUT_STATUS', self::CHECKOUT_STATUS);
     }
 }

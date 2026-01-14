@@ -95,15 +95,17 @@ class AuthenticatedSessionController extends Controller
             return;
         }
 
+        $customer = $user->customer;
+
         // Eager load items to prevent N+1 queries
-        $guestCart = Cart::with('items')->where('session_id', $oldSessionId)->whereNull('user_id')->where('status', 'active')->first();
+        $guestCart = Cart::with('items.product')->where('session_id', $oldSessionId)->whereNull('customer_id')->where('status', 'active')->first();
 
         if (! $guestCart) {
             return;
         }
 
         $userCart = Cart::firstOrCreate(
-            ['user_id' => $user->id, 'status' => 'active'],
+            ['customer_id' => $customer->id, 'status' => 'active'],
             ['cart_uuid' => \Illuminate\Support\Str::uuid(), 'session_id' => session()->getId()]
         );
 
@@ -149,15 +151,19 @@ class AuthenticatedSessionController extends Controller
             return;
         }
 
+        $customer = $user->customer;
+
         // Find all active carts for this user, with the most recently updated one first.
-        $allCarts = Cart::with('items')
-            ->where('user_id', $user->id)
+        $allCarts = Cart::with('items.product')
+            ->where('customer_id', $customer->id)
             ->where('status', 'active')
             ->orderBy('updated_at', 'desc')
             ->get();
 
+        $count = $allCarts->count();
+
         // If there's only one or zero carts, there's nothing to merge.
-        if ($allCarts->count() <= 1) {
+        if ($count <= 1) {
             return;
         }
 

@@ -12,6 +12,18 @@ export type User = {
     updated_at: string;
 };
 
+export type Customer = {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone?: string | null;
+    active: boolean;
+    company?: string | null;
+    created_at: string;
+    updated_at: string;
+};
+
 export type Category = {
     id: number;
     title: string;
@@ -72,7 +84,7 @@ export type Price = {
 
 export type Address = {
     id: number;
-    user_id: number;
+    customer_id: number;
     street1: string;
     street2?: string | null;
     city: string;
@@ -130,6 +142,7 @@ export type Order = {
     id: number;
     user_id?: number | null;
     user: UserType | null;
+    customer?: Customer | null;
     guest_name: string;
     guest_email: string;
     total: number;
@@ -158,4 +171,4 @@ export type OrderItem = {
     updated_at: string;
 };
 
-export type CustomerData = (UserType & { addresses: Address[] }) | null;
+export type CustomerData = (Customer & { addresses: Address[] }) | null;

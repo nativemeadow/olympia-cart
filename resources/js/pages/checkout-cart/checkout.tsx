@@ -6,19 +6,21 @@ import StepThree from './step-three/page';
 import StepFour from './step-four/page';
 import Confirmation from './step-five/page';
 import CheckoutLayout from './layout';
-import { Button } from '@/components/ui/button';
-import { type SharedData } from '@/types';
-import type { User } from '@/types';
-import { Address } from '@/types/model-types';
+import { SharedData } from '@/types';
+import { type Checkout } from '@/types';
+import { CustomerData } from '@/types/model-types';
+import useCheckoutStore from '@/zustand/checkoutStore';
 import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 
 import classes from './checkout.module.css';
-
-type CustomerData = (User & { addresses: Address[] }) | null;
+import { useEffect } from 'react';
 
 function CheckOutPage() {
-    const { auth, customer } = usePage<
-        SharedData & { customer: CustomerData }
+    const { auth, customer, checkout } = usePage<
+        SharedData & {
+            customer: CustomerData;
+            checkout: Checkout | null;
+        }
     >().props;
     const {
         currentStep,
@@ -29,6 +31,12 @@ function CheckOutPage() {
         setStepCanProceed,
         resetCheckout,
     } = useCheckOutSteps();
+
+    const { setCheckout } = useCheckoutStore();
+
+    useEffect(() => {
+        setCheckout(checkout);
+    }, [checkout, setCheckout]);
 
     const { cartId } = useShoppingCartStore.getState();
 

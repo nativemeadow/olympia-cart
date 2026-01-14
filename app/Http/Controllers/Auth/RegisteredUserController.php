@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Http\Controllers\Controller;
 use App\Models\LoginCode;
 use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -94,7 +95,7 @@ class RegisteredUserController extends Controller
 
     /**
      * Handle an incoming guest registration request during checkout.
-     * Creates a user without a password.
+     * Creates a customer record without a user.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -108,37 +109,58 @@ class RegisteredUserController extends Controller
 
         $existingUser = User::where('email', $request->email)->first();
 
-        // User exists and has a password, so they are a fully registered user.
-        if ($existingUser && $existingUser->password) {
+        if ($existingUser) {
+            // A user with this email already exists, so they should log in.
             return response()->json([
                 'errors' => ['email' => ['An account with this email already exists. Please log in.']],
             ], 422);
         }
 
-        // User exists but has no password, so they are a returning guest.
-        if ($existingUser) {
-            $this->sendLoginCode($existingUser->email);
-            return response()->json(['status' => 'code_sent']);
+        // Find or create a customer record.
+        $customer = Customer::firstOrCreate(
+            ['email' => $request->email],
+            [
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+            ]
+        );
+
+        // Store customer ID in session to identify as guest.
+        $request->session()->put('guest_customer_id', $customer->id);
+
+        // Associate the cart with the customer.
+        $cart = Cart::where('session_id', $request->session()->getId())->first();
+        if ($cart) {
+            $cart->customer_id = $customer->id;
+            $cart->save();
         }
 
-        // No user exists, create a new guest user.
-        $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'password' => null, // Store guest users without a password
+        return response()->json(['message' => 'Proceeding as guest.']);
+    }
+
+    /**
+     * Handle an incoming authentication request.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function login(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        // Capture the guest session ID before it's regenerated on login.
-        $guestSessionId = $request->session()->getId();
+        $user = User::where('email', $request->email)->first();
 
-        event(new Registered($user));
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'errors' => ['email' => ['The provided credentials do not match our records.']],
+            ], 422);
+        }
 
         Auth::login($user);
 
-        $this->mergeGuestCart($guestSessionId, $user);
-
-        return response()->json(['message' => 'Guest registration successful.']);
+        return response()->json(['message' => 'Login successful.']);
     }
 
     /**
@@ -222,20 +244,24 @@ class RegisteredUserController extends Controller
             return;
         }
 
-        $guestCart = Cart::where('session_id', $oldSessionId)->whereNull('user_id')->first();
+        $guestCart = Cart::where('session_id', $oldSessionId)->whereNull('customer_id')->first();
 
         if (!$guestCart) {
             return;
         }
 
-        $guestCart = Cart::with('items')->where('session_id', $oldSessionId)->whereNull('user_id')->where('status', 'active')->first();
-
-        if (!$guestCart) {
-            return;
-        }
+        // Find or create a customer record for the user, only when they are checking out.
+        $customer = Customer::firstOrCreate(
+            ['user_id' => $user->id],
+            [
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+            ]
+        );
 
         // Check if the user already has an active cart.
-        $userCart = Cart::with('items')->where('user_id', $user->id)->where('status', 'active')->where('status', 'active')->first();
+        $userCart = Cart::with('items')->where('customer_id', $customer->id)->where('status', 'active')->first();
 
         if ($userCart) {
             // User has an existing cart, merge guest items into it.
@@ -247,14 +273,15 @@ class RegisteredUserController extends Controller
                     $existingItem->quantity += $guestItem->quantity;
                     $existingItem->save();
                 } else {
-                    $guestItem->cart()->associate($userCart)->save();
+                    $guestItem->cart_id = $userCart->id;
+                    $guestItem->save();
                 }
             }
             $userCart->recalculateTotal();
             $guestCart->delete(); // Delete the old guest cart
         } else {
             // No existing user cart, so we can just assign the guest cart to the user.
-            $guestCart->user_id = $user->id;
+            $guestCart->customer_id = $customer->id;
             $guestCart->session_id = session()->getId(); // Update to the new session ID
             $guestCart->save();
         }

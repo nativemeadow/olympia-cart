@@ -34,18 +34,6 @@ class CategoryController extends Controller
         ]);
     }
 
-    // public function show($categorySlug): Response
-    // {
-    //     $category = Category::where('slug', $categorySlug)
-    //         ->with(['children', 'products.prices'])
-    //         ->firstOrFail();
-
-    //     return Inertia::render('categories/show', [
-    //         'category' => $category,
-    //         'category_path' => $categorySlug,
-    //     ]);
-    // }
-
     public function show($categorySlug): Response
     {
         // THE FIX: Update the eager loading to fetch the new relationships.

@@ -4,7 +4,6 @@ import { Category } from '@/types/model-types';
 import { Head, Link } from '@inertiajs/react';
 
 import classes from './index.module.css';
-import { user } from '@heroui/react';
 
 type CategoriesIndexProps = {
     categories: Category[];

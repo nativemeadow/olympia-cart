@@ -18,6 +18,8 @@ import { states } from '@/utils/counties-locals/states';
 import { Checkout } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 
+import useAuth from '@/hooks/useAuth';
+
 interface AddressDialogProps {
     address: Address | 'new' | null;
     isOpen: boolean;
@@ -29,6 +31,7 @@ export function AddressDialog({
     isOpen,
     onClose,
 }: AddressDialogProps) {
+    const { user, isAuthenticated } = useAuth();
     const { setCheckout } = useCheckoutStore();
     const isNew = address === 'new';
     const formKey =
@@ -74,10 +77,17 @@ export function AddressDialog({
             },
             preserveScroll: true,
         };
+
         if (isNew) {
-            post(route('address.store'), options);
+            const routeName = isAuthenticated
+                ? 'address.store'
+                : 'checkout-cart.checkout.guest.address.store';
+            post(route(routeName), options);
         } else if (address) {
-            patch(route('address.update', address.id), options);
+            const routeName = isAuthenticated
+                ? 'address.update'
+                : 'checkout-cart.checkout.guest.address.update';
+            patch(route(routeName, { address: address.id }), options);
         }
     };
 

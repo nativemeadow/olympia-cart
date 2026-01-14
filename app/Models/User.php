@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Address;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property-read \App\Models\Customer|null $customer
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -65,7 +68,10 @@ class User extends Authenticatable
         return $this->hasMany(Address::class);
     }
 
-    function customers(): HasOne
+    /**
+     * Get the customer record associated with the user.
+     */
+    public function customer()
     {
         return $this->hasOne(Customer::class);
     }

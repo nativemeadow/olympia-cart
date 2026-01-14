@@ -29,7 +29,12 @@ class CartItemController extends Controller
         // Recalculate the total from all items to ensure accuracy
         $cartItem->cart->recalculateTotal();
 
-        return Redirect::back()->with('success', 'Cart updated successfully.');
+        $cart = $cartItem->cart->load('items.product');
+
+        return Redirect::back()->with([
+            'success' => 'Cart updated successfully.',
+            'cart' => $cart,
+        ]);
     }
 
     /**
@@ -61,12 +66,20 @@ class CartItemController extends Controller
                 // 4. Finally, delete the cart.
                 $cart->delete();
             });
-            return Redirect::back()->with('success', 'Your cart is now empty.');
+            return Redirect::back()->with([
+                'success' => 'Your cart is now empty.',
+                'cart' => null,
+            ]);
         }
 
         // If items remain, just recalculate the total.
         $cart->recalculateTotal();
 
-        return Redirect::back()->with('success', 'Item removed from cart.');
+        $cart->load('items.product');
+
+        return Redirect::back()->with([
+            'success' => 'Item removed from cart.',
+            'cart' => $cart,
+        ]);
     }
 }

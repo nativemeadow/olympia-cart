@@ -12,7 +12,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'customer_id',
         'guest_name',
         'guest_email',
         'shipping_address_id',
@@ -25,9 +25,9 @@ class Order extends Model
     /**
      * Get the user that owns the order.
      */
-    public function user(): BelongsTo
+    public function Customer(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'customer_id');
     }
 
     /**

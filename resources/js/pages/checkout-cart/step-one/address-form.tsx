@@ -8,6 +8,7 @@ import { states } from '@/utils/counties-locals/states';
 import useCheckoutStore from '@/zustand/checkoutStore';
 
 import { router, useForm } from '@inertiajs/react';
+import axios from 'axios';
 import {
     useRef,
     FormEventHandler,
@@ -40,6 +41,7 @@ const AddressForm = forwardRef<AddressFormHandle, Props>(
                 state: '',
                 zip: '',
                 phone: '',
+                // These are for the authenticated user route
                 billing: type === 'billing' || billingSameAsShipping,
                 default: type === 'shipping' || billingSameAsShipping,
             });
@@ -47,6 +49,41 @@ const AddressForm = forwardRef<AddressFormHandle, Props>(
         const performSubmit = (
             onSuccessCallback?: (newCheckout: Checkout) => void,
         ) => {
+            // If the user is a guest, we use a different route and method.
+            if (!user) {
+                const guestAddressData = {
+                    ...data,
+                    type: type, // 'shipping' or 'billing'
+                    billing_same_as_shipping: billingSameAsShipping,
+                };
+
+                axios
+                    .post(
+                        //route('checkout.guest.address.store'),
+                        route('checkout-cart.checkout.guest.address.store'),
+                        guestAddressData,
+                    )
+                    .then((response) => {
+                        const newCheckout = response.data as Checkout;
+                        reset();
+                        setCheckout(newCheckout);
+                        onSuccessCallback?.(newCheckout);
+                    })
+                    .catch((error) => {
+                        console.error(
+                            'Error saving guest address:',
+                            error.response?.data,
+                        );
+                        // Optionally, handle validation errors from axios
+                        if (error.response && error.response.status === 422) {
+                            // You might want to set these errors on the form
+                        }
+                        alert('Could not save address. Please try again.');
+                    });
+                return;
+            }
+
+            // This is the existing logic for authenticated users.
             const addressData = {
                 ...data,
                 billing_same_as_shipping: billingSameAsShipping,

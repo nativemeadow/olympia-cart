@@ -4,15 +4,15 @@ import OMG_Logo from '@/layouts/OGM_Logo';
 import { type SharedData } from '@/types';
 import { UserNav } from '@/components/user-nav';
 import { Link, usePage } from '@inertiajs/react';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import NavLinks from './NavLinks';
-import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 import CartLink from './CartLink';
 import Footer from './Footer';
 import PageTransition from '@/components/page-transition';
 import { User } from '@/types';
 import SearchProducts from './SearchProducts';
 import cx from 'clsx';
+import CartSync from '@/components/CartSync';
 
 import classes from './public-layout.module.css';
 
@@ -23,17 +23,12 @@ type PublicLayoutProps = {
 export default function PublicLayout({ children }: PublicLayoutProps) {
     const { auth, cart } = usePage<SharedData>().props;
     const breadcrumbs = useBreadcrumbsFromPath();
-    const syncCart = useShoppingCartStore((state) => state.syncCart);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const user = auth.user as User | null;
 
-    // Sync the Zustand store with the cart data from the server on every page load/navigation.
-    useEffect(() => {
-        syncCart(cart);
-    }, [cart, syncCart]);
-
     return (
         <div className={classes.page_container}>
+            <CartSync />
             <header
                 className={cx(
                     'sticky top-0 z-10 w-full bg-[#FDFDFC] text-sm text-[#1b1b18] not-has-[nav]:hidden lg:justify-center dark:bg-[#0a0a0a] dark:text-[#EDEDEC]',

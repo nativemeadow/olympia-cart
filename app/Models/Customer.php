@@ -30,4 +30,14 @@ class Customer extends Model
     {
         return $this->hasMany(Cart::class);
     }
+
+    function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
+    }
 }
