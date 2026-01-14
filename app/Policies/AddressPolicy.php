@@ -13,7 +13,7 @@ class AddressPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true; // Or add specific logic if needed
+        return $user->customer()->exists(); // Or add specific logic if needed
     }
 
     /**
@@ -21,7 +21,7 @@ class AddressPolicy
      */
     public function view(User $user, Address $address): bool
     {
-        return $user->id === $address->user_id;
+        return $user->customer()->exists() && $user->customer->id === $address->customer_id;
     }
 
     /**
@@ -38,7 +38,11 @@ class AddressPolicy
     public function update(User $user, Address $address): bool
     {
         // A user can update an address if they are the owner of that address.
-        return $user->id === $address->user_id;
+        // 1. Get the user's associated customer ID.
+        $customer_id = $user->customer?->id;
+
+        // 2. Check if the address's customer_id matches.
+        return $customer_id === $address->customer_id;
     }
 
     /**
@@ -46,6 +50,7 @@ class AddressPolicy
      */
     public function delete(User $user, Address $address): bool
     {
-        return $user->id === $address->user_id;
+        // A user can delete an address if it belongs to their customer profile.
+        return $user->customer?->id === $address->customer_id;
     }
 }

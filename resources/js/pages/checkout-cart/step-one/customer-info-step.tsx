@@ -65,7 +65,28 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         null,
     );
 
-    const { delete: destroy, processing: deleting } = useForm();
+    const { delete: destroy, processing: deleting } = useForm({});
+
+    const {
+        data: guestData,
+        setData: setGuestData,
+        post: guestPost,
+        processing: guestProcessing,
+        errors: guestErrors,
+    } = useForm({
+        first_name: '',
+        last_name: '',
+        email: '',
+    });
+
+    const handleGuestCheckout: FormEventHandler = (e) => {
+        e.preventDefault();
+        guestPost(route('checkout.guest.store'), {
+            onSuccess: () => {
+                router.reload();
+            },
+        });
+    };
 
     const {
         data: loginData,
@@ -133,8 +154,11 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         setLocalAddresses(updatedAddresses);
 
         // Make the API call to persist the change
+        const routeName = isAuthenticated
+            ? 'address.setDefault'
+            : 'checkout.guest.address.setDefault';
         router.put(
-            route('address.setDefault', { address: addressId }),
+            route(routeName, { address: addressId }),
             { type, state: isChecked },
             {
                 preserveScroll: true,
@@ -195,7 +219,10 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
     };
 
     const handleDelete = (addressId: number) => {
-        destroy(route('address.destroy', addressId), {
+        const routeName = isAuthenticated
+            ? 'address.destroy'
+            : 'checkout-cart.checkout.guest.address.destroy';
+        destroy(route(routeName, { address: addressId }), {
             preserveScroll: true,
         });
     };
@@ -260,7 +287,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         // If no forms are visible, it calls proceedToNextStep directly.
 
         if (!checkout) {
-            alert('Checkout information is not available. Please try again.');
+            alert('');
             return;
         }
 
@@ -370,7 +397,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         );
     };
 
-    if (isAuthenticated && customer) {
+    if (customer) {
         const hasShippingAddress = localAddresses.some((addr) => addr.default);
         const hasBillingAddress = localAddresses.some((addr) => addr.billing);
 
@@ -707,10 +734,94 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                 </Label>
                             </div>
                             <div className="mt-6 text-left">
-                                <h2 className="mt-4 mb-2 font-semibold">
-                                    Login Information
-                                </h2>
-                                <Register isGuest={isGuest} />
+                                {isGuest ? (
+                                    <form
+                                        onSubmit={handleGuestCheckout}
+                                        className="space-y-4"
+                                    >
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label htmlFor="guest-first_name">
+                                                    First Name
+                                                </Label>
+                                                <Input
+                                                    id="guest-first_name"
+                                                    type="text"
+                                                    value={guestData.first_name}
+                                                    onChange={(e) =>
+                                                        setGuestData(
+                                                            'first_name',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    required
+                                                    autoFocus
+                                                />
+                                                <InputError
+                                                    message={
+                                                        guestErrors.first_name
+                                                    }
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="guest-last_name">
+                                                    Last Name
+                                                </Label>
+                                                <Input
+                                                    id="guest-last_name"
+                                                    type="text"
+                                                    value={guestData.last_name}
+                                                    onChange={(e) =>
+                                                        setGuestData(
+                                                            'last_name',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    required
+                                                />
+                                                <InputError
+                                                    message={
+                                                        guestErrors.last_name
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <Label htmlFor="guest-email">
+                                                Email
+                                            </Label>
+                                            <Input
+                                                id="guest-email"
+                                                type="email"
+                                                value={guestData.email}
+                                                onChange={(e) =>
+                                                    setGuestData(
+                                                        'email',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                required
+                                            />
+                                            <InputError
+                                                message={guestErrors.email}
+                                            />
+                                        </div>
+                                        <Button
+                                            type="submit"
+                                            className="w-full"
+                                            disabled={guestProcessing}
+                                        >
+                                            Continue as Guest
+                                        </Button>
+                                    </form>
+                                ) : (
+                                    <>
+                                        <h2 className="mt-4 mb-2 font-semibold">
+                                            Login Information
+                                        </h2>
+                                        <Register isGuest={isGuest} />
+                                    </>
+                                )}
                             </div>
                         </div>
                     </AccordionContent>

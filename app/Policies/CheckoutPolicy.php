@@ -21,7 +21,16 @@ class CheckoutPolicy
 
         // If the user is authenticated, check if the cart belongs to them.
         if ($user) {
-            return $checkout->cart->user_id === $user->id;
+            // Get the customer record associated with the authenticated user.
+            $customer = $user->customer;
+
+            // If the user has a customer record, check if the cart belongs to that customer.
+            if ($customer) {
+                return $checkout->cart->customer_id === $customer->id;
+            }
+
+            // If the user exists but has no customer record, deny access.
+            return false;
         }
 
         // For guests, check if the cart's session ID matches the current session.

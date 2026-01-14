@@ -98,8 +98,8 @@
                     <div class="content">
                         <h2>Thank You For Your Payment!</h2>
                         <p>Hello, {{ $name }}</p>
-                        <p>We''ve received your payment and your order is being processed. Here are the details of your
-                            transaction:</p>
+                        <p>We've received your payment and your order is being processed. Here are the details of your
+                            purchase:</p>
 
                         <table class="details-table">
                             <tr>
@@ -108,7 +108,7 @@
                             </tr>
                             <tr>
                                 <td>Amount Paid:</td>
-                                <td>${{ number_format($amount, 2) }}</td>
+                                <td>${{ number_format($amount / 100, 2) }}</td>
                             </tr>
                             <tr>
                                 <td>Date:</td>

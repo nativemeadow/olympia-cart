@@ -123,9 +123,9 @@ const StepFive = () => {
                         {renderAddress(
                             order.billing_address || null,
                             'Shipping', // This should be shipping_address, but it's not in the API response
-                            order.user?.first_name +
+                            order.customer?.first_name +
                                 ' ' +
-                                order.user?.last_name ||
+                                order.customer?.last_name ||
                                 order.guest_name ||
                                 null,
                             order.user?.email || null,

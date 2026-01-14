@@ -33,20 +33,20 @@ const breadcrumbs: BreadcrumbItem[] = [
 // Removed unused resultData type
 
 interface AddressFormProps {
-    address?: AddressType;
+    addresses?: AddressType;
     onCancel: () => void;
 }
 
-function AddressForm({ address, onCancel }: AddressFormProps) {
+function AddressForm({ addresses, onCancel }: AddressFormProps) {
     const { data, setData, post, patch, processing, errors, reset } = useForm({
-        phone: address?.phone || '',
-        street1: address?.street1 || '',
-        street2: address?.street2 || '',
-        city: address?.city || '',
-        state: address?.state || '',
-        zip: address?.zip || '',
-        billing: address?.billing || false,
-        default: address?.default || false,
+        phone: addresses?.phone || '',
+        street1: addresses?.street1 || '',
+        street2: addresses?.street2 || '',
+        city: addresses?.city || '',
+        state: addresses?.state || '',
+        zip: addresses?.zip || '',
+        billing: addresses?.billing || false,
+        default: addresses?.default || false,
     });
 
     const handleSubmit: FormEventHandler = (e) => {
@@ -55,8 +55,8 @@ function AddressForm({ address, onCancel }: AddressFormProps) {
             onSuccess: () => onCancel(),
             preserveScroll: true,
         };
-        if (address) {
-            patch(route('address.update', address.id), options);
+        if (addresses) {
+            patch(route('address.update', addresses.id), options);
         } else {
             post(route('address.store'), options);
         }
@@ -67,7 +67,7 @@ function AddressForm({ address, onCancel }: AddressFormProps) {
             <form onSubmit={handleSubmit}>
                 <CardHeader>
                     <CardTitle>
-                        {address ? 'Edit Address' : 'Add New Address'}
+                        {addresses ? 'Edit Address' : 'Add New Address'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -186,7 +186,7 @@ function AddressForm({ address, onCancel }: AddressFormProps) {
                         Cancel
                     </Button>
                     <Button type="submit" disabled={processing}>
-                        {address ? 'Update' : 'Save'} Address
+                        {addresses ? 'Update' : 'Save'} Address
                     </Button>
                 </CardFooter>
             </form>
@@ -194,15 +194,17 @@ function AddressForm({ address, onCancel }: AddressFormProps) {
     );
 }
 
-export default function Address() {
-    const { addresses } =
-        usePage<PageProps<{ addresses: AddressType[] }>>().props;
+export default function Address({
+    address,
+}: PageProps<{ address: AddressType[] }>) {
+    const { address: addresses } =
+        usePage<PageProps<{ address: AddressType[] }>>().props;
 
     const [editingAddress, setEditingAddress] = useState<
         AddressType | null | 'new'
     >(null);
     const { flash } = usePage<SharedData>().props;
-    const { delete: destroy, processing } = useForm();
+    const { delete: destroy, processing } = useForm({});
 
     const handleCancel = () => {
         setEditingAddress(null);
@@ -234,7 +236,7 @@ export default function Address() {
 
                 {editingAddress !== null ? (
                     <AddressForm
-                        address={
+                        addresses={
                             editingAddress === 'new'
                                 ? undefined
                                 : editingAddress

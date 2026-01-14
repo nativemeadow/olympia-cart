@@ -1,47 +1,57 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { CartItem, Cart } from '@/types/model-types';
+import { Cart } from '@/types/model-types';
 
 type ShoppingCartStore = {
-    items: Array<CartItem>;
+    cart: Cart | null;
     removeItem: (itemId: number) => void;
     clearCart: () => void;
     syncCart: (cart: Cart | null) => void;
     cartCount: () => number;
     cartTotal: () => number;
     cartId: () => number | null;
+    getItems: () => Cart['items'] | [] | null;
 };
 
 export const useShoppingCartStore = create(
     devtools<ShoppingCartStore>(
         (set, get) => ({
-            items: [],
+            cart: null,
             removeItem: (itemId) =>
-                set((state) => ({
-                    items: state.items.filter(
-                        (item) => item.item_id !== itemId,
-                    ),
-                })),
-            clearCart: () => set({ items: [] }),
+                set((state) => {
+                    if (!state.cart) return {};
+                    const updatedItems = state.cart.items?.filter(
+                        (item) => item.id !== itemId,
+                    );
+                    return {
+                        cart: { ...state.cart, items: updatedItems },
+                    };
+                }),
+            clearCart: () =>
+                set((state) => {
+                    if (!state.cart) return { cart: null };
+                    return { cart: { ...state.cart, items: [] } };
+                }),
             syncCart: (cart) => {
-                set({
-                    items: cart?.items || [],
-                });
+                set({ cart });
             },
             cartCount: () => {
-                return get().items.length;
+                return get().cart?.items?.length || 0;
             },
             cartTotal: () => {
-                return get()
-                    .items.reduce(
+                const total =
+                    get().cart?.items?.reduce(
                         (total, item) =>
                             total + Number(item.price / 100) * item.quantity,
                         0,
-                    )
-                    .toFixed(2) as unknown as number;
+                    ) || 0;
+                return parseFloat(total.toFixed(2));
             },
             cartId: () => {
-                return get().items[0]?.cart_id || null;
+                return get().cart?.id || null;
+            },
+            getItems: () => {
+                return get().cart?.items || [];
             },
         }),
         { name: 'ShoppingCartStore' },

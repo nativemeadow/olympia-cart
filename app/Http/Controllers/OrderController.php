@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cart;
+use App\Http\Controllers\Traits\ManagesCustomer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Constants\StatusCode;
@@ -16,14 +16,16 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class OrderController extends Controller
 {
     use AuthorizesRequests;
+    use ManagesCustomer;
 
     public function confirmation(Request $request): JsonResponse
     {
         $order = null;
+        $customer = $this->getCurrentCustomer();
 
-        if ($request->user()) {
-            $order = Order::where('user_id', $request->user()->id)
-                ->with(['items.product', 'shippingAddress', 'billingAddress', 'user'])
+        if ($customer) {
+            $order = Order::where('customer_id', $customer->id)
+                ->with(['items.product', 'shippingAddress', 'billingAddress', 'customer'])
                 ->latest()
                 ->first();
         } else {
@@ -44,17 +46,17 @@ class OrderController extends Controller
      */
     public function show(): \Inertia\Response
     {
-        $user = Auth::user();
+        $customer = $this->getCurrentCustomer();
 
         // Fetch the latest order for the authenticated user
-        $order = Order::where('user_id', $user->id)->latest()->firstOrFail();
+        $order = Order::where('customer_id', $customer->id)->latest()->firstOrFail();
 
         // Eager load relationships to prevent N+1 query issues
-        $order->load(['items.product', 'shippingAddress', 'billingAddress', 'user']);
+        $order->load(['items.product', 'shippingAddress', 'billingAddress', 'customer']);
 
         // Map customer details for the frontend
-        $customer = $order->user ?
-            ['name' => $order->user->name, 'email' => $order->user->email] :
+        $customer = $order->customer ?
+            ['name' => $order->customer->name, 'email' => $order->customer->email] :
             ['name' => $order->guest_name, 'email' => $order->guest_email];
 
         // Add customer to the order object before sending to the view
@@ -67,10 +69,10 @@ class OrderController extends Controller
 
     public function index(): \Inertia\Response
     {
-        $user = Auth::user();
+        $customer = $this->getCurrentCustomer();
 
         // Fetch all orders for the authenticated user
-        $orders = Order::where('user_id', $user->id)
+        $orders = Order::where('customer_id', $customer->id)
             ->with(['items.product', 'shippingAddress', 'billingAddress'])
             ->latest()
             ->get();
@@ -88,40 +90,44 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-
-        $user = $request->user();
+        $customer = $this->getCurrentCustomer();
         $cart = null;
         $checkout = null;
 
-        if ($user) {
-            // Find the user's most recently updated cart.
-            $cart = $user->carts()->latest()->first();
-            $checkout = \App\Models\Checkout::where('cart_id', $cart->id)->first();
+        if ($customer) {
+            // Find the customer's most recently updated cart.
+            $cart = $customer->carts()->latest()->first();
+        } else {
+            // For guests, find the cart using the session ID.
+            $cart = \App\Models\Cart::where('session_id', $request->session()->getId())->whereNull('customer_id')->first();
         }
-
-        $is_guest = $cart->session_id === session()->getId() ? true : false;
 
         if (!$cart) {
             return back()->withErrors(['cart' => 'No active shopping cart found.'])->with('error', 'No active shopping cart found.');
         }
 
-        $order = null;
+        // Now that we have a cart, find the associated checkout.
+        $checkout = \App\Models\Checkout::where('cart_id', $cart->id)->first();
 
+        if (!$checkout) {
+            return back()->withErrors(['checkout' => 'No active checkout session found.'])->with('error', 'No active checkout session found.');
+        }
+
+        $order = null;
         $orderStatus = StatusCode::getOrderStatus();
-        DB::transaction(function () use ($cart, $user, $checkout, $is_guest, $orderStatus, &$order) {
+
+        DB::transaction(function () use ($cart, $customer, $checkout, $orderStatus, &$order) {
             // Use updateOrCreate to find an existing order for this checkout or create a new one.
-            // This handles cases where the user goes back and changes their address.
             $order = Order::updateOrCreate(
                 ['checkout_id' => $checkout->id], // Find order by checkout_id
                 [
-                    'user_id' => $user->id,
+                    'customer_id' => $customer?->id,
                     'status' => $orderStatus['PENDING'],
                     'total' => $cart->total,
-                    'guest_name' => $is_guest ? ($user->first_name . ' ' . $user->last_name) ?? 'Guest' : null,
-                    'guest_email' => $is_guest ? $user->email ?? null : null,
+                    'guest_name' => $customer ? ($customer->first_name . ' ' . $customer->last_name) : 'Guest',
+                    'guest_email' => $customer?->email,
                     'shipping_address_id' =>  $checkout->delivery_address_id,
                     'billing_address_id' => $checkout->billing_address_id,
-                    'checkout_id' => $checkout->id,
                 ]
             );
             // If we are updating an existing order, clear out the old items.

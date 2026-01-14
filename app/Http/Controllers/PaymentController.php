@@ -105,19 +105,19 @@ class PaymentController extends Controller
 
     public function sendConfirmationEmail(Order $order, Payment $payment)
     {
-        $user = $order->user;
-        $user_name = $order->user->first_name . ' ' . $order->user->last_name;
+        $customer = $order->customer;
+        $customer_name = $customer->first_name . ' ' . $customer->last_name;
         $mailData = [
             'orderId' => $order->id,
             'amount' => $payment->amount,
             'date' => $payment->created_at->toFormattedDateString(),
         ];
         try {
-            Mail::to($user->email)->send(new PaymentConfirmationMail(
+            Mail::to($customer->email)->send(new PaymentConfirmationMail(
                 orderNumber: $mailData['orderId'],
                 amount: $mailData['amount'],
                 date: $mailData['date'],
-                name: $user_name
+                name: $customer_name
             ));
         } catch (\Exception $e) {
             Log::error("Failed to send payment confirmation email: " . $e->getMessage());

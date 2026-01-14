@@ -23,7 +23,7 @@ createInertiaApp({
             page.default.layout === undefined &&
             !name.startsWith('auth/') &&
             !name.startsWith('settings/') &&
-            name !== 'dashboard'
+            !name.startsWith('dashboard')
         ) {
             page.default.layout = (p: ReactNode) => (
                 <PublicLayout>{p}</PublicLayout>

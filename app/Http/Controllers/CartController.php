@@ -7,15 +7,20 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use App\Models\Cart;
+use App\Models\Customer;
+use App\Http\Controllers\Traits\ManagesCustomer;
 
 class CartController extends Controller
 {
+    use ManagesCustomer;
+
     public function index()
     {
-        $user = Auth::user();
+        $customer = $this->getCurrentCustomer();
+
         $cart = null;
-        if ($user) {
-            $cart = Cart::with('items.product')->where('user_id', $user->id)->where('status', 'active')->first();
+        if ($customer) {
+            $cart = Cart::with('items.product')->where('customer_id', $customer->id)->where('status', 'active')->first();
         } else {
             $cart = Cart::with('items.product')->where('session_id', session()->getId())->where('status', 'active')->first();
         }
@@ -27,6 +32,7 @@ class CartController extends Controller
         return Inertia::render('shopping-cart/show', [
             'cart' => $cart,
             'checkout' => $checkout,
+            'guest_checkout_email' => $customer?->email,
         ]);
     }
 
@@ -44,6 +50,8 @@ class CartController extends Controller
             'category_slug' => 'nullable|string',
         ]);
 
+        $customer = $this->getCurrentCustomer();
+
         $cart = $this->getOrCreateCart($request);
 
         // Check if the item (by SKU and unit) already exists in the cart
@@ -56,6 +64,7 @@ class CartController extends Controller
             $cartItem->save();
         } else {
             // Item does not exist, create a new one
+            $validated['customer_id'] = $customer ? $customer->id : null;
             $cart->items()->create($validated);
         }
 
@@ -65,7 +74,10 @@ class CartController extends Controller
 
         // return response()->json(['message' => $message]);
         // Redirect back with a success message
-        return redirect()->back()->with('success', $message);
+        return redirect()->back()->with([
+            'success' => $message,
+            'cart' => $cart,
+        ]);
     }
 
     /**
@@ -76,56 +88,51 @@ class CartController extends Controller
      */
     private function getOrCreateCart(Request $request): Cart
     {
-        $user = Auth::user();
+        $customer = $this->getCurrentCustomer();
         $sessionId = $request->session()->getId();
 
-        if ($user) {
-            $userCart = Cart::where('user_id', $user->id)->where('session_id', $sessionId)->where('status', 'active')->first();
-            // Find or create a cart for the logged-in user.
-            if (!$userCart) {
-                $uuid = Str::uuid();
-                $userCart = Cart::create([
-                    'user_id' => $user->id,
-                    'status' => 'active',
-                    'total' => 0,
-                    'cart_uuid' => $uuid,
-                    'session_id' => $sessionId
-                ]);
-            }
+        // Case 1: A logged-in user or a guest with a customer record.
+        if ($customer) {
+            $cart = Cart::where('customer_id', $customer->id)->where('status', 'active')->first();
 
             // Check for a guest cart from the current session to merge.
-            $sessionCart = Cart::where('session_id', $sessionId)->whereNull('user_id')->first();
-            if ($sessionCart) {
-                // Merge items from guest cart to user cart and delete guest cart
-                $sessionCart->items()->update(['cart_id' => $userCart->id]);
-                $userCart->total += $sessionCart->total;
-                $userCart->save();
+            $sessionCart = Cart::where('session_id', $sessionId)->whereNull('customer_id')->first();
+
+            if ($cart && $sessionCart) {
+                // Both a user cart and a session cart exist. Merge them.
+                $sessionCart->items()->update(['cart_id' => $cart->id]);
+                $cart->recalculateTotal(); // Recalculate total after merging.
                 $sessionCart->delete();
+                return $cart;
             }
 
-            // Ensure session_id is always associated with the user's cart
-            if ($userCart->session_id !== $sessionId) {
-                $userCart->session_id = $sessionId;
-                $userCart->save();
+            if ($sessionCart) {
+                // Only a session cart exists. Assign it to the customer.
+                $sessionCart->customer_id = $customer->id;
+                $sessionCart->session_id = $sessionId; // Ensure session ID is updated.
+                $sessionCart->save();
+                return $sessionCart;
             }
 
-            return $userCart;
-        }
+            if ($cart) {
+                return $cart;
+            }
 
-
-        $userCart = Cart::where('user_id', null)->where('session_id', $sessionId)->where('status', 'active')->first();
-        // Find or create a cart for the logged-in user.
-        if (!$userCart) {
-            $uuid = Str::uuid();
-            $userCart = Cart::create([
-                'user_id' => null,
+            // No cart exists for the customer or session. Create a new one.
+            return Cart::create([
+                'customer_id' => $customer->id,
                 'status' => 'active',
                 'total' => 0,
-                'cart_uuid' => $uuid,
-                'session_id' => $sessionId
+                'cart_uuid' => Str::uuid(),
+                'session_id' => $sessionId,
             ]);
         }
 
-        return $userCart;
+        // Case 2: A truly anonymous guest.
+        // Find or create a cart based on session ID.
+        return Cart::firstOrCreate(
+            ['session_id' => $sessionId, 'customer_id' => null, 'status' => 'active'],
+            ['total' => 0, 'cart_uuid' => Str::uuid()]
+        );
     }
 }

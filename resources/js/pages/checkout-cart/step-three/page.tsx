@@ -24,7 +24,7 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
         checkout || {};
     const productLink = `/${categoryPath}/${productPath}/`;
 
-    const { items, cartTotal } = useShoppingCartStore();
+    const { getItems, cartTotal } = useShoppingCartStore();
 
     console.log(
         'StepThree render - checkout:',
@@ -56,6 +56,8 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
     const handlePreviousStep = () => {
         previousStep();
     };
+
+    const cartItems = getItems();
 
     return (
         <>
@@ -141,9 +143,9 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
                 </div>
                 <div className={classes.order_summary_section}>
                     <h2 className="mb-4 text-xl font-bold">Order Summary</h2>
-                    {items && items.length > 0 ? (
+                    {cartItems && cartItems.length > 0 ? (
                         <>
-                            {items.map((item: CartItem) => (
+                            {cartItems.map((item: CartItem) => (
                                 <div
                                     key={item.id}
                                     className="flex items-center space-x-4 border-b py-2 last:border-b-0 last:pb-0"
@@ -161,12 +163,15 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
                                         </p>
                                         <p className="text-sm text-gray-600">
                                             Qty: {item.quantity} - Price: $
-                                            {item.price.toFixed(2)}
+                                            {Number(item.price / 100).toFixed(
+                                                2,
+                                            )}
                                         </p>
                                         <p className="font-semibold">
                                             $
                                             {(
-                                                item.price * item.quantity
+                                                Number(item.price / 100) *
+                                                item.quantity
                                             ).toFixed(2)}
                                         </p>
                                     </div>

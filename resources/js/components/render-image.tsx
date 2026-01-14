@@ -6,7 +6,14 @@ type Props = {
 
 const ImageRender = ({ src, alt, className }: Props) => {
     const imagePath = `${src}`;
-    return <img className={className} src={imagePath} alt={alt} />;
+    return (
+        <img
+            className={className}
+            src={imagePath}
+            alt={alt}
+            style={{ color: 'transparent' }}
+        />
+    );
 };
 
 export default ImageRender;

@@ -9,6 +9,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\SearchIndexController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CheckoutStepsController;
 use Inertia\Inertia;
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -20,8 +21,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // The homepage shows the category index.
 Route::get('/', [CategoryController::class, 'index'])->name('home');
 
-
-
 // ... other routes
 
 Route::patch('/cart/items/{cartItem}', [CartItemController::class, 'update'])->name('cart.items.update');
@@ -29,9 +28,7 @@ Route::delete('/cart/items/{cartItem}', [CartItemController::class, 'destroy'])-
 
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
-Route::get('/categories/products/{categorySlug}/{slug}/test', [ProductController::class, 'testShow'])->where('categorySlug', '.*')->name('products.testShow');
 Route::get('/categories/products/{categorySlug}/{slug}', [ProductController::class, 'show'])->where('categorySlug', '.*')->name('products.show');
-Route::get('categories/{categorySlug}/test', [CategoryController::class, 'testShow'])->where('categorySlug', '.*')->name('categories.testShow');
 Route::get('/categories/{categorySlug}', [CategoryController::class, 'show'])->where('categorySlug', '.*')->name('categories.show');
 
 
@@ -51,13 +48,16 @@ Route::get('/search/{searchTerm?}', [SearchIndexController::class, 'index'])->na
 
 // Existing Checkout Routes (preserved)
 Route::get('/checkout', [App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout.index');
+// used for starting checkout from cart -- do not remove
 Route::get('/checkout/create', [App\Http\Controllers\CheckoutController::class, 'create'])->name('checkout.create');
 Route::post('/checkout', [App\Http\Controllers\CheckoutController::class, 'store'])->name('checkout.store');
 Route::get('/checkout/{id}', [App\Http\Controllers\CheckoutController::class, 'show'])->name('checkout.show');
+// ued for editing checkout information -- do not remove
 Route::patch('/checkout/{id}', [App\Http\Controllers\CheckoutController::class, 'update'])->name('checkout.update');
 Route::patch('/checkout/{id}/status', [App\Http\Controllers\CheckoutController::class, 'updateStatus'])->name('checkout.updateStatus');
 
 Route::post('/payment/process', [App\Http\Controllers\PaymentController::class, 'processPayment'])->name('payment.process');
+
 Route::post('/order/store', [App\Http\Controllers\OrderController::class, 'store'])->name('order.store');
 Route::put('/order/{id}/update', [App\Http\Controllers\OrderController::class, 'update'])->name('order.update');
 Route::post('payment/store', [PaymentController::class, 'store'])->name('payment.store');
@@ -73,6 +73,10 @@ Route::prefix('checkout-cart')->name('checkout-cart.')->group(function () {
     Route::post('/step-three', [App\Http\Controllers\CheckoutStepsController::class, 'processStepThree'])->name('step-three');
     Route::post('/payment', [App\Http\Controllers\CheckoutStepsController::class, 'processPayment'])->name('payment');
     Route::post('/step-five', [App\Http\Controllers\CheckoutStepsController::class, 'processStepFive'])->name('step-five');
+    Route::post('guest-address', [CheckoutStepsController::class, 'storeGuestAddress'])->name('checkout.guest.address.store');
+    Route::patch('guest-address/{address}', [CheckoutStepsController::class, 'updateGuestAddress'])->name('checkout.guest.address.update');
+    Route::delete('guest-address/{address}', [CheckoutStepsController::class, 'destroyGuestAddress'])->name('checkout.guest.address.destroy');
+    Route::put('guest-address/{address}/set-default', [CheckoutStepsController::class, 'setGuestDefaultAddress'])->name('checkout.guest.address.setDefault');
 });
 
 Route::inertia('/session', 'session/index')->name('session.index');
@@ -80,3 +84,4 @@ Route::inertia('/session', 'session/index')->name('session.index');
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
+require __DIR__ . '/dashboard.php';

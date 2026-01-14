@@ -142,3 +142,15 @@ export type PageProps<
         error: string | null;
     };
 };
+
+export type CategoryHierarchy = {
+    id: number;
+    title: string;
+    slug: string;
+    parent_id: number | null;
+    order: number;
+    level: number;
+    path: string;
+    children?: CategoryHierarchy[];
+    products?: Product[];
+};
