@@ -73,6 +73,7 @@ export type Checkout = {
     billing_address_id: number | null;
     billing_address: Address | null;
     instructions: string | null;
+    customer_id: number | null;
 };
 
 // Type for an attribute (e.g., "Color", "Size")

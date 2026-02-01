@@ -108,12 +108,13 @@ class AddressController extends Controller
         $typeColumn = $validated['type'] === 'shipping' ? 'default' : 'billing';
         $isBeingSet = $validated['state'];
         $user = $request->user();
+        $customer = $user->customer;
 
-        DB::transaction(function () use ($user, $address, $typeColumn, $isBeingSet) {
+        DB::transaction(function () use ($customer, $address, $typeColumn, $isBeingSet) {
             // If a checkbox is checked, we first ensure no other address has this flag.
             if ($isBeingSet) {
                 // 1. Unset the current default for this type for all of the user's addresses.
-                $user->addresses()->where('id', '!=', $address->id)->update([$typeColumn => false]);
+                $customer->addresses()->where('id', '!=', $address->id)->update([$typeColumn => false]);
             }
 
             // 2. Set the state on the specified address.

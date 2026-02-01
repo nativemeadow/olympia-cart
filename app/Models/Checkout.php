@@ -23,6 +23,7 @@ class Checkout extends Model
         'billing_address_id',
         'instructions',
         'billing_same_as_shipping',
+        'customer_id',
     ];
 
     /**

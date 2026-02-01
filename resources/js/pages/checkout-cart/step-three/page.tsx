@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { CartItem } from '@/types/model-types';
 import classes from './step-three.module.css';
 import { useForm } from '@inertiajs/react';
+import { formatPhoneNumber } from '@/utils/format-phone-number';
 
 const categoryPath = 'categories';
 const productPath = 'products';
@@ -67,7 +68,11 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
             <div className={classes['review-container']}>
                 <div className={classes.address_section}>
                     <div>
-                        <h2 className="text-xl font-bold">Shipping Address</h2>
+                        {checkout?.is_delivery ? (
+                            <h2 className="text-xl font-bold">
+                                Shipping Address
+                            </h2>
+                        ) : null}
                         {checkout?.is_delivery && checkout?.delivery_address ? (
                             <div
                                 key={checkout?.delivery_address.id}
@@ -79,11 +84,16 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
                                     {checkout?.delivery_address.state}
                                     {checkout?.delivery_address.zip}
                                 </p>
-                                <p>Phone: {checkout?.delivery_address.phone}</p>
+                                <p>
+                                    Phone:{' '}
+                                    {formatPhoneNumber(
+                                        checkout?.delivery_address.phone,
+                                    )}
+                                </p>
                             </div>
-                        ) : (
+                        ) : checkout?.is_delivery ? (
                             <p>No addresses available.</p>
-                        )}
+                        ) : null}
                     </div>
                     <div>
                         <h2 className="text-xl font-bold">Billing Address</h2>
@@ -98,7 +108,12 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
                                     {checkout?.billing_address.state}
                                     {checkout?.billing_address.zip}
                                 </p>
-                                <p>Phone: {checkout?.billing_address.phone}</p>
+                                <p>
+                                    Phone:{' '}
+                                    {formatPhoneNumber(
+                                        checkout?.billing_address.phone,
+                                    )}
+                                </p>
                             </div>
                         ) : (
                             <p>No addresses available.</p>

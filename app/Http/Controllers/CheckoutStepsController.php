@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Checkout;
 use App\Models\Address;
+use App\Models\Cart;
+use App\Models\Customer;
 use App\Http\Controllers\Traits\ManagesCustomer;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
@@ -31,10 +33,10 @@ class CheckoutStepsController extends Controller
         } else {
             $guestCustomerId = $request->session()->get('guest_customer_id');
             if ($guestCustomerId) {
-                $cart = \App\Models\Cart::where('customer_id', $guestCustomerId)->latest()->first();
-                $customer = \App\Models\Customer::find($guestCustomerId);
+                $cart = Cart::where('customer_id', $guestCustomerId)->latest()->first();
+                $customer = Customer::find($guestCustomerId);
             } else {
-                $cart = \App\Models\Cart::where('session_id', $request->session()->getId())->whereNull('customer_id')->first();
+                $cart = Cart::where('session_id', $request->session()->getId())->whereNull('customer_id')->first();
             }
         }
 
@@ -83,7 +85,7 @@ class CheckoutStepsController extends Controller
         if (!$customer) {
             $guestCustomerId = $request->session()->get('guest_customer_id');
             if ($guestCustomerId) {
-                $customer = \App\Models\Customer::find($guestCustomerId);
+                $customer = Customer::find($guestCustomerId);
             }
         }
 
@@ -110,6 +112,14 @@ class CheckoutStepsController extends Controller
             return back()->withErrors(['checkout' => 'Checkout id is required.']);
         }
 
+        $checkout = Checkout::findOrFail($checkoutId);
+
+        // Ensure the customer_id is set on the checkout for guests
+        if (!$checkout->customer_id && $customer) {
+            $checkout->customer_id = $customer->id;
+            $checkout->save();
+        }
+
         $addresses = $customer ? $customer->addresses()->pluck('id')->toArray() : [];
         if (isset($validated['billing_same_as_shipping']) && count($addresses) === 1) {
             // If there's only one address, use it for both billing and shipping.
@@ -118,7 +128,7 @@ class CheckoutStepsController extends Controller
             $customer->addresses()->where('id', $addresses[0])->update(['billing' => true]);
         }
 
-        $checkout = Checkout::findOrFail($checkoutId);
+        $validated['customer_id'] = $customer?->id ?? $request->session()->get('guest_customer_id');
 
         $this->authorize('update', $checkout);
 
@@ -164,69 +174,93 @@ class CheckoutStepsController extends Controller
      */
     public function processStepFive(Request $request)
     {
-        // This is likely the final step to create the order record after successful payment.
+        // This is the final step to create the order record after successful payment.
         // It might redirect to a "Thank You" page.
+
+        // If the customer was a guest, we must explicitly clear their session data
+        // to ensure their next visit starts with a clean slate.
+        if ($request->session()->has('guest_customer_id')) {
+            // Optionally, remove the guest customer record from the sessions table
+            DB::table('sessions')->where('guest_customer_id', $request->session()->get('guest_customer_id'))->delete();
+
+            // 1. Remove all data from the session.
+            $request->session()->flush();
+
+            // 2. Save the now-empty session state to the database.
+            $request->session()->save();
+
+            // 3. Regenerate the session ID for a completely new session.
+            $request->session()->regenerate();
+        }
+
         return to_route('home')->with('success', 'Your order has been placed!');
     }
 
     /**
-     * Store a new address for a guest customer.
+     * Store a new address during the checkout process for either a guest or authenticated user.
      */
-    public function storeGuestAddress(Request $request)
+    public function storeCheckoutAddress(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            //'first_name' => 'required|string|max:255',
-            //'last_name' => 'required|string|max:255',
-            'street1' => 'required|string|max:255',
-            'street2' => 'nullable|string|max:255',
-            'city' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
-            'zip' => 'required|string|max:10',
-            'phone' => 'required|string|max:20',
-            //'email' => 'required|email|max:255',
-            'type' => ['required', Rule::in(['shipping', 'billing'])],
+            'shipping_address' => 'nullable|array',
+            'shipping_address.street1' => 'required_with:shipping_address|string|max:255',
+            'shipping_address.city' => 'required_with:shipping_address|string|max:255',
+            'shipping_address.state' => 'required_with:shipping_address|string|max:255',
+            'shipping_address.zip' => 'required_with:shipping_address|string|max:10',
+            'shipping_address.phone' => 'required_with:shipping_address|string|max:20',
+
+            'billing_address' => 'nullable|array',
+            'billing_address.street1' => 'required_with:billing_address|string|max:255',
+            'billing_address.city' => 'required_with:billing_address|string|max:255',
+            'billing_address.state' => 'required_with:billing_address|string|max:255',
+            'billing_address.zip' => 'required_with:billing_address|string|max:10',
+            'billing_address.phone' => 'required_with:billing_address|string|max:20',
+
             'billing_same_as_shipping' => 'sometimes|boolean',
         ]);
 
-        $guestCustomerId = $request->session()->get('guest_customer_id');
-        if (!$guestCustomerId) {
-            return response()->json(['message' => 'Guest session not found.'], 404);
-        }
+        $customer = $this->getCurrentCustomer(); // This method already handles getting guest or auth customer
 
-        $customer = \App\Models\Customer::find($guestCustomerId);
         if (!$customer) {
-            return response()->json(['message' => 'Guest customer not found.'], 404);
+            return back()->withErrors(['session' => 'Your session has expired. Please try again.']);
         }
-
-        $addressData = collect($validated)->except(['type', 'billing_same_as_shipping'])->toArray();
-        $type = $validated['type'];
-        $billingSameAsShipping = $validated['billing_same_as_shipping'] ?? false;
-
-        $address = $customer->addresses()->create($addressData);
 
         $checkout = $customer->carts()->latest()->first()->checkout;
 
-        if ($type === 'shipping') {
-            $customer->addresses()->where('id', '!=', $address->id)->update(['default' => false]);
-            $address->update(['default' => true]);
-            $checkout->update(['delivery_address_id' => $address->id]);
+        DB::transaction(function () use ($customer, $checkout, $validated) {
+            $shippingData = $validated['shipping_address'] ?? null;
+            $billingData = $validated['billing_address'] ?? null;
+            $isSameAsShipping = $validated['billing_same_as_shipping'] ?? false;
 
-            if ($billingSameAsShipping) {
-                $customer->addresses()->where('id', '!=', $address->id)->update(['billing' => false]);
-                $address->update(['billing' => true]);
-                $checkout->update(['billing_address_id' => $address->id, 'billing_same_as_shipping' => true]);
+            // If billing is same as shipping, there should be shipping data.
+            if ($isSameAsShipping) {
+                if ($shippingData) {
+                    $address = $customer->addresses()->create($shippingData + ['default' => true, 'billing' => true]);
+                    $checkout->delivery_address_id = $address->id;
+                    $checkout->billing_address_id = $address->id;
+                    $checkout->billing_same_as_shipping = true;
+                }
+            } else {
+                // If they are not the same, process them independently.
+                if ($shippingData) {
+                    $shippingAddress = $customer->addresses()->create($shippingData + ['default' => true, 'billing' => false]);
+                    $checkout->delivery_address_id = $shippingAddress->id;
+                }
+                if ($billingData) {
+                    $billingAddress = $customer->addresses()->create($billingData + ['billing' => true, 'default' => false]);
+                    $checkout->billing_address_id = $billingAddress->id;
+                }
+                // Only set same as shipping to false if we are NOT setting it to true.
+                $checkout->billing_same_as_shipping = false;
             }
-        } elseif ($type === 'billing') {
-            $customer->addresses()->where('id', '!=', $address->id)->update(['billing' => false]);
-            $address->update(['billing' => true]);
-            $checkout->update(['billing_address_id' => $address->id]);
-        }
 
-        // Return the updated checkout object
-        return response()->json($checkout->load(['deliveryAddress', 'billingAddress']));
+            $checkout->save();
+        });
+
+        return redirect()->route('checkout-cart.index');
     }
 
-    public function updateGuestAddress(Request $request, Address $address)
+    public function updateCheckoutAddress(Request $request, Address $address)
     {
         $guestCustomerId = $request->session()->get('guest_customer_id');
         if (!$guestCustomerId || $address->customer_id != $guestCustomerId) {
@@ -247,14 +281,14 @@ class CheckoutStepsController extends Controller
 
         $address->update($validated);
 
-        $customer = \App\Models\Customer::find($guestCustomerId);
+        $customer = Customer::find($guestCustomerId);
         $customer->load('addresses');
 
         // Return a redirect to refresh the page state
         return redirect()->route('checkout-cart.index')->with('success', 'Address updated.');
     }
 
-    public function destroyGuestAddress(Request $request, Address $address)
+    public function deleteCheckoutAddress(Request $request, Address $address)
     {
         $guestCustomerId = $request->session()->get('guest_customer_id');
         if (!$guestCustomerId || $address->customer_id != $guestCustomerId) {
@@ -270,7 +304,7 @@ class CheckoutStepsController extends Controller
     {
         $guestCustomerId = $request->session()->get('guest_customer_id');
         if (!$guestCustomerId || $address->customer_id != $guestCustomerId) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            $this->authorize('update', $address);
         }
 
         $validated = $request->validate([
@@ -281,7 +315,7 @@ class CheckoutStepsController extends Controller
         $typeColumn = $validated['type'] === 'shipping' ? 'default' : 'billing';
         $isBeingSet = $validated['state'];
 
-        $customer = \App\Models\Customer::find($guestCustomerId);
+        $customer = Customer::find($guestCustomerId);
 
         DB::transaction(function () use ($customer, $address, $typeColumn, $isBeingSet) {
             if ($isBeingSet) {
@@ -291,5 +325,65 @@ class CheckoutStepsController extends Controller
         });
 
         return redirect()->route('checkout-cart.index')->with('success', 'Default address updated.');
+    }
+
+    public function setBillingFromShipping(Request $request)
+    {
+        $guestCustomerId = $request->session()->get('guest_customer_id');
+        if (!$guestCustomerId) {
+            return back()->withErrors(['session' => 'Your session has expired. Please try again.']);
+        }
+
+        $customer = Customer::find($guestCustomerId);
+        $checkout = $customer->carts()->latest()->first()->checkout;
+
+        $this->authorize('update', $checkout);
+
+        DB::transaction(function () use ($customer, $checkout) {
+            $shippingAddress = $customer->addresses()->where('default', true)->first();
+
+            if ($shippingAddress) {
+                $shippingAddress->update(['billing' => true]);
+                $checkout->billing_address_id = $shippingAddress->id;
+                $checkout->billing_same_as_shipping = true;
+                $checkout->save();
+            }
+        });
+
+        return redirect()->route('checkout-cart.index');
+    }
+
+    public function storeDialogAddress(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'phone' => 'required|string|max:20',
+            'street1' => 'required|string|max:255',
+            'street2' => 'nullable|string|max:255',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
+            'zip' => 'required|string|max:10',
+            'billing' => 'sometimes|boolean',
+            'default' => 'sometimes|boolean',
+        ]);
+
+        $customer = $this->getCurrentCustomer();
+
+        if (!$customer) {
+            return back()->withErrors(['session' => 'Your session has expired. Please try again.']);
+        }
+
+        DB::transaction(function () use ($customer, $validated) {
+            $address = $customer->addresses()->create($validated);
+
+            if ($validated['billing']) {
+                $customer->addresses()->where('id', '!=', $address->id)->update(['billing' => false]);
+            }
+
+            if ($validated['default']) {
+                $customer->addresses()->where('id', '!=', $address->id)->update(['default' => false]);
+            }
+        });
+
+        return redirect()->route('checkout-cart.index');
     }
 }

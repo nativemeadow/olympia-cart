@@ -6,6 +6,7 @@ use App\Models\CartItem;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Session;
+use Pest\ArchPresets\Custom;
 
 class CartItemPolicy
 {
@@ -38,12 +39,17 @@ class CartItemPolicy
      */
     public function update(?User $user, CartItem $cartItem): bool
     {
-        if ($user) {
-            return $cartItem->cart->user_id === $user->id;
+        // If a user is authenticated, check ownership via the customer record.
+        if ($user && $user->customer) {
+            return $cartItem->cart->customer_id === $user->customer->id;
         }
 
-        // For guests, check if the cart's session_id matches the current session.
-        return $cartItem->cart->session_id === Session::getId() && is_null($cartItem->cart->user_id);
+        // If it's a guest, check if the cart's session_id matches the current session.
+        if (is_null($user)) {
+            return $cartItem->cart->session_id === Session::getId();
+        }
+
+        return false;
     }
 
     /**
@@ -51,18 +57,23 @@ class CartItemPolicy
      */
     public function delete(?User $user, CartItem $cartItem): bool
     {
-        if ($user) {
-            return $cartItem->cart->user_id === $user->id;
+        // If a user is authenticated, check ownership via the customer record.
+        if ($user && $user->customer) {
+            return $cartItem->cart->customer_id === $user->customer->id;
         }
 
-        // For guests, check if the cart's session_id matches the current session.
-        return $cartItem->cart->session_id === Session::getId() && is_null($cartItem->cart->user_id);
+        // If it's a guest, check if the cart's session_id matches the current session.
+        if (is_null($user)) {
+            return $cartItem->cart->session_id === Session::getId();
+        }
+
+        return false;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, CartItem $cartItem): bool
+    public function restore(?User $user, CartItem $cartItem): bool
     {
         return false;
     }

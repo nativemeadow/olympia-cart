@@ -1,6 +1,7 @@
 import React from 'react';
 import { Address } from '@/types/model-types';
 import { Badge } from '@/components/ui/badge';
+import { formatPhoneNumber } from '@/utils/format-phone-number';
 
 import classes from './address-display-card.module.css';
 
@@ -23,7 +24,7 @@ const AddressDisplayCard: React.FC<AddressDisplayCardProps> = ({
             ) : null}
             <p>{`${address.street1}${address.street2 ? `, ${address.street2}` : ''}`}</p>
             <p>{`${address.city}, ${address.state} ${address.zip}`}</p>
-            <p>{address.phone}</p>
+            <p>{formatPhoneNumber(address.phone)}</p>
         </div>
     );
 };

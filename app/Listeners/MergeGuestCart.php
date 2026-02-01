@@ -46,7 +46,10 @@ class MergeGuestCart
 
         $customer = $user->customer;
         // Find the user's existing cart, if any.
-        $userCart = Cart::with('items')->where('customer_id', $customer->id)->where('status', 'active')->where('status', 'active')->first();
+        $userCart = null;
+        if ($customer) {
+            $userCart = Cart::with('items')->where('customer_id', $customer->id)->where('status', 'active')->first();
+        }
 
         if ($guestCart) {
             if ($userCart) {
@@ -57,6 +60,9 @@ class MergeGuestCart
             } else {
                 // Only a guest cart exists. Assign it to the user.
                 $guestCart->user_id = $user->id;
+                if ($customer) {
+                    $guestCart->customer_id = $customer->id;
+                }
                 $userCart = $guestCart; // The guest cart is now the user's cart.
             }
         }

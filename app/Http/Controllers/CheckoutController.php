@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Checkout;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Controllers\Traits\ManagesCustomer;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
@@ -60,6 +61,7 @@ class CheckoutController extends Controller
             'is_delivery' => $validatedData['is_delivery'],
             'billing_address_id' => null,
             'billing_same_as_shipping' => $validatedData['billing_same_as_shipping'] ?? false,
+            'customer_id' => $customer?->id ?? session('guest_customer_id'),
         ];
 
         if ($validatedData['is_pickup']) {
@@ -89,7 +91,17 @@ class CheckoutController extends Controller
 
     public function update(Request $request, $id)
     {
-        $customer = $this->getCurrentCustomer();
+        $checkout = Checkout::findOrFail($id);
+        // Add logging to debug authorization
+        // Log::info('CheckoutController@update authorization check', [
+        //     'session_guest_customer_id' => $request->session()->get('guest_customer_id'),
+        //     'checkout_customer_id' => $checkout->customer_id,
+        //     'user_authenticated' => Auth::check(),
+        // ]);
+
+        // Manually authorize for both authenticated and guest users
+        // $user = Auth::user();
+
         // Validate only the fields that are present in the request.
         $validatedData = $request->validate([
             'is_pickup' => 'sometimes|boolean',
@@ -110,10 +122,6 @@ class CheckoutController extends Controller
             ],
         ]);
 
-        $checkout = Checkout::findOrFail($id);
-
-        $this->authorize('update', $checkout);
-
         // First, fill the model with any validated data from the request.
         $checkout->fill($validatedData);
 
@@ -133,6 +141,11 @@ class CheckoutController extends Controller
                 'is_pickup' => false,
                 'is_delivery' => true,
             ]);
+        }
+
+        $customer = $this->getCurrentCustomer();
+        if ($customer) {
+            $checkout->customer_id = $customer->id;
         }
 
         $checkout->save();
@@ -167,5 +180,18 @@ class CheckoutController extends Controller
         $checkout->save();
 
         return back()->with('success', 'Checkout status updated successfully.');
+    }
+
+    public function updateCustomerId(Request $request, $id)
+    {
+        $customer = $this->getCurrentCustomer();
+        $checkout = Checkout::findOrFail($id);
+
+        $this->authorize('update', $checkout);
+
+        $checkout->customer_id = $customer?->id ?? null;
+        $checkout->save();
+
+        return back()->with('success', 'Checkout customer updated successfully.');
     }
 }

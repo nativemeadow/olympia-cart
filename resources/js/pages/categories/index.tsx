@@ -34,12 +34,12 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
                     No top-level categories found.
                 </div>
             ) : (
-                <div className={`${classes.gallery_grid} flex-grow px-8`}>
+                <div className={`${classes.gallery_grid}`}>
                     {categories.map((cat) => (
                         <Link
                             key={cat.id}
                             href={`/categories/${cat.slug}`}
-                            className={`${classes.gallery_cell} ${classes[`gallery_${cat.slug}`]}`}
+                            className={`${classes[`gallery_${cat.slug}`]}`}
                         >
                             <div className={classes.gallery_item}>
                                 <RenderImage

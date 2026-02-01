@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Pest\ArchPresets\Custom;
 
 class Payment extends Model
 {
@@ -18,6 +19,7 @@ class Payment extends Model
         'currency',
         'status',
         'payment_method_details',
+        'customer_id'
     ];
 
     protected $casts = [

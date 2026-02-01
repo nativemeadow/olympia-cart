@@ -35,14 +35,16 @@ class AddressPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Address $address): bool
+    public function update(?User $user, Address $address): bool
     {
-        // A user can update an address if they are the owner of that address.
-        // 1. Get the user's associated customer ID.
-        $customer_id = $user->customer?->id;
+        if ($user) {
+            // Authenticated user logic
+            return $user->customer?->id === $address->customer_id;
+        }
 
-        // 2. Check if the address's customer_id matches.
-        return $customer_id === $address->customer_id;
+        // Guest user logic
+        $guestCustomerId = session()->get('guest_customer_id');
+        return $guestCustomerId && $guestCustomerId === $address->customer_id;
     }
 
     /**

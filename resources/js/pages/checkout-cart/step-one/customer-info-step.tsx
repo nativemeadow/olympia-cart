@@ -4,6 +4,7 @@ import useCheckoutStore from '@/zustand/checkoutStore';
 import useCheckoutStepsStore from '@/zustand/checkoutStepsStore';
 import { Address, CustomerData } from '@/types/model-types';
 import { Checkout } from '@/types';
+import { formatPhoneNumber } from '@/utils/format-phone-number';
 
 import classes from './customer-info.module.css'; // Assuming you have some CSS modules for styling
 import { router, useForm, Link } from '@inertiajs/react';
@@ -81,7 +82,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
 
     const handleGuestCheckout: FormEventHandler = (e) => {
         e.preventDefault();
-        guestPost(route('checkout.guest.store'), {
+        guestPost(route('checkout-cart.guest.store'), {
             onSuccess: () => {
                 router.reload();
             },
@@ -154,9 +155,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         setLocalAddresses(updatedAddresses);
 
         // Make the API call to persist the change
-        const routeName = isAuthenticated
-            ? 'address.setDefault'
-            : 'checkout.guest.address.setDefault';
+        const routeName = 'checkout-cart.checkout.address.setDefault';
         router.put(
             route(routeName, { address: addressId }),
             { type, state: isChecked },
@@ -164,7 +163,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                 preserveScroll: true,
                 onSuccess: (page) => {
                     setCheckout(page.props.checkout as Checkout);
-                    updateShippingBillingCheckout();
+                    //updateShippingBillingCheckout();
                 },
                 onError: () => {
                     // On error, revert to the original state from props
@@ -174,54 +173,10 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         );
     };
 
-    const updateShippingBillingCheckout = () => {
-        if (checkout) {
-            const hasShippingAddress = localAddresses.some(
-                (addr) => addr.default,
-            );
-            const hasBillingAddress = localAddresses.some(
-                (addr) => addr.billing,
-            );
-
-            const updatedData: {
-                delivery_address_id: number | null;
-                billing_address_id: number | null;
-            } = {
-                delivery_address_id: null,
-                billing_address_id: null,
-            };
-
-            if (hasShippingAddress) {
-                const shippingAddress = localAddresses.find(
-                    (addr) => addr.default,
-                );
-                updatedData.delivery_address_id = shippingAddress?.id || null;
-            }
-
-            if (hasBillingAddress) {
-                const billingAddress = localAddresses.find(
-                    (addr) => addr.billing,
-                );
-                updatedData.billing_address_id = billingAddress?.id || null;
-            }
-
-            router.patch(
-                route('checkout-cart.processStepOne', checkout.id),
-                updatedData,
-                {
-                    preserveScroll: true,
-                    onSuccess: (page) => {
-                        setCheckout(page.props.checkout as Checkout);
-                    },
-                },
-            );
-        }
-    };
-
     const handleDelete = (addressId: number) => {
         const routeName = isAuthenticated
             ? 'address.destroy'
-            : 'checkout-cart.checkout.guest.address.destroy';
+            : 'checkout-cart.checkout.customer.address.destroy';
         destroy(route(routeName, { address: addressId }), {
             preserveScroll: true,
         });
@@ -233,35 +188,40 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         const isChecked = e.target.checked;
         setBillingSameAsShipping(isChecked);
 
-        if (!checkout) {
-            return;
+        // For authenticated users with an existing shipping address, we can update immediately.
+        if (isAuthenticated && checkout) {
+            const shippingAddress = localAddresses.find((addr) => addr.default);
+            if (isChecked && shippingAddress) {
+                router.post(
+                    route('checkout-cart.checkout.setBillingFromShipping'),
+                    {},
+                    {
+                        preserveScroll: true,
+                        onSuccess: (page) => {
+                            setCheckout(page.props.checkout as Checkout);
+                        },
+                    },
+                );
+            } else {
+                // If unchecking, update the checkout state.
+                const payload = {
+                    billing_same_as_shipping: isChecked,
+                    billing_address_id: null, // Unset billing address
+                };
+                router.patch(
+                    route('checkout-cart.processStepOne', checkout.id),
+                    payload,
+                    {
+                        preserveScroll: true,
+                        onSuccess: (page) => {
+                            setCheckout(page.props.checkout as Checkout);
+                        },
+                    },
+                );
+            }
         }
-
-        // Find the current default shipping address from the local state
-        const shippingAddress = localAddresses.find((addr) => addr.default);
-
-        // Determine the correct billing_address_id for the payload
-        const newBillingAddressId =
-            isChecked && shippingAddress ? shippingAddress.id : null;
-
-        // Build the explicit payload
-        const payload = {
-            billing_same_as_shipping: isChecked,
-            billing_address_id: newBillingAddressId,
-        };
-
-        // Send the complete payload to the backend
-        router.patch(
-            route('checkout-cart.processStepOne', checkout.id),
-            payload,
-            {
-                preserveScroll: true,
-                onSuccess: (page) => {
-                    // The checkout object from the server will now have the correct state.
-                    setCheckout(page.props.checkout as Checkout);
-                },
-            },
-        );
+        // For guests, we simply update the local state.
+        // The data will be sent when they submit the address form(s).
     };
 
     const nextButtonLabel = () => {
@@ -281,120 +241,102 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
     };
 
     const handleContinue = () => {
-        // This function is now the single source of truth for proceeding.
-        // It first ensures any visible address forms are submitted.
-        // In the onSuccess callback of the form submissions, it calls proceedToNextStep.
-        // If no forms are visible, it calls proceedToNextStep directly.
-
         if (!checkout) {
-            alert('');
+            alert('Checkout session not found. Please refresh and try again.');
             return;
         }
 
-        const isPickup = checkout.is_pickup;
         const isDelivery = checkout.is_delivery;
+        const isPickup = checkout.is_pickup;
 
-        // Determine if forms are visible and need submission
-        const needsShippingFormSubmit = isDelivery && showShippingForm;
-        const needsBillingFormSubmit =
-            (isPickup && showBillingForm) ||
-            (isDelivery && !billingSameAsShipping && showBillingForm);
+        // Check if we can proceed without submitting new addresses
+        const canProceedDirectly =
+            (isPickup && checkout.billing_address_id) ||
+            (isDelivery &&
+                checkout.billing_address_id &&
+                checkout.delivery_address_id);
 
-        if (needsShippingFormSubmit) {
-            // Chain submissions: submit shipping, then billing (if needed), then proceed.
-            shippingFormRef.current?.submit({
-                onSuccess: (newCheckoutFromShipping: Checkout) => {
-                    if (needsBillingFormSubmit) {
-                        billingFormRef.current?.submit({
-                            onSuccess: () =>
-                                proceedToNextStep(newCheckoutFromShipping),
-                        });
-                    } else {
-                        proceedToNextStep(newCheckoutFromShipping);
-                    }
-                },
-            });
-        } else if (needsBillingFormSubmit) {
-            // Only billing form needs submission
-            billingFormRef.current?.submit({
-                onSuccess: (newCheckoutFromBilling) =>
-                    proceedToNextStep(newCheckoutFromBilling),
-            });
-        } else {
-            // No forms to submit, just validate and proceed
-            proceedToNextStep(checkout);
-        }
-    };
+        router.patch(route(`checkout.updateCustomerId`, checkout.id), {
+            customer_id: customer?.id,
+        });
 
-    const proceedToNextStep = (updatedCheckout: Checkout | null) => {
-        // 1. Guard clause: Ensure checkout exists before proceeding.
-        if (!updatedCheckout) {
-            alert('Checkout information is not available. Please try again.');
+        if (canProceedDirectly) {
+            setStepCanProceed('customerInfo', true);
+            setStepCompleted('customerInfo', true);
+            nextStep();
             return;
         }
 
-        // 2. Determine order type and required data.
-        const isPickup = updatedCheckout.is_pickup;
-        const hasBillingAddress = !!updatedCheckout.billing_address_id;
-        const hasDeliveryAddress = !!updatedCheckout.delivery_address_id;
-
-        // 3. Centralized Validation Logic.
-        const canProceed =
-            (isPickup && hasBillingAddress) ||
-            (!isPickup && hasBillingAddress && hasDeliveryAddress);
-
-        if (!canProceed) {
-            const errorMessage = isPickup
-                ? 'Please ensure a billing address is selected before continuing.'
-                : 'Please ensure both shipping and billing addresses are selected before continuing.';
-            alert(errorMessage);
-            return;
-        }
-
-        // 4. Build the payload based on order type.
-        // This payload is for the 'processStepOne' route.
-        const payload = {
-            is_pickup: isPickup,
-            billing_address_id: updatedCheckout.billing_same_as_shipping
-                ? updatedCheckout.delivery_address_id
-                : updatedCheckout.billing_address_id,
-            delivery_address_id: isPickup
-                ? null
-                : updatedCheckout.delivery_address_id,
+        // If we can't proceed directly, it means we need to collect address(es)
+        const payload: any = {
+            billing_same_as_shipping: billingSameAsShipping,
         };
 
-        // 5. Execute the sequence of actions.
-        // We can chain these actions in the onSuccess callbacks for better reliability.
-        router.patch(
-            route('checkout-cart.processStepOne', updatedCheckout.id),
-            payload,
-            {
-                preserveScroll: true,
-                onSuccess: () => {
-                    // This second patch runs only after the first one succeeds.
-                    router.patch(
-                        route('checkout.updateStatus', updatedCheckout.id),
-                        { status: 'processing' },
-                        {
-                            preserveScroll: true,
-                            onSuccess: (page) => {
-                                // Final state updates after all server actions are successful.
-                                setCheckout(page.props.checkout as Checkout);
-                                setStepCanProceed('customerInfo', true);
-                                setStepCompleted('customerInfo', true);
-                                nextStep();
-                            },
-                        },
-                    );
-                },
-                onError: (errors) => {
-                    console.error('Failed to process checkout step:', errors);
-                    alert(
-                        'An error occurred while saving your information. Please try again.',
-                    );
-                },
+        let shippingData = null;
+        if (isDelivery && showShippingForm) {
+            shippingData = shippingFormRef.current?.getFormData();
+            if (shippingData && Object.values(shippingData).some((v) => v)) {
+                payload.shipping_address = shippingData;
+            }
+        }
+
+        let billingData = null;
+        if (showBillingForm && !billingSameAsShipping) {
+            billingData = billingFormRef.current?.getFormData();
+            if (billingData && Object.values(billingData).some((v) => v)) {
+                payload.billing_address = billingData;
+            }
+        }
+
+        // If billing is same as shipping, we only need shipping data.
+        // The backend will handle creating one address for both.
+        if (billingSameAsShipping && shippingData) {
+            payload.billing_address = shippingData;
+        }
+
+        // If it's pickup, we only care about the billing form.
+        if (!isDelivery && showBillingForm) {
+            billingData = billingFormRef.current?.getFormData();
+            if (billingData && Object.values(billingData).some((v) => v)) {
+                payload.billing_address = billingData;
+            }
+        }
+
+        // Ensure we have at least one address to submit
+        if (!payload.shipping_address && !payload.billing_address) {
+            alert('Please fill out at least one address form to continue.');
+            return;
+        }
+
+        const routeName = 'checkout-cart.checkout.address.store'; // Authenticated users also use this route for checkout addresses
+
+        router.post(route(routeName), payload, {
+            preserveScroll: true,
+            onSuccess: (page) => {
+                // After saving, the component re-renders with new props.
+                // We need to use the *updated* checkout from the page props.
+                const updatedCheckout = page.props.checkout as Checkout;
+
+                const canProceedAfterSave =
+                    (updatedCheckout.is_pickup &&
+                        updatedCheckout.billing_address_id) ||
+                    (updatedCheckout.is_delivery &&
+                        updatedCheckout.billing_address_id &&
+                        updatedCheckout.delivery_address_id);
+
+                if (canProceedAfterSave) {
+                    setStepCanProceed('customerInfo', true);
+                    setStepCompleted('customerInfo', true);
+                    nextStep();
+                }
             },
-        );
+            onError: (errors) => {
+                console.error('Failed to save addresses:', errors);
+                alert(
+                    'There was an error saving your addresses. Please check the form and try again.',
+                );
+            },
+        });
     };
 
     if (customer) {
@@ -450,7 +392,11 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                                 {address.city}, {address.state}{' '}
                                                 {address.zip}
                                             </p>
-                                            <p>{address.phone}</p>
+                                            <p>
+                                                {formatPhoneNumber(
+                                                    address.phone,
+                                                )}
+                                            </p>
                                         </div>
                                         <div className="mt-4 space-y-2 border-t pt-2">
                                             <label className="flex items-center text-sm">
@@ -611,9 +557,10 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                             </div>
                         )}
 
-                        <div className="mt-6 flex justify-between">
+                        <div className="mt-6 flex w-full justify-between">
                             <Link
                                 href={route('shopping-cart.show')}
+                                as="button"
                                 className="inline-flex h-12 w-full items-center justify-center rounded bg-green-600 px-4 py-2 text-xl font-medium text-white ring-offset-background transition-colors hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
                             >
                                 Back to My Cart
@@ -629,9 +576,10 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                         </div>
                     </>
                 ) : checkout?.is_pickup ? (
-                    <div className="mt-6 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+                    <div className="mt-6 flex w-full justify-between">
                         <Link
                             href={route('shopping-cart.show')}
+                            as="button"
                             className="inline-flex h-12 w-full items-center justify-center rounded border bg-transparent px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
                         >
                             Back to My Cart
@@ -712,10 +660,6 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                             Create an account to save your information for next
                             time, or continue as a guest.
                         </p>
-                        {/* The registration and address forms will go here.
-                            For now, this is a placeholder.
-                            You would integrate your registration form and AddressForm components here.
-                        */}
                         <div className="text-center">
                             <div className="mt-4 flex items-center justify-center">
                                 <Input
@@ -725,7 +669,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                     onChange={(e) =>
                                         setIsGuest(e.target.checked)
                                     }
-                                    className="mr-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    className={classes.guest_button}
                                 />
 
                                 <Label htmlFor="isGuest">
@@ -733,14 +677,21 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                     Guest)
                                 </Label>
                             </div>
+                            <h2 className={classes.customer_info_header}>
+                                {isGuest ? 'Guest' : 'Your'} Information
+                            </h2>
                             <div className="mt-6 text-left">
                                 {isGuest ? (
                                     <form
                                         onSubmit={handleGuestCheckout}
-                                        className="space-y-4"
+                                        className={classes.guest_form}
                                     >
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
+                                        <div className={classes.guest_grid}>
+                                            <div
+                                                className={
+                                                    classes.guest_form_group
+                                                }
+                                            >
                                                 <Label htmlFor="guest-first_name">
                                                     First Name
                                                 </Label>
@@ -748,6 +699,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                                     id="guest-first_name"
                                                     type="text"
                                                     value={guestData.first_name}
+                                                    placeholder="First name"
                                                     onChange={(e) =>
                                                         setGuestData(
                                                             'first_name',
@@ -763,7 +715,11 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                                     }
                                                 />
                                             </div>
-                                            <div>
+                                            <div
+                                                className={
+                                                    classes.guest_form_group
+                                                }
+                                            >
                                                 <Label htmlFor="guest-last_name">
                                                     Last Name
                                                 </Label>
@@ -771,6 +727,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                                     id="guest-last_name"
                                                     type="text"
                                                     value={guestData.last_name}
+                                                    placeholder="Last name"
                                                     onChange={(e) =>
                                                         setGuestData(
                                                             'last_name',
@@ -786,7 +743,9 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                                 />
                                             </div>
                                         </div>
-                                        <div>
+                                        <div
+                                            className={classes.guest_form_group}
+                                        >
                                             <Label htmlFor="guest-email">
                                                 Email
                                             </Label>
@@ -794,6 +753,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                                 id="guest-email"
                                                 type="email"
                                                 value={guestData.email}
+                                                placeholder="email@example.com"
                                                 onChange={(e) =>
                                                     setGuestData(
                                                         'email',
@@ -815,12 +775,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                         </Button>
                                     </form>
                                 ) : (
-                                    <>
-                                        <h2 className="mt-4 mb-2 font-semibold">
-                                            Login Information
-                                        </h2>
-                                        <Register isGuest={isGuest} />
-                                    </>
+                                    <Register isGuest={isGuest} />
                                 )}
                             </div>
                         </div>

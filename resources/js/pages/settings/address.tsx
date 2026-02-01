@@ -13,8 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { InputError } from '@/components/ui/input-error';
-import AppLayout from '@/layouts/app-layout';
-import SettingsLayout from '@/layouts/settings/layout';
+import { formatPhoneNumber } from '@/utils/format-phone-number';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { type Address as AddressType } from '@/types/model-types';
 import { PageProps } from '@/types';
@@ -254,8 +253,14 @@ export default function Address({
                                         {address.street2 &&
                                             `${address.street2}, `}
                                         {`${address.city}, ${address.state} ${address.zip}, `}
-                                        {address.phone &&
-                                            `Phone: ${address.phone}`}
+                                        {address.phone && (
+                                            <p>
+                                                Phone:{' '}
+                                                {formatPhoneNumber(
+                                                    address.phone,
+                                                )}
+                                            </p>
+                                        )}
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="flex gap-4 text-sm">

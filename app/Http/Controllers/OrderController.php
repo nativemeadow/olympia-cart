@@ -22,9 +22,14 @@ class OrderController extends Controller
     {
         $order = null;
         $customer = $this->getCurrentCustomer();
+        $customerId = $customer->id ?? null;
 
-        if ($customer) {
-            $order = Order::where('customer_id', $customer->id)
+        if ($request->session()->has('order_customer_id')) {
+            $customerId = $request->session()->get('order_customer_id');
+        }
+
+        if ($customerId) {
+            $order = Order::where('customer_id', $customerId)
                 ->with(['items.product', 'shippingAddress', 'billingAddress', 'customer'])
                 ->latest()
                 ->first();
