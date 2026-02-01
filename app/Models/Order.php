@@ -22,12 +22,27 @@ class Order extends Model
         'checkout_id',
     ];
 
+    protected $with = [
+        'items',
+        'customer',
+        'shippingAddress',
+        'billingAddress',
+    ];
+
     /**
-     * Get the user that owns the order.
+     * Get the customer that owns the order.
      */
-    public function Customer(): BelongsTo
+    public function customer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    /**
+     * Get the user associated with the order through the customer.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'customer_id', 'id');
     }
 
     /**

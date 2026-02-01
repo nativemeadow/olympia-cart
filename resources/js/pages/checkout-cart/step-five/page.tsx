@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Address, Order, OrderItem } from '@/types/model-types';
+import { Address, CustomerData, Order, OrderItem } from '@/types/model-types';
 import checkoutStepsStore from '@/zustand/checkoutStepsStore';
 import parse from 'html-react-parser';
 import {
@@ -15,6 +15,7 @@ import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import useCheckoutStore from '@/zustand/checkoutStore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatPhoneNumber } from '@/utils/format-phone-number';
 
 import classes from './step-five.module.css';
 
@@ -42,13 +43,15 @@ const renderAddress = (
                 <p>
                     {address.city}, {address.state} {address.zip}
                 </p>
-                {address.phone && <p>Phone: {address.phone}</p>}
+                {address.phone && (
+                    <p>Phone: {formatPhoneNumber(address.phone)}</p>
+                )}
             </CardContent>
         </Card>
     );
 };
 
-const StepFive = () => {
+const StepFive = ({ customer }: { customer: CustomerData }) => {
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -121,24 +124,24 @@ const StepFive = () => {
                     </p>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         {renderAddress(
-                            order.billing_address || null,
+                            order.shipping_address || null,
                             'Shipping', // This should be shipping_address, but it's not in the API response
                             order.customer?.first_name +
                                 ' ' +
                                 order.customer?.last_name ||
                                 order.guest_name ||
                                 null,
-                            order.user?.email || null,
+                            order.customer?.email || null,
                         )}
                         {renderAddress(
                             order.billing_address || null,
                             'Billing',
-                            order.user?.first_name +
+                            order.customer?.first_name +
                                 ' ' +
-                                order.user?.last_name ||
+                                order.customer?.last_name ||
                                 order.guest_name ||
                                 null,
-                            order.user?.email || null,
+                            order.customer?.email || null,
                         )}
                     </div>
                     <h3 className="mt-6 text-xl font-semibold">

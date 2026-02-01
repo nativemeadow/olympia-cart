@@ -10,6 +10,7 @@ use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\SearchIndexController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CheckoutStepsController;
+use \App\Http\Controllers\Auth\RegisteredUserController;
 use Inertia\Inertia;
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -52,9 +53,10 @@ Route::get('/checkout', [App\Http\Controllers\CheckoutController::class, 'index'
 Route::get('/checkout/create', [App\Http\Controllers\CheckoutController::class, 'create'])->name('checkout.create');
 Route::post('/checkout', [App\Http\Controllers\CheckoutController::class, 'store'])->name('checkout.store');
 Route::get('/checkout/{id}', [App\Http\Controllers\CheckoutController::class, 'show'])->name('checkout.show');
-// ued for editing checkout information -- do not remove
+// used for editing checkout information -- do not remove
 Route::patch('/checkout/{id}', [App\Http\Controllers\CheckoutController::class, 'update'])->name('checkout.update');
 Route::patch('/checkout/{id}/status', [App\Http\Controllers\CheckoutController::class, 'updateStatus'])->name('checkout.updateStatus');
+Route::patch('checkout/{id}/customerId', [App\Http\Controllers\CheckoutController::class, 'updateCustomerId'])->name('checkout.updateCustomerId');
 
 Route::post('/payment/process', [App\Http\Controllers\PaymentController::class, 'processPayment'])->name('payment.process');
 
@@ -65,18 +67,20 @@ Route::get('/order/confirmation', [App\Http\Controllers\OrderController::class, 
 
 
 // New Inertia-based Multi-Step Checkout Flow
-// Note: The 'auth' middleware has been removed to allow guest checkout.
-Route::prefix('checkout-cart')->name('checkout-cart.')->group(function () {
-    Route::get('/', [App\Http\Controllers\CheckoutStepsController::class, 'showCartCheckout'])->name('index');
-    Route::patch('/step-one/{id}', [App\Http\Controllers\CheckoutStepsController::class, 'processStepOne'])->name('processStepOne');
-    Route::post('/step-two', [App\Http\Controllers\CheckoutStepsController::class, 'processStepTwo'])->name('step-two');
-    Route::post('/step-three', [App\Http\Controllers\CheckoutStepsController::class, 'processStepThree'])->name('step-three');
-    Route::post('/payment', [App\Http\Controllers\CheckoutStepsController::class, 'processPayment'])->name('payment');
-    Route::post('/step-five', [App\Http\Controllers\CheckoutStepsController::class, 'processStepFive'])->name('step-five');
-    Route::post('guest-address', [CheckoutStepsController::class, 'storeGuestAddress'])->name('checkout.guest.address.store');
-    Route::patch('guest-address/{address}', [CheckoutStepsController::class, 'updateGuestAddress'])->name('checkout.guest.address.update');
-    Route::delete('guest-address/{address}', [CheckoutStepsController::class, 'destroyGuestAddress'])->name('checkout.guest.address.destroy');
-    Route::put('guest-address/{address}/set-default', [CheckoutStepsController::class, 'setGuestDefaultAddress'])->name('checkout.guest.address.setDefault');
+Route::prefix('checkout-cart')->name('checkout-cart.')->middleware('checkout.valid')->group(function () {
+    Route::get('/', [CheckoutStepsController::class, 'showCartCheckout'])->name('index');
+    Route::patch('/step-one/{id}', [CheckoutStepsController::class, 'processStepOne'])->name('processStepOne');
+    Route::post('/step-two', [CheckoutStepsController::class, 'processStepTwo'])->name('step-two');
+    Route::post('/step-three', [CheckoutStepsController::class, 'processStepThree'])->name('step-three');
+    Route::post('/payment', [CheckoutStepsController::class, 'processPayment'])->name('payment');
+    Route::get('/step-five', [CheckoutStepsController::class, 'processStepFive'])->name('step-five');
+    Route::post('checkout-address', [CheckoutStepsController::class, 'storeCheckoutAddress'])->name('checkout.address.store');
+    Route::post('checkout-address-dialog', [CheckoutStepsController::class, 'storeDialogAddress'])->name('checkout.address.dialog.store');
+    Route::patch('checkout-address/{address}', [CheckoutStepsController::class, 'updateCheckoutAddress'])->name('checkout.address.update');
+    Route::delete('checkout-address/{address}', [CheckoutStepsController::class, 'deleteCheckoutAddress'])->name('checkout.customer.address.destroy');
+    Route::put('checkout-address/{address}/set-default', [CheckoutStepsController::class, 'setGuestDefaultAddress'])->name('checkout.address.setDefault');
+    Route::post('set-billing-from-shipping', [CheckoutStepsController::class, 'setBillingFromShipping'])->name('checkout.setBillingFromShipping');
+    Route::post('guest', [RegisteredUserController::class, 'checkoutGuestStore'])->name('guest.store');
 });
 
 Route::inertia('/session', 'session/index')->name('session.index');

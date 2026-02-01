@@ -22,6 +22,7 @@ class AddressRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'name' => 'nullable|string|max:255',
             'street1' => 'required|string|max:255',
             'street2' => 'nullable|string|max:255',
             'city' => 'required|string|max:255',

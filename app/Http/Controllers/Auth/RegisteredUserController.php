@@ -63,7 +63,7 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function checkoutStore(Request $request): JsonResponse // For full account creation
+    public function checkoutStore(Request $request): RedirectResponse // For full account creation
     {
         $request->validate([
             'first_name' => 'required|string|max:255',
@@ -79,18 +79,27 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        // Find or create a customer record for the user.
+        $customer = Customer::firstOrCreate(
+            ['email' => $user->email],
+            [
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'user_id' => $user->id,
+            ]
+        );
+
         // Capture the guest session ID before it's regenerated on login.
         $guestSessionId = $request->session()->getId();
-
-        event(new Registered($user));
 
         Auth::login($user);
 
         // Now, use the old guest session ID to find and merge the cart.
         $this->mergeGuestCart($guestSessionId, $user);
 
+        event(new Registered($user));
 
-        return response()->json(['message' => 'Registration successful.']);
+        return redirect()->route('checkout-cart.index');
     }
 
     /**
@@ -99,7 +108,7 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function checkoutGuestStore(Request $request): JsonResponse
+    public function checkoutGuestStore(Request $request): RedirectResponse
     {
         $request->validate([
             'first_name' => 'required|string|max:255',
@@ -111,9 +120,7 @@ class RegisteredUserController extends Controller
 
         if ($existingUser) {
             // A user with this email already exists, so they should log in.
-            return response()->json([
-                'errors' => ['email' => ['An account with this email already exists. Please log in.']],
-            ], 422);
+            return back()->withErrors(['email' => 'An account with this email already exists. Please log in.']);
         }
 
         // Find or create a customer record.
@@ -135,7 +142,7 @@ class RegisteredUserController extends Controller
             $cart->save();
         }
 
-        return response()->json(['message' => 'Proceeding as guest.']);
+        return back();
     }
 
     /**

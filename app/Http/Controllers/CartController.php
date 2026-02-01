@@ -114,6 +114,17 @@ class CartController extends Controller
                 return $sessionCart;
             }
 
+            if (!$cart && !$sessionCart) {
+                // No cart exists for the customer or session. Create a new one.
+                return Cart::create([
+                    'customer_id' => $customer->id,
+                    'status' => 'active',
+                    'total' => 0,
+                    'cart_uuid' => Str::uuid(),
+                    'session_id' => $sessionId,
+                ]);
+            }
+
             if ($cart) {
                 return $cart;
             }

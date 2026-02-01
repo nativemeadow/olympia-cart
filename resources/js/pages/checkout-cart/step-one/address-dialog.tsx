@@ -79,14 +79,10 @@ export function AddressDialog({
         };
 
         if (isNew) {
-            const routeName = isAuthenticated
-                ? 'address.store'
-                : 'checkout-cart.checkout.guest.address.store';
+            const routeName = 'checkout-cart.checkout.address.dialog.store';
             post(route(routeName), options);
         } else if (address) {
-            const routeName = isAuthenticated
-                ? 'address.update'
-                : 'checkout-cart.checkout.guest.address.update';
+            const routeName = 'checkout-cart.checkout.address.update';
             patch(route(routeName, { address: address.id }), options);
         }
     };

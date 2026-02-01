@@ -132,7 +132,7 @@ const RegisterOnCheckout = ({ isGuest }: Props) => {
         <form onSubmit={handleSubmit} className={classes.form}>
             <div className={classes.name_grid}>
                 <div className={classes.form_group}>
-                    <Label htmlFor="first_name">First name</Label>
+                    <Label htmlFor="first_name">First Name</Label>
                     <Input
                         id="first_name"
                         type="text"
@@ -144,7 +144,6 @@ const RegisterOnCheckout = ({ isGuest }: Props) => {
                         placeholder="First name"
                         value={data.first_name}
                         onChange={(e) => setData('first_name', e.target.value)}
-                        className={classes.input}
                     />
                     <InputError
                         message={errors.first_name}
@@ -152,7 +151,7 @@ const RegisterOnCheckout = ({ isGuest }: Props) => {
                     />
                 </div>
                 <div className={classes.form_group}>
-                    <Label htmlFor="last_name">Last name</Label>
+                    <Label htmlFor="last_name">Last Name</Label>
                     <Input
                         id="last_name"
                         type="text"
@@ -163,7 +162,6 @@ const RegisterOnCheckout = ({ isGuest }: Props) => {
                         placeholder="Last name"
                         value={data.last_name}
                         onChange={(e) => setData('last_name', e.target.value)}
-                        className={classes.input}
                     />
                     <InputError
                         message={errors.last_name}
@@ -173,7 +171,7 @@ const RegisterOnCheckout = ({ isGuest }: Props) => {
             </div>
 
             <div className={classes.form_group}>
-                <Label htmlFor="email">Email address</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                     id="email"
                     type="email"
@@ -184,7 +182,6 @@ const RegisterOnCheckout = ({ isGuest }: Props) => {
                     placeholder="email@example.com"
                     value={data.email}
                     onChange={(e) => setData('email', e.target.value)}
-                    className={classes.input}
                 />
                 <InputError message={errors.email} />
             </div>
@@ -204,7 +201,6 @@ const RegisterOnCheckout = ({ isGuest }: Props) => {
                             onChange={(e) =>
                                 setData('password', e.target.value)
                             }
-                            className={classes.input}
                         />
                         <InputError message={errors.password} />
                     </div>
@@ -224,8 +220,8 @@ const RegisterOnCheckout = ({ isGuest }: Props) => {
                             onChange={(e) =>
                                 setData('password_confirmation', e.target.value)
                             }
-                            className={classes.input}
                         />
+
                         <InputError message={errors.password_confirmation} />
                     </div>
                 </>

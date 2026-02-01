@@ -14,6 +14,7 @@ import { useShoppingCartStore } from '@/zustand/shoppingCartStore';
 
 import classes from './checkout.module.css';
 import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 
 function CheckOutPage() {
     const { auth, customer, checkout } = usePage<
@@ -72,7 +73,9 @@ function CheckOutPage() {
                     {currentStep === 'payment' && (
                         <StepFour customer={customer} />
                     )}
-                    {currentStep === 'confirmation' && <Confirmation />}
+                    {currentStep === 'confirmation' && (
+                        <Confirmation customer={customer} />
+                    )}
                 </div>
                 {/* <div className={classes.checkout_button_group}>
                     <Button

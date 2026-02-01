@@ -3,10 +3,7 @@ import { Head } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 
-import AppLayout from '@/layouts/app-layout';
-import SettingsLayout from '@/layouts/settings/layout';
 import { Order, OrderItem } from '@/types/model-types';
-
 import {
     Accordion,
     AccordionContent,
@@ -14,7 +11,6 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion';
 import { PageProps } from '@/types';
-
 import classes from './orders.module.css';
 
 const categoryPath = 'categories';

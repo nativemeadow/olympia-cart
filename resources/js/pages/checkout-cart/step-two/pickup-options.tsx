@@ -41,7 +41,7 @@ const PickupOptions = () => {
 
         httpMethod(submissionRoute, {
             onSuccess: () => {
-                reset();
+                //reset();
             },
         });
     };

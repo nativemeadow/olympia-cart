@@ -24,98 +24,47 @@ type Props = {
     billingSameAsShipping?: boolean;
 };
 
+export type AddressFormData = {
+    street1: string;
+    street2: string;
+    city: string;
+    state: string;
+    zip: string;
+    phone: string;
+};
+
 // Define the shape of the functions we will expose via the ref
 export type AddressFormHandle = {
-    // The submit function can now accept an options object with its own onSuccess
-    submit: (options: { onSuccess: (newCheckout: Checkout) => void }) => void;
+    // The submit function no longer handles the submission, it just returns data.
+    getFormData: () => AddressFormData;
 };
 
 const AddressForm = forwardRef<AddressFormHandle, Props>(
     ({ type, user, billingSameAsShipping = false }, ref) => {
         const { setCheckout } = useCheckoutStore();
-        const { data, setData, post, processing, errors, reset, isDirty } =
-            useForm({
-                street1: '',
-                street2: '',
-                city: '',
-                state: '',
-                zip: '',
-                phone: '',
-                // These are for the authenticated user route
-                billing: type === 'billing' || billingSameAsShipping,
-                default: type === 'shipping' || billingSameAsShipping,
-            });
-
-        const performSubmit = (
-            onSuccessCallback?: (newCheckout: Checkout) => void,
-        ) => {
-            // If the user is a guest, we use a different route and method.
-            if (!user) {
-                const guestAddressData = {
-                    ...data,
-                    type: type, // 'shipping' or 'billing'
-                    billing_same_as_shipping: billingSameAsShipping,
-                };
-
-                axios
-                    .post(
-                        //route('checkout.guest.address.store'),
-                        route('checkout-cart.checkout.guest.address.store'),
-                        guestAddressData,
-                    )
-                    .then((response) => {
-                        const newCheckout = response.data as Checkout;
-                        reset();
-                        setCheckout(newCheckout);
-                        onSuccessCallback?.(newCheckout);
-                    })
-                    .catch((error) => {
-                        console.error(
-                            'Error saving guest address:',
-                            error.response?.data,
-                        );
-                        // Optionally, handle validation errors from axios
-                        if (error.response && error.response.status === 422) {
-                            // You might want to set these errors on the form
-                        }
-                        alert('Could not save address. Please try again.');
-                    });
-                return;
-            }
-
-            // This is the existing logic for authenticated users.
-            const addressData = {
-                ...data,
-                billing_same_as_shipping: billingSameAsShipping,
-            };
-            post(route('address.store'), {
-                ...addressData,
-                preserveScroll: true,
-                onSuccess: (page) => {
-                    const newCheckout = page.props.checkout as Checkout;
-                    reset();
-                    setCheckout(newCheckout);
-                    onSuccessCallback?.(newCheckout);
-                    // This ensures the parent component's `localAddresses` state will be updated.
-                    router.visit(window.location.href, {
-                        preserveState: true,
-                        preserveScroll: true,
-                    });
-                },
-            });
-        };
+        const { data, setData, errors } = useForm<AddressFormData>({
+            street1: '',
+            street2: '',
+            city: '',
+            state: '',
+            zip: '',
+            phone: '',
+        });
 
         // Expose the submit function to the parent component via the ref
         useImperativeHandle(ref, () => ({
-            submit({ onSuccess }) {
-                performSubmit(onSuccess);
-            },
+            getFormData: () => data,
         }));
 
-        const handleFormSubmit: FormEventHandler = (e) => {
-            e.preventDefault();
-            performSubmit(); // Call with no options
-        };
+        // This handler is for submitting the form directly (e.g., if it had its own submit button)
+        // const handleFormSubmit: FormEventHandler = (e) => {
+        //     e.preventDefault();
+        //     // This direct submission logic is now deprecated in favor of the parent controller.
+        //     // We leave it here in case it's needed for other purposes.
+        //     console.warn(
+        //         'Direct form submission from AddressForm is deprecated.',
+        //     );
+        // };
 
         const handleStateChange = (value: string) => {
             setData('state', value);
@@ -126,7 +75,7 @@ const AddressForm = forwardRef<AddressFormHandle, Props>(
 
         return (
             <div>
-                <form onSubmit={handleFormSubmit} className={classes.form}>
+                <form className={classes.form}>
                     <div className={classes.form_group}>
                         <Label htmlFor={`${type}-street1`}>
                             Street Address
@@ -218,11 +167,7 @@ const AddressForm = forwardRef<AddressFormHandle, Props>(
                             <InputError message={errors.phone} />
                         </div>
                     </div>
-                    <div className={classes.footer}>
-                        <Button type="submit" disabled={processing}>
-                            Save Address
-                        </Button>
-                    </div>
+                    <div className={classes.footer}></div>
                 </form>
             </div>
         );

@@ -91,8 +91,18 @@ class PaymentController extends Controller
             // After successful payment, regenerate the session ID
             $request->session()->regenerate();
 
+            // Flash a session variable to allow access to the confirmation page
+            $request->session()->flash('can_view_confirmation', true);
+
             // success email to customer
             $this->sendConfirmationEmail($order, $payment);
+
+            $request->session()->flash('order_customer_id', $order->customer_id);
+
+            // if guest customer, remove guest_customer_id from session
+            if (!$order->customer_id) {
+                $request->session()->forget('guest_customer_id');
+            }
 
             return back()->with('success', 'Payment successful.');
         } catch (Exception $e) {
