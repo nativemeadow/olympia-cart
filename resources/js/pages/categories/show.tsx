@@ -8,6 +8,9 @@ import ProductsList from '@/pages/categories/product-list';
 import { useEffect } from 'react';
 import { CategoryDataType, ProductType } from '@/types';
 
+const categoryImageFolder =
+    import.meta.env.CATEGORY_IMAGE_FOLDER ?? 'category_images';
+
 type Props = {
     categoryData: {
         data: CategoryDataType;
@@ -37,7 +40,7 @@ export default function CategoryShow({ categoryData, category_path }: Props) {
 
             {category.image && (
                 <img
-                    src={`/category_images/${category.image}`}
+                    src={`/${categoryImageFolder}/${category.image}`}
                     alt={category.title}
                     className="mx-auto mb-4 h-auto w-full max-w-md rounded-lg object-cover"
                 />

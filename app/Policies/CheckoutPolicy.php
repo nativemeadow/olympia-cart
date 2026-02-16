@@ -45,4 +45,28 @@ class CheckoutPolicy
         // If neither a logged-in user nor a guest session matches, deny access.
         return false;
     }
+
+    /**
+     * Determine whether the user can assign a customer to the checkout.
+     * This is a special case for when a guest becomes an authenticated user.
+     */
+    public function assignCustomer(?User $user, Checkout $checkout): bool
+    {
+        // Use the trait to get the current customer, which will be the authenticated user.
+        $customer = $this->getCurrentCustomer();
+
+        // The user must be authenticated and have a customer record to claim a checkout.
+        if (!$customer) {
+            return false;
+        }
+
+        // The checkout must have a cart associated with it.
+        if (!$checkout->cart) {
+            return false;
+        }
+
+        // The key check: The session ID of the cart must match the current session ID.
+        // This proves the checkout was created in the current user's browser session.
+        return $checkout->cart->session_id === session()->getId();
+    }
 }

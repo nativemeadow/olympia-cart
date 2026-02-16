@@ -106,7 +106,7 @@ class AuthenticatedSessionController extends Controller
 
         $userCart = Cart::firstOrCreate(
             ['customer_id' => $customer->id, 'status' => 'active'],
-            ['cart_uuid' => \Illuminate\Support\Str::uuid(), 'session_id' => session()->getId()]
+            ['cart_uuid' => \Illuminate\Support\Str::uuid(), 'session_id' => session()->getId(), 'total' => 0]
         );
 
         // Eager load user cart items as well

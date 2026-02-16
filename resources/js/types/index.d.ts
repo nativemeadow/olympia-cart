@@ -155,3 +155,35 @@ export type CategoryHierarchy = {
     children?: CategoryHierarchy[];
     products?: Product[];
 };
+
+export type Paginated<T> = {
+    data: T[];
+    links: {
+        active: boolean;
+        label: string;
+        page: number | null;
+        url: string | null;
+    }[];
+    meta: {
+        current_page: number;
+        from: number;
+        last_page: number;
+        path: string;
+        per_page: number;
+        to: number;
+        total: number;
+    };
+};
+
+export type User = {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    avatar?: string | null;
+    email_verified_at?: string | null;
+    is_guest: boolean;
+    created_at: string;
+    updated_at: string;
+    [key: string]: unknown; // This allows for additional properties...
+};

@@ -2,7 +2,10 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
-use \App\Http\Middleware\ShareCartMiddleware;
+use App\Http\Middleware\ShareCartMiddleware;
+use App\Http\Middleware\EnsureCheckoutIsValid;
+
+use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -25,8 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-            'checkout.valid' => \App\Http\Middleware\EnsureCheckoutIsValid::class,
+            'verified' => EnsureEmailIsVerified::class,
+            'checkout.valid' => EnsureCheckoutIsValid::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

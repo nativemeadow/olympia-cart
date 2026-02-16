@@ -4,10 +4,12 @@ namespace App\Policies;
 
 use App\Models\Address;
 use App\Models\User;
+use App\Http\Controllers\Traits\ManagesCustomer;
 use Illuminate\Auth\Access\Response;
 
 class AddressPolicy
 {
+    use ManagesCustomer;
     /**
      * Determine whether the user can view any models.
      */
@@ -50,9 +52,14 @@ class AddressPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Address $address): bool
+    public function delete(?User $user, Address $address): bool
     {
-        // A user can delete an address if it belongs to their customer profile.
-        return $user->customer?->id === $address->customer_id;
+        $customer = $this->getCurrentCustomer();
+
+        if (!$customer) {
+            return false;
+        }
+
+        return $customer->id === $address->customer_id;
     }
 }

@@ -38,6 +38,7 @@ interface AddressFormProps {
 
 function AddressForm({ addresses, onCancel }: AddressFormProps) {
     const { data, setData, post, patch, processing, errors, reset } = useForm({
+        name: addresses?.name || '',
         phone: addresses?.phone || '',
         street1: addresses?.street1 || '',
         street2: addresses?.street2 || '',
@@ -70,6 +71,15 @@ function AddressForm({ addresses, onCancel }: AddressFormProps) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                            id="name"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                        />
+                        <InputError message={errors.name} />
+                    </div>
                     <div className="grid gap-2">
                         <Label htmlFor="street1">Street Address</Label>
                         <Input
@@ -247,9 +257,9 @@ export default function Address({
                         {addresses.map((address) => (
                             <Card key={address.id}>
                                 <CardHeader>
-                                    <CardTitle>{address.street1}</CardTitle>
+                                    <CardTitle>{address.name}</CardTitle>
                                     <CardDescription>
-                                        {address.street1},{' '}
+                                        {address.street1},
                                         {address.street2 &&
                                             `${address.street2}, `}
                                         {`${address.city}, ${address.state} ${address.zip}, `}

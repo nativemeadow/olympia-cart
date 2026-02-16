@@ -7,6 +7,7 @@ use App\Models\Address;
 use App\Models\Cart;
 use App\Models\Customer;
 use App\Http\Controllers\Traits\ManagesCustomer;
+use App\Http\Controllers\Traits\ClearsGuestSession;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ class CheckoutStepsController extends Controller
 {
     use AuthorizesRequests;
     use ManagesCustomer;
+    use ClearsGuestSession;
 
     /**
      * Display the Inertia-based multi-step checkout page.
@@ -142,11 +144,33 @@ class CheckoutStepsController extends Controller
     /**
      * Process Step 2: Shipping & Delivery.
      */
-    public function processStepTwo(Request $request)
+    public function processStepTwo(Request $request): RedirectResponse
     {
-        // This can use logic similar to your existing `store` method,
-        // but adapted for guest users (e.g., using session for cart).
-        return back()->with('success', 'Shipping & Delivery information saved.');
+        $customer = $this->getCurrentCustomer();
+        if (!$customer) {
+            return back()->withErrors(['session' => 'Your session has expired. Please try again.']);
+        }
+
+        $cart = $customer->carts()->where('status', 'active')->latest()->first();
+        if (!$cart || !$cart->checkout) {
+            return back()->withErrors(['checkout' => 'Could not find an active checkout session.']);
+        }
+        $checkout = $cart->checkout;
+
+        $this->authorize('update', $checkout);
+
+        $validated = $request->validate([
+            'is_pickup' => 'sometimes|boolean',
+            'pickup_date' => 'required_if:is_pickup,true|nullable|date|after_or_equal:today',
+            'pickup_time' => 'required_if:is_pickup,true|nullable|string',
+            'is_delivery' => 'sometimes|boolean',
+            'delivery_date' => 'required_if:is_delivery,true|nullable|date|after_or_equal:today',
+            'instructions' => 'nullable|string|max:1000',
+        ]);
+
+        $checkout->update($validated);
+
+        return redirect()->route('checkout-cart.index');
     }
 
     /**
@@ -203,14 +227,18 @@ class CheckoutStepsController extends Controller
     {
         $validated = $request->validate([
             'shipping_address' => 'nullable|array',
+            'shipping_address.name' => 'sometimes|string|max:255',
             'shipping_address.street1' => 'required_with:shipping_address|string|max:255',
+            'shipping_address.street2' => 'nullable|string|max:255',
             'shipping_address.city' => 'required_with:shipping_address|string|max:255',
             'shipping_address.state' => 'required_with:shipping_address|string|max:255',
             'shipping_address.zip' => 'required_with:shipping_address|string|max:10',
             'shipping_address.phone' => 'required_with:shipping_address|string|max:20',
 
             'billing_address' => 'nullable|array',
+            'billing_address.name' => 'sometimes|string|max:255',
             'billing_address.street1' => 'required_with:billing_address|string|max:255',
+            'billing_address.street2' => 'nullable|string|max:255',
             'billing_address.city' => 'required_with:billing_address|string|max:255',
             'billing_address.state' => 'required_with:billing_address|string|max:255',
             'billing_address.zip' => 'required_with:billing_address|string|max:10',
@@ -262,27 +290,43 @@ class CheckoutStepsController extends Controller
 
     public function updateCheckoutAddress(Request $request, Address $address)
     {
-        $guestCustomerId = $request->session()->get('guest_customer_id');
-        if (!$guestCustomerId || $address->customer_id != $guestCustomerId) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        $customer = $this->getCurrentCustomer();
+        if (!$customer || $address->customer_id !== $customer->id) {
+            abort(403, 'Unauthorized action.');
         }
 
+        $this->authorize('update', $address);
+
         $validated = $request->validate([
-            'first_name' => 'sometimes|required|string|max:255',
-            'last_name' => 'sometimes|required|string|max:255',
+            'name' => 'sometimes|string|max:255',
             'street1' => 'sometimes|required|string|max:255',
             'street2' => 'nullable|string|max:255',
             'city' => 'sometimes|required|string|max:255',
             'state' => 'sometimes|required|string|max:255',
             'zip' => 'sometimes|required|string|max:10',
             'phone' => 'sometimes|required|string|max:20',
-            'email' => 'sometimes|required|email|max:255',
+            'email' => 'sometimes|email|max:255',
+            'billing' => 'sometimes|boolean',
+            'default' => 'sometimes|boolean',
         ]);
 
-        $address->update($validated);
+        DB::transaction(function () use ($customer, $address, $validated) {
+            // If the 'billing' flag is being set to true, we need to ensure
+            // no other address for this customer is also marked as the billing address.
+            if (isset($validated['billing']) && $validated['billing']) {
+                $customer->addresses()->where('id', '!=', $address->id)->update(['billing' => false]);
+            }
 
-        $customer = Customer::find($guestCustomerId);
-        $customer->load('addresses');
+            // If the 'default' flag is being set to true, we need to ensure
+            // no other address for this customer is also marked as the default shipping address.
+            if (isset($validated['default']) && $validated['default']) {
+                $customer->addresses()->where('id', '!=', $address->id)->update(['default' => false]);
+            }
+
+            // Now, update the address with all validated data.
+            $address->update($validated);
+        });
+
 
         // Return a redirect to refresh the page state
         return redirect()->route('checkout-cart.index')->with('success', 'Address updated.');
@@ -290,22 +334,24 @@ class CheckoutStepsController extends Controller
 
     public function deleteCheckoutAddress(Request $request, Address $address)
     {
-        $guestCustomerId = $request->session()->get('guest_customer_id');
-        if (!$guestCustomerId || $address->customer_id != $guestCustomerId) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+
+        $this->authorize('delete', $address);
 
         $address->delete();
 
         return redirect()->route('checkout-cart.index')->with('success', 'Address removed.');
     }
 
-    public function setGuestDefaultAddress(Request $request, Address $address)
+    public function setDefaultAddress(Request $request, Address $address)
     {
-        $guestCustomerId = $request->session()->get('guest_customer_id');
-        if (!$guestCustomerId || $address->customer_id != $guestCustomerId) {
-            $this->authorize('update', $address);
+        $customer = $this->getCurrentCustomer();
+        if (!$customer || $customer->id !== $address->customer_id) {
+            // Either no customer found, or the address does not belong to them.
+            abort(403, 'Unauthorized action.');
         }
+
+        // Authorize that the current user can update this address.
+        $this->authorize('update', $address);
 
         $validated = $request->validate([
             'type' => ['required', Rule::in(['shipping', 'billing'])],
@@ -315,12 +361,12 @@ class CheckoutStepsController extends Controller
         $typeColumn = $validated['type'] === 'shipping' ? 'default' : 'billing';
         $isBeingSet = $validated['state'];
 
-        $customer = Customer::find($guestCustomerId);
-
         DB::transaction(function () use ($customer, $address, $typeColumn, $isBeingSet) {
+            // If a new default is being set, first clear any other defaults of the same type.
             if ($isBeingSet) {
                 $customer->addresses()->where('id', '!=', $address->id)->update([$typeColumn => false]);
             }
+            // Now, set the state of the target address.
             $address->update([$typeColumn => $isBeingSet]);
         });
 
@@ -329,13 +375,17 @@ class CheckoutStepsController extends Controller
 
     public function setBillingFromShipping(Request $request)
     {
-        $guestCustomerId = $request->session()->get('guest_customer_id');
-        if (!$guestCustomerId) {
+        $customer = $this->getCurrentCustomer();
+
+        if (!$customer) {
             return back()->withErrors(['session' => 'Your session has expired. Please try again.']);
         }
 
-        $customer = Customer::find($guestCustomerId);
-        $checkout = $customer->carts()->latest()->first()->checkout;
+        $cart = $customer->carts()->where('status', 'active')->latest()->first();
+        if (!$cart || !$cart->checkout) {
+            return back()->withErrors(['checkout' => 'Could not find an active checkout session.']);
+        }
+        $checkout = $cart->checkout;
 
         $this->authorize('update', $checkout);
 
@@ -343,6 +393,9 @@ class CheckoutStepsController extends Controller
             $shippingAddress = $customer->addresses()->where('default', true)->first();
 
             if ($shippingAddress) {
+                // Also mark any other address as not the default billing address
+                $customer->addresses()->where('id', '!=', $shippingAddress->id)->update(['billing' => false]);
+
                 $shippingAddress->update(['billing' => true]);
                 $checkout->billing_address_id = $shippingAddress->id;
                 $checkout->billing_same_as_shipping = true;
@@ -356,6 +409,7 @@ class CheckoutStepsController extends Controller
     public function storeDialogAddress(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
             'phone' => 'required|string|max:20',
             'street1' => 'required|string|max:255',
             'street2' => 'nullable|string|max:255',
@@ -385,5 +439,15 @@ class CheckoutStepsController extends Controller
         });
 
         return redirect()->route('checkout-cart.index');
+    }
+
+    /**
+     * Flash a session variable to indicate a checkout has been completed.
+     */
+    public function clearGuestSession(Request $request)
+    {
+        $this->clearGuestSessionIfPresent($request);
+
+        return response()->json(['status' => 'session_removed']);
     }
 }

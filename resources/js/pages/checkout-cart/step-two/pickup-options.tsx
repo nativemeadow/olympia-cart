@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
+import { Checkout } from '@/types';
 
 import classes from './options.module.css';
 
 const PickupOptions = () => {
-    const { checkout } = useCheckoutStore();
+    const { checkout, setCheckout } = useCheckoutStore();
     const { data, setData, post, patch, processing, errors, reset } = useForm({
         is_pickup: true,
         is_delivery: false,
@@ -40,8 +41,9 @@ const PickupOptions = () => {
         const httpMethod = checkout ? patch : post;
 
         httpMethod(submissionRoute, {
-            onSuccess: () => {
+            onSuccess: (page) => {
                 //reset();
+                setCheckout(page.props.checkout as Checkout);
             },
         });
     };

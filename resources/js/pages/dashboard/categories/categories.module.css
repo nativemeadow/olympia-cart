@@ -1,0 +1,77 @@
+/* From index.tsx */
+.title {
+    font-size: 1.125rem; /* text-lg */
+    font-weight: 600; /* font-semibold */
+    line-height: 1.75rem;
+}
+@media (min-width: 768px) {
+    .title {
+        font-size: 1.5rem; /* md:text-2xl */
+        line-height: 2rem;
+    }
+}
+
+.description {
+    font-size: 0.875rem; /* text-sm */
+    line-height: 1.25rem;
+    color: var(--muted-foreground);
+}
+
+.container {
+    margin-top: 1rem; /* mt-4 */
+    border-radius: 0.5rem; /* rounded-lg */
+    border: 1px solid var(--border);
+    background-color: var(--background);
+    padding: 1rem; /* p-4 */
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
+}
+
+/* From category-node.tsx */
+.node {
+    margin-left: 1rem; /* ml-4 */
+}
+
+.node_header {
+    display: flex;
+    align-items: center;
+}
+
+.node_header:hover .actions {
+    display: flex;
+}
+
+.toggle_button {
+    margin-right: 0.5rem; /* mr-2 */
+}
+
+.chevron_icon {
+    height: 1rem; /* h-4 */
+    width: 1rem; /* w-4 */
+}
+
+.toggle_placeholder {
+    margin-right: 0.5rem; /* mr-2 */
+    width: 2.5rem; /* w-10, same as button size=icon */
+}
+
+.node_title {
+    font-size: 1rem; /* text-md */
+    line-height: 1.5rem;
+}
+
+.actions {
+    margin-left: auto;
+    display: none;
+    align-items: center;
+}
+
+.children_container {
+    border-left: 1px solid var(--border);
+    padding-left: 1rem; /* pl-4 */
+}
+
+/* From category-actions.tsx */
+.action_icon {
+    height: 1rem; /* h-4 */
+    width: 1rem; /* w-4 */
+}

@@ -25,6 +25,7 @@ type Props = {
 };
 
 export type AddressFormData = {
+    name: string;
     street1: string;
     street2: string;
     city: string;
@@ -43,6 +44,7 @@ const AddressForm = forwardRef<AddressFormHandle, Props>(
     ({ type, user, billingSameAsShipping = false }, ref) => {
         const { setCheckout } = useCheckoutStore();
         const { data, setData, errors } = useForm<AddressFormData>({
+            name: '',
             street1: '',
             street2: '',
             city: '',
@@ -76,6 +78,16 @@ const AddressForm = forwardRef<AddressFormHandle, Props>(
         return (
             <div>
                 <form className={classes.form}>
+                    <div className={classes.form_group}>
+                        <Label htmlFor={`${type}-name`}>Name</Label>
+                        <Input
+                            id={`${type}-name`}
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            required
+                        />
+                        <InputError message={errors.name} />
+                    </div>
                     <div className={classes.form_group}>
                         <Label htmlFor={`${type}-street1`}>
                             Street Address

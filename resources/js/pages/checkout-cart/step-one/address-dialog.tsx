@@ -1,7 +1,7 @@
 import React, { FormEventHandler, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import useCheckoutStore from '@/zustand/checkoutStore';
-import { Address } from '@/types/model-types';
+import { Address, CustomerData } from '@/types/model-types';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -21,12 +21,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import useAuth from '@/hooks/useAuth';
 
 interface AddressDialogProps {
+    customer?: CustomerData;
     address: Address | 'new' | null;
     isOpen: boolean;
     onClose: () => void;
 }
 
 export function AddressDialog({
+    customer,
     address,
     isOpen,
     onClose,
@@ -40,6 +42,7 @@ export function AddressDialog({
     const { data, setData, post, patch, processing, errors, reset } = useForm(
         formKey,
         {
+            name: '',
             phone: '',
             street1: '',
             street2: '',
@@ -54,6 +57,10 @@ export function AddressDialog({
     useEffect(() => {
         if (address && address !== 'new') {
             setData({
+                name:
+                    address.name ||
+                    customer?.first_name + ' ' + customer?.last_name ||
+                    '',
                 phone: address.phone || '',
                 street1: address.street1 || '',
                 street2: address.street2 || '',
@@ -96,6 +103,15 @@ export function AddressDialog({
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                            id="name"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                        />
+                        <InputError message={errors.name} />
+                    </div>
                     <div className="grid gap-2">
                         <Label htmlFor="street1">Street Address</Label>
                         <Input

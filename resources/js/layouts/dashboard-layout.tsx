@@ -7,6 +7,7 @@ import {
     Users,
     Settings,
     LayoutGrid,
+    UserCog,
 } from 'lucide-react';
 import { User } from '@/types';
 import { UserNav } from '@/components/user-nav';
@@ -14,13 +15,18 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 
-const navItems = [
-    { href: 'dashboard', label: 'Dashboard', icon: Home },
-    { href: 'dashboard.categories', label: 'Categories', icon: LayoutGrid },
+const navLinks = [
+    { href: 'dashboard.index', label: 'Dashboard', icon: Home },
+    {
+        href: 'dashboard.categories.index',
+        label: 'Categories',
+        icon: LayoutGrid,
+    },
     { href: 'dashboard.products', label: 'Products', icon: Package },
+    { href: 'dashboard.media', label: 'Media', icon: LayoutGrid },
     { href: 'dashboard.orders', label: 'Orders', icon: ShoppingCart },
     { href: 'dashboard.customers', label: 'Customers', icon: Users },
-    { href: 'dashboard.users', label: 'Admin Users', icon: Users },
+    { href: 'dashboard.users', label: 'Users', icon: UserCog },
     { href: 'dashboard.settings', label: 'Settings', icon: Settings },
 ];
 
@@ -37,7 +43,7 @@ const NavLink = ({ href, children }: { href: string; children: ReactNode }) => (
 export default function DashboardLayout({ children }: PropsWithChildren) {
     const { auth } = usePage<{ auth: { user: User } }>().props;
 
-    const navigationLinks = navItems.map((item) => (
+    const navigationLinks = navLinks.map((item) => (
         <NavLink key={item.href} href={item.href}>
             <item.icon className="h-4 w-4" />
             {item.label}

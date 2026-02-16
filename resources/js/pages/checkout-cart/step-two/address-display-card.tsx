@@ -22,6 +22,7 @@ const AddressDisplayCard: React.FC<AddressDisplayCardProps> = ({
             {isSameAsShipping ? (
                 <Badge className="mb-2">Same as Shipping</Badge>
             ) : null}
+            <p>{address.name}</p>
             <p>{`${address.street1}${address.street2 ? `, ${address.street2}` : ''}`}</p>
             <p>{`${address.city}, ${address.state} ${address.zip}`}</p>
             <p>{formatPhoneNumber(address.phone)}</p>

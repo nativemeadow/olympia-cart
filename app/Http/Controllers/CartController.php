@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use App\Models\Cart;
-use App\Models\Customer;
 use App\Http\Controllers\Traits\ManagesCustomer;
 
 class CartController extends Controller

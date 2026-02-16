@@ -10,6 +10,7 @@ use Inertia\Response;
 
 class CategoryController extends Controller
 {
+
     public function children($id)
     {
         $children = Category::findOrFail($id)->children;
@@ -23,7 +24,7 @@ class CategoryController extends Controller
     }
 
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
         // A top-level category is one that does not have any parents.
         // Using doesntHave() is more expressive and robust than the previous subquery.
@@ -34,7 +35,7 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function show($categorySlug): Response
+    public function show(Request $request, $categorySlug): Response
     {
         // THE FIX: Update the eager loading to fetch the new relationships.
         // We load products, then for each product its variants,
