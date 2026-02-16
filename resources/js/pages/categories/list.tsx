@@ -8,6 +8,9 @@ type Props = {
     basePath?: string;
 };
 
+const categoryImageFolder =
+    import.meta.env.CATEGORY_IMAGE_FOLDER ?? 'category_images';
+
 const list = ({ categories, basePath }: Props) => {
     return (
         <div className={classes.grid}>
@@ -36,7 +39,7 @@ const list = ({ categories, basePath }: Props) => {
                                 {category.image && (
                                     <img
                                         className={classes.list_item_image}
-                                        src={`/category_images/${category.image}`}
+                                        src={`/${categoryImageFolder}/${category.image}`}
                                         alt={category.title}
                                     />
                                 )}

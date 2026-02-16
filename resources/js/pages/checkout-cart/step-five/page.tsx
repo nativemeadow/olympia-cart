@@ -65,6 +65,8 @@ const StepFive = ({ customer }: { customer: CustomerData }) => {
                 const response = await axios.get('/order/confirmation');
                 if (response.data.order) {
                     setOrder(response.data.order);
+                    // Tag the session to indicate checkout is complete
+                    await axios.post('/clear-guest-session');
                 } else {
                     setError('Could not find your order.');
                 }

@@ -33,6 +33,7 @@ createInertiaApp({
         return page;
     },
     setup({ el, App, props }) {
+        console.log(props); // Add this line
         const root = createRoot(el);
 
         // This logic checks if the page was reloaded. If so, it makes a fresh

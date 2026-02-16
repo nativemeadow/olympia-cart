@@ -187,7 +187,7 @@ CREATE UNIQUE INDEX "category_product_category_id_product_id_unique" on "categor
 CREATE TABLE
   IF NOT EXISTS "addresses" (
     "id" integer primary key autoincrement not null,
-    "user_id" integer not null,
+    "customer_id" integer not null,
     "name" varchar,
     "street1" varchar not null,
     "street2" varchar,
@@ -200,7 +200,7 @@ CREATE TABLE
     "billing" tinyint (1) not null default '1',
     "created_at" datetime,
     "updated_at" datetime,
-    foreign key ("user_id") references "users" ("id") on delete cascade
+    foreign key ("customer_id") references "customers" ("id") on delete cascade
   );
 
 CREATE TABLE
@@ -247,7 +247,7 @@ CREATE TABLE
   IF NOT EXISTS "carts" (
     "id" integer primary key autoincrement not null,
     "cart_uuid" varchar not null,
-    "user_id" integer,
+    "customer_id" integer,
     "session_id" varchar,
     "status" varchar not null,
     "active" tinyint (1) not null default '1',

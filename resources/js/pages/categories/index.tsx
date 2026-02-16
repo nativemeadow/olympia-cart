@@ -9,6 +9,9 @@ type CategoriesIndexProps = {
     categories: Category[];
 };
 
+const categoryImageFolder =
+    import.meta.env.CATEGORY_IMAGE_FOLDER ?? 'category_images';
+
 export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
     useEffect(() => {
         document
@@ -43,7 +46,7 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
                         >
                             <div className={classes.gallery_item}>
                                 <RenderImage
-                                    src={`category_images/${cat.image}`}
+                                    src={`${categoryImageFolder}/${cat.image}`}
                                     alt={cat.title}
                                     className={classes.gallery_image}
                                 />

@@ -1,9 +1,11 @@
 import DashboardLayout from '@/layouts/dashboard-layout';
 import { Head } from '@inertiajs/react';
-import { Category } from '@/types/model-types';
+import { CategoryHierarchy } from '@/types';
+import ProductNode from './product-node';
+import styles from './products.module.css';
 
 type CategoriesIndexProps = {
-    categories: Category[];
+    categories: CategoryHierarchy[];
 };
 
 export default function Products({ categories }: CategoriesIndexProps) {
@@ -17,10 +19,11 @@ export default function Products({ categories }: CategoriesIndexProps) {
                 This is where you will manage your product catalog and
                 inventory.
             </p>
-            {/* You can now map over the 'categories' prop here */}
-            <pre className="mt-4 rounded-lg bg-gray-100 p-4">
-                {JSON.stringify(categories, null, 2)}
-            </pre>
+            <div className={styles.container}>
+                {categories.map((category) => (
+                    <ProductNode key={category.id} category={category} />
+                ))}
+            </div>
         </DashboardLayout>
     );
 }

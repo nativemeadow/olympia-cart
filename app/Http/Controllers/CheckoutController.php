@@ -187,7 +187,8 @@ class CheckoutController extends Controller
         $customer = $this->getCurrentCustomer();
         $checkout = Checkout::findOrFail($id);
 
-        $this->authorize('update', $checkout);
+        // Use the specific 'assignCustomer' policy for this action
+        $this->authorize('assignCustomer', $checkout);
 
         $checkout->customer_id = $customer?->id ?? null;
         $checkout->save();

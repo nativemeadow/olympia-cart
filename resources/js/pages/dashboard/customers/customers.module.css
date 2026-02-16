@@ -1,0 +1,59 @@
+.customer_table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* This is key for respecting column widths */
+}
+
+.customer_table th,
+.customer_table td {
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 1rem; /* Equivalent to px-4 py-2 */
+    text-align: left;
+}
+
+.customer_table th {
+    font-weight: 600; /* Equivalent to font-semibold */
+    font-size: 0.875rem; /* Equivalent to text-sm */
+    color: var(--muted-foreground);
+}
+
+/* --- Column Widths --- */
+.status_col {
+    width: 10%;
+}
+
+.name_col {
+    width: 25%;
+}
+
+.email_col {
+    width: 35%;
+}
+
+.orders_col {
+    width: 30%;
+}
+
+.status_badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px; /* rounded-full */
+    padding: 0.25rem 0.5rem; /* py-1 px-2 */
+    font-size: 0.75rem; /* text-xs */
+    font-weight: 500; /* font-medium */
+}
+
+.registered_badge {
+    background-color: var(--color-green-600);
+    color: var(--color-gray-10);
+}
+
+.guest_badge {
+    background-color: var(--color-orange-500);
+    color: var(--color-gray-10);
+}
+
+.table_container {
+    max-width: 800px; /* Constrain the maximum width of the table */
+    margin-top: 1.5rem; /* Equivalent to mt-6 */
+}

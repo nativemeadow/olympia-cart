@@ -139,14 +139,13 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         type: 'shipping' | 'billing',
         isChecked: boolean,
     ) => {
-        // Optimistically update the UI
         const key = type === 'shipping' ? 'default' : 'billing';
+
+        // Optimistically update local addresses
         const updatedAddresses = localAddresses.map((addr) => {
             if (addr.id === addressId) {
-                // Set the state of the toggled checkbox
                 return { ...addr, [key]: isChecked };
             }
-            // If we are setting a new default, unset it for all other addresses
             if (isChecked) {
                 return { ...addr, [key]: false };
             }
@@ -154,16 +153,42 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         });
         setLocalAddresses(updatedAddresses);
 
+        // After optimistic update, check if default shipping and billing are the same
+        const defaultShipping = updatedAddresses.find((a) => a.default);
+        const defaultBilling = updatedAddresses.find((a) => a.billing);
+        setBillingSameAsShipping(
+            !!defaultShipping &&
+                !!defaultBilling &&
+                defaultShipping.id === defaultBilling.id,
+        );
+
         // Make the API call to persist the change
-        const routeName = 'checkout-cart.checkout.address.setDefault';
         router.put(
-            route(routeName, { address: addressId }),
+            route('checkout-cart.checkout.address.setDefault', {
+                address: addressId,
+            }),
             { type, state: isChecked },
             {
                 preserveScroll: true,
                 onSuccess: (page) => {
-                    setCheckout(page.props.checkout as Checkout);
-                    //updateShippingBillingCheckout();
+                    // Re-sync with server state on success
+                    const serverCheckout = page.props.checkout as Checkout;
+                    const serverCustomer = page.props.customer as CustomerData;
+                    setCheckout(serverCheckout);
+                    if (serverCustomer?.addresses) {
+                        setLocalAddresses(serverCustomer.addresses);
+                        const newShipping = serverCustomer.addresses.find(
+                            (a) => a.default,
+                        );
+                        const newBilling = serverCustomer.addresses.find(
+                            (a) => a.billing,
+                        );
+                        setBillingSameAsShipping(
+                            !!newShipping &&
+                                !!newBilling &&
+                                newShipping.id === newBilling.id,
+                        );
+                    }
                 },
                 onError: () => {
                     // On error, revert to the original state from props
@@ -188,40 +213,24 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         const isChecked = e.target.checked;
         setBillingSameAsShipping(isChecked);
 
-        // For authenticated users with an existing shipping address, we can update immediately.
-        if (isAuthenticated && checkout) {
-            const shippingAddress = localAddresses.find((addr) => addr.default);
-            if (isChecked && shippingAddress) {
-                router.post(
-                    route('checkout-cart.checkout.setBillingFromShipping'),
-                    {},
-                    {
-                        preserveScroll: true,
-                        onSuccess: (page) => {
-                            setCheckout(page.props.checkout as Checkout);
-                        },
-                    },
-                );
-            } else {
-                // If unchecking, update the checkout state.
-                const payload = {
-                    billing_same_as_shipping: isChecked,
-                    billing_address_id: null, // Unset billing address
-                };
-                router.patch(
-                    route('checkout-cart.processStepOne', checkout.id),
-                    payload,
-                    {
-                        preserveScroll: true,
-                        onSuccess: (page) => {
-                            setCheckout(page.props.checkout as Checkout);
-                        },
-                    },
-                );
+        const defaultShippingAddress = localAddresses.find(
+            (addr) => addr.default,
+        );
+
+        // If checking the box and a default shipping address exists,
+        // set it as the billing address.
+        if (isChecked && defaultShippingAddress) {
+            handleSetDefault(defaultShippingAddress.id, 'billing', true);
+        } else if (!isChecked) {
+            // If unchecking, the user intends to select a different billing address.
+            // We can find the current billing address and "uncheck" it.
+            const currentBillingAddress = localAddresses.find(
+                (addr) => addr.billing,
+            );
+            if (currentBillingAddress) {
+                handleSetDefault(currentBillingAddress.id, 'billing', false);
             }
         }
-        // For guests, we simply update the local state.
-        // The data will be sent when they submit the address form(s).
     };
 
     const nextButtonLabel = () => {
@@ -347,8 +356,8 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
         return (
             <>
                 <h2 className="text-2xl font-bold">
-                    Welcome back,{' '}
-                    {customer.first_name + ' ' + customer.last_name}!
+                    Welcome
+                    {` ${customer.first_name} ${customer.last_name}`}!
                 </h2>
                 <p className="mt-2 text-gray-600">
                     Please confirm your details below.
@@ -384,6 +393,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                                         )}
                                     >
                                         <div className="flex-grow">
+                                            <p>{address.name}</p>
                                             <p>{address.street1}</p>
                                             {address.street2 && (
                                                 <p>{address.street2}</p>
@@ -491,6 +501,7 @@ const CustomerInfoStep = ({ customer }: { customer: CustomerData }) => {
                 )}
 
                 <AddressDialog
+                    customer={customer}
                     address={dialogAddress}
                     isOpen={dialogAddress !== null}
                     onClose={() => setDialogAddress(null)}

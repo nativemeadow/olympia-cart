@@ -1,6 +1,8 @@
 import classes from './show.module.css';
 import { useProductViewStore } from '@/zustand/productViewStore';
 
+const productImageFolder = import.meta.env.PRODUCT_IMAGE_FOLDER ?? 'products';
+
 const ThumbImages = () => {
     const { product, selectedPrice, setSelectedPrice } = useProductViewStore();
 
@@ -25,7 +27,7 @@ const ThumbImages = () => {
                             key={index}
                             width={100}
                             height={70}
-                            src={`/products/${price.image ? (Array.isArray(price.image) ? price.image[0] : price.image) : product.image}`}
+                            src={`/${productImageFolder}/${price.image ? (Array.isArray(price.image) ? price.image[0] : price.image) : product.image}`}
                             alt={
                                 String(price.description) ||
                                 `Thumbnail ${price.title}`

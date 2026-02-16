@@ -18,6 +18,13 @@ class OrderController extends Controller
     use AuthorizesRequests;
     use ManagesCustomer;
 
+    public function getAll(Request $request)
+    {
+        // get all orders for the admin dashboard
+        $orders = Order::with('customer')->latest()->get();
+        return Inertia::render('dashboard/orders/index', ['orders' => $orders]);
+    }
+
     public function confirmation(Request $request): JsonResponse
     {
         $order = null;
@@ -42,6 +49,8 @@ class OrderController extends Controller
                     ->first();
             }
         }
+
+        $request->session()->forget('order_customer_id');
 
         return response()->json(['order' => $order]);
     }

@@ -12,6 +12,8 @@ import { useProductViewStore } from '@/zustand/productViewStore';
 
 import classes from './show.module.css';
 
+const productImageFolder = import.meta.env.PRODUCT_IMAGE_FOLDER ?? 'products';
+
 type Props = {
     productData: {
         data: ProductType;
@@ -66,7 +68,7 @@ const ProductDetail = ({ categorySlug, productData }: Props) => {
                     <div>
                         <RenderImage
                             className={classes.main_image_container}
-                            src={`/products/${productImage}`}
+                            src={`/${productImageFolder}/${productImage}`}
                             alt={product.title}
                         />
                     </div>

@@ -6,6 +6,7 @@ import { ProductType } from '@/types';
 
 import classes from './product-card.module.css';
 
+const productImageFolder = import.meta.env.PRODUCT_IMAGE_FOLDER ?? 'products';
 const categoryPath = 'categories';
 
 type Props = {
@@ -24,7 +25,7 @@ const ProductCard = (props: Props) => {
                         href={`/${categoryPath}/products/${categorySlug}/${product.slug}`}
                     >
                         <img
-                            src={`/products/${product.image}`}
+                            src={`/${productImageFolder}/${product.image}`}
                             alt={
                                 product.title !== undefined ? product.title : ''
                             }

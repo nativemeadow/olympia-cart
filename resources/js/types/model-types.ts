@@ -22,6 +22,9 @@ export type Customer = {
     company?: string | null;
     created_at: string;
     updated_at: string;
+    user_id?: number | null;
+    addresses?: Address[];
+    orders?: Order[];
 };
 
 export type Category = {
@@ -84,6 +87,7 @@ export type Price = {
 
 export type Address = {
     id: number;
+    name: string;
     customer_id: number;
     street1: string;
     street2?: string | null;
@@ -100,10 +104,26 @@ export type Address = {
 
 export type Images = {
     id: number;
-    product_id?: number | null;
-    category_id?: number | null;
-    url: string;
-    alt?: string | null;
+    name: string;
+    image: string;
+    description?: string | null;
+    category: string;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Media = {
+    id: number;
+    title: string;
+    description?: string | null;
+    alt_text?: string | null;
+    file_path: string;
+    file_name: string;
+    url: string; // This will be added dynamically in the controller
+    mime_type: string;
+    size: number;
+    disk: string;
+    type?: string | null; // e.g., 'product', 'category', 'faq'
     created_at: string;
     updated_at: string;
 };
@@ -145,6 +165,7 @@ export type Order = {
     customer?: Customer | null;
     guest_name: string;
     guest_email: string;
+    status: string;
     total: number;
     created_at: string;
     updated_at: string;

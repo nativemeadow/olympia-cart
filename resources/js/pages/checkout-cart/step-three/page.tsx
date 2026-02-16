@@ -78,6 +78,7 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
                                 key={checkout?.delivery_address.id}
                                 className="mb-4 rounded border p-4"
                             >
+                                <p>{checkout?.delivery_address.name}</p>
                                 <p>{checkout?.delivery_address.street1}</p>
                                 <p>
                                     {checkout?.delivery_address.city},
@@ -102,6 +103,7 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
                                 key={checkout?.billing_address.id}
                                 className="mb-4 rounded border p-4"
                             >
+                                <p>{checkout?.billing_address.name}</p>
                                 <p>{checkout?.billing_address.street1}</p>
                                 <p>
                                     {checkout?.billing_address.city},

@@ -70,7 +70,7 @@ Route::get('/order/confirmation', [App\Http\Controllers\OrderController::class, 
 Route::prefix('checkout-cart')->name('checkout-cart.')->middleware('checkout.valid')->group(function () {
     Route::get('/', [CheckoutStepsController::class, 'showCartCheckout'])->name('index');
     Route::patch('/step-one/{id}', [CheckoutStepsController::class, 'processStepOne'])->name('processStepOne');
-    Route::post('/step-two', [CheckoutStepsController::class, 'processStepTwo'])->name('step-two');
+    Route::patch('/step-two', [CheckoutStepsController::class, 'processStepTwo'])->name('processStepTwo');
     Route::post('/step-three', [CheckoutStepsController::class, 'processStepThree'])->name('step-three');
     Route::post('/payment', [CheckoutStepsController::class, 'processPayment'])->name('payment');
     Route::get('/step-five', [CheckoutStepsController::class, 'processStepFive'])->name('step-five');
@@ -78,10 +78,13 @@ Route::prefix('checkout-cart')->name('checkout-cart.')->middleware('checkout.val
     Route::post('checkout-address-dialog', [CheckoutStepsController::class, 'storeDialogAddress'])->name('checkout.address.dialog.store');
     Route::patch('checkout-address/{address}', [CheckoutStepsController::class, 'updateCheckoutAddress'])->name('checkout.address.update');
     Route::delete('checkout-address/{address}', [CheckoutStepsController::class, 'deleteCheckoutAddress'])->name('checkout.customer.address.destroy');
-    Route::put('checkout-address/{address}/set-default', [CheckoutStepsController::class, 'setGuestDefaultAddress'])->name('checkout.address.setDefault');
+    Route::put('checkout-address/{address}/set-default', [CheckoutStepsController::class, 'setDefaultAddress'])->name('checkout.address.setDefault');
     Route::post('set-billing-from-shipping', [CheckoutStepsController::class, 'setBillingFromShipping'])->name('checkout.setBillingFromShipping');
     Route::post('guest', [RegisteredUserController::class, 'checkoutGuestStore'])->name('guest.store');
 });
+// clear guest session after order confirmation is outside of the checkout-cart middleware group 
+// so it can be accessed after checkout is complete
+Route::post('/clear-guest-session', [CheckoutStepsController::class, 'clearGuestSession'])->name('clearGuestSession');
 
 Route::inertia('/session', 'session/index')->name('session.index');
 
