@@ -10,7 +10,7 @@ type CategoriesIndexProps = {
 };
 
 const categoryImageFolder =
-    import.meta.env.CATEGORY_IMAGE_FOLDER ?? 'category_images';
+    import.meta.env.VITE_CATEGORY_IMAGE_FOLDER ?? 'category_images';
 
 export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
     useEffect(() => {

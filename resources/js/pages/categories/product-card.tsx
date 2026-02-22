@@ -6,7 +6,8 @@ import { ProductType } from '@/types';
 
 import classes from './product-card.module.css';
 
-const productImageFolder = import.meta.env.PRODUCT_IMAGE_FOLDER ?? 'products';
+const productImageFolder =
+    import.meta.env.VITE_PRODUCT_IMAGE_FOLDER ?? 'products';
 const categoryPath = 'categories';
 
 type Props = {

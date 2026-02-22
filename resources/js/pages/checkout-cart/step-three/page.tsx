@@ -10,6 +10,7 @@ import { formatPhoneNumber } from '@/utils/format-phone-number';
 
 const categoryPath = 'categories';
 const productPath = 'products';
+const productImagePath = import.meta.env.VITE_PRODUCTS_IMAGE_TYPE ?? 'products';
 
 const StepThree = ({ customer }: { customer: CustomerData }) => {
     const { checkout } = useCheckout();
@@ -170,7 +171,7 @@ const StepThree = ({ customer }: { customer: CustomerData }) => {
                                     <div>
                                         <img
                                             className={classes.image}
-                                            src={`/products/${item.image}`}
+                                            src={`/${productImagePath}/${item.image}`}
                                             alt={item.title}
                                         />
                                     </div>

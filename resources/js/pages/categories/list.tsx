@@ -9,7 +9,7 @@ type Props = {
 };
 
 const categoryImageFolder =
-    import.meta.env.CATEGORY_IMAGE_FOLDER ?? 'category_images';
+    import.meta.env.VITE_CATEGORY_IMAGE_FOLDER ?? 'category_images';
 
 const list = ({ categories, basePath }: Props) => {
     return (

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import DashboardLayout from '@/layouts/dashboard-layout';
 import { Paginated, PageProps } from '@/types';
 import { Media } from '@/types/model-types';
@@ -14,6 +15,7 @@ import {
     SelectContent,
     SelectGroup,
     SelectItem,
+    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
@@ -22,6 +24,17 @@ import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 import { Input } from '@/components/ui/input';
 import UploadNewImage from './create';
 import UpdateImage from './update';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { FaTrash } from 'react-icons/fa';
 
 type MediaProps = {
     media: Paginated<Media>;
@@ -35,6 +48,7 @@ type MediaProps = {
 
 const MediaComponent = ({ media, filters }: MediaProps & PageProps) => {
     const { data, links, meta } = media;
+    const [mediaToDelete, setMediaToDelete] = useState<Media | null>(null);
 
     console.log('Media data:', data);
     console.log('Media links:', links);
@@ -82,6 +96,15 @@ const MediaComponent = ({ media, filters }: MediaProps & PageProps) => {
         );
     };
 
+    const handleDelete = () => {
+        if (mediaToDelete) {
+            router.delete(route('dashboard.media.destroy', mediaToDelete.id), {
+                onSuccess: () => setMediaToDelete(null),
+                preserveState: false, // Reload the page to see the changes
+            });
+        }
+    };
+
     return (
         <DashboardLayout>
             <Head title="Media" />
@@ -108,6 +131,9 @@ const MediaComponent = ({ media, filters }: MediaProps & PageProps) => {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
+                            <SelectLabel>Sort By</SelectLabel>
+                            <SelectItem value="type_asc">Type A-Z</SelectItem>
+                            <SelectItem value="type_desc">Type Z-A</SelectItem>
                             <SelectItem value="created_at_desc">
                                 Newest First
                             </SelectItem>
@@ -124,33 +150,34 @@ const MediaComponent = ({ media, filters }: MediaProps & PageProps) => {
             </div>
             <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                 {data.map((image) => (
-                    <div
-                        key={image.id}
-                        className="flex flex-col items-center gap-2"
-                    >
-                        <figure
-                            key={image.id}
-                            className="group relative aspect-square overflow-hidden rounded-md border"
-                        >
-                            <img
-                                src={image.url + '/' + image.file_name}
-                                alt={image.alt_text || image.title}
-                                title={image.title}
-                                className="h-full w-full object-cover transition-all group-hover:brightness-75"
-                            />
-                            <figcaption className="absolute inset-0 flex items-center justify-center bg-white/50 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-50">
-                                <p className="text-center text-sm font-semibold text-gray-800">
-                                    {image.title}
-                                </p>
-                            </figcaption>
-                        </figure>
-                        <div className="text-sm text-muted-foreground">
-                            {image.title} Uploaded on{' '}
-                            {new Date(image.created_at).toLocaleDateString()}
-                            <br />
-                            {image.type && ` | Type: ${image.type}`}
-                            <br />
-                            <UpdateImage media={image} />
+                    <div key={image.id} className="flex flex-col gap-2">
+                        <div className="group relative">
+                            <figure className="aspect-square w-full overflow-hidden rounded-md border">
+                                <img
+                                    src={image.url + '/' + image.file_name}
+                                    alt={image.alt_text || image.title}
+                                    title={image.title}
+                                    className="h-full w-full object-cover transition-all group-hover:brightness-75"
+                                />
+                            </figure>
+                            <div className="absolute right-2 bottom-2 flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                                <UpdateImage media={image} />
+                                <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() => setMediaToDelete(image)}
+                                >
+                                    <FaTrash className="h-4 w-4 text-white" />
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="flex w-full flex-col items-start">
+                            <p className="font-semibold">{image.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                                {new Date(
+                                    image.created_at,
+                                ).toLocaleDateString()}
+                            </p>
                         </div>
                     </div>
                 ))}
@@ -272,6 +299,36 @@ const MediaComponent = ({ media, filters }: MediaProps & PageProps) => {
                     </PaginationContent>
                 </Pagination>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog
+                open={!!mediaToDelete}
+                onOpenChange={(open) => !open && setMediaToDelete(null)}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete the image "{mediaToDelete?.title}" from the
+                            server.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDelete}
+                            className={`${buttonVariants({
+                                variant: 'destructive',
+                            })} text-white`}
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </DashboardLayout>
     );
 };

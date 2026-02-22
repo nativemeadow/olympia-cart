@@ -21,6 +21,8 @@ import classes from './step-five.module.css';
 
 const categoryPath = 'categories';
 
+const productImagePath = import.meta.env.VITE_PRODUCTS_IMAGE_TYPE ?? 'products';
+
 const renderAddress = (
     address: Address | null,
     title: string,
@@ -161,7 +163,7 @@ const StepFive = ({ customer }: { customer: CustomerData }) => {
                                     >
                                         <img
                                             className={classes.image}
-                                            src={`/products/${item.image}`}
+                                            src={`/${productImagePath}/${item.image}`}
                                             alt={item.title}
                                         />
                                     </Link>
