@@ -11,6 +11,9 @@ import classes from './cart.module.css';
 const categoryPath = 'categories';
 const productPath = 'products';
 
+const productImageFolder =
+    import.meta.env.VITE_PRODUCT_IMAGE_FOLDER ?? 'products';
+
 type Props = {
     item: CartItemType;
 };
@@ -56,7 +59,7 @@ const CartItem = ({ item }: Props) => {
                         >
                             <img
                                 className={classes.image}
-                                src={`/products/${item.image}`}
+                                src={`/${productImageFolder}/${item.image}`}
                                 alt={item.title}
                             />
                         </Link>

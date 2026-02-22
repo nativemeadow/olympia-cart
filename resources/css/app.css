@@ -365,3 +365,9 @@ body.contact-us-page-body .page-container {
     min-height: calc(100vh - 7rem);
     margin: 0 auto;
 }
+
+/* preview */
+.image-preview {
+    max-width: 100%;
+    height: auto;
+}

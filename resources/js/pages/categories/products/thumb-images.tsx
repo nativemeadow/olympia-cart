@@ -1,7 +1,8 @@
 import classes from './show.module.css';
 import { useProductViewStore } from '@/zustand/productViewStore';
 
-const productImageFolder = import.meta.env.PRODUCT_IMAGE_FOLDER ?? 'products';
+const productImageFolder =
+    import.meta.env.VITE_PRODUCT_IMAGE_FOLDER ?? 'products';
 
 const ThumbImages = () => {
     const { product, selectedPrice, setSelectedPrice } = useProductViewStore();

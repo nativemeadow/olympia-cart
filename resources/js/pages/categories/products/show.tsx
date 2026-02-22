@@ -12,7 +12,8 @@ import { useProductViewStore } from '@/zustand/productViewStore';
 
 import classes from './show.module.css';
 
-const productImageFolder = import.meta.env.PRODUCT_IMAGE_FOLDER ?? 'products';
+const productImageFolder =
+    import.meta.env.VITE_PRODUCT_IMAGE_FOLDER ?? 'products';
 
 type Props = {
     productData: {

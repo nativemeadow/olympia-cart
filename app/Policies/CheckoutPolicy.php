@@ -67,6 +67,10 @@ class CheckoutPolicy
 
         // The key check: The session ID of the cart must match the current session ID.
         // This proves the checkout was created in the current user's browser session.
+        // if the user is authenticated, we can also check if the checkout's customer_id matches the user's customer id, which would indicate they are claiming their own checkout after logging in.
+        if ($checkout->customer_id === $customer->id) {
+            return true;
+        }
         return $checkout->cart->session_id === session()->getId();
     }
 }
