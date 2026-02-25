@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Dashboard\CategoryController;
+use App\Http\Controllers\Dashboard\ProductController;
 use App\Http\Controllers\Dashboard\MediaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CustomersController;
@@ -29,6 +30,12 @@ Route::prefix('dashboard')
             DashboardController::class,
             'products',
         ])->name('products');
+
+        Route::get('/product/{product_id}', [
+            ProductController::class,
+            'show',
+        ])->name('product.show');
+
 
         Route::get('/customers', [CustomersController::class, 'getAll'])->name(
             'customers',

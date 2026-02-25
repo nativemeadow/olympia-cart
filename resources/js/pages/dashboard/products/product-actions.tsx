@@ -10,32 +10,36 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CategoryHierarchy } from '@/types';
+import { Product } from '@/types/model-types';
 import { useForm } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { FormEventHandler, PropsWithChildren, useState } from 'react';
-import styles from './categories.module.css';
+import {
+    FormEventHandler,
+    PropsWithChildren,
+    useEffect,
+    useState,
+} from 'react';
+import styles from '../categories/categories.module.css';
+import classes from './products.module.css';
 
-type CategoryFormData = {
-    title: string;
-    parent_id: number | null;
+type ProductFormData = {
+    name: string;
+    // Add other product fields here
 };
 
-function AddEditCategoryForm({
-    category,
+function AddEditProductForm({
+    product,
     isEdit = false,
     onSuccess,
 }: {
-    category?: CategoryHierarchy;
+    product?: Product;
     isEdit?: boolean;
     onSuccess: () => void;
 }) {
     const { data, setData, post, put, processing, errors, reset } =
-        useForm<CategoryFormData>({
-            title: category?.title || '',
-            parent_id: isEdit
-                ? category?.parent_id || null
-                : category?.id || null,
+        useForm<ProductFormData>({
+            name: product?.title || '',
+            // Initialize other product fields here
         });
 
     const handleSubmit: FormEventHandler = (e) => {
@@ -46,10 +50,10 @@ function AddEditCategoryForm({
                 onSuccess();
             },
         };
-        if (isEdit && category) {
-            put(route('dashboard.categories.update', category.id), options);
+        if (isEdit && product) {
+            put(route('dashboard.products.update', product.id), options);
         } else {
-            post(route('dashboard.categories.store'), options);
+            post(route('dashboard.products.store'), options);
         }
     };
 
@@ -57,21 +61,22 @@ function AddEditCategoryForm({
         <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="title" className="text-right">
-                        Title
+                    <Label htmlFor="name" className="text-right">
+                        Name
                     </Label>
                     <Input
-                        id="title"
-                        value={data.title}
-                        onChange={(e) => setData('title', e.target.value)}
+                        id="name"
+                        value={data.name}
+                        onChange={(e) => setData('name', e.target.value)}
                         className="col-span-3"
                     />
-                    {errors.title && (
+                    {errors.name && (
                         <p className="col-span-4 text-center text-sm text-red-600">
-                            {errors.title}
+                            {errors.name}
                         </p>
                     )}
                 </div>
+                {/* Add other product form fields here */}
             </div>
             <DialogFooter>
                 <Button type="submit" disabled={processing}>
@@ -82,17 +87,17 @@ function AddEditCategoryForm({
     );
 }
 
-function DeleteCategoryForm({
-    category,
+function DeleteProductForm({
+    product,
     onSuccess,
 }: {
-    category: CategoryHierarchy;
+    product: Product;
     onSuccess: () => void;
 }) {
     const { delete: destroy, processing } = useForm({});
 
     const handleDelete = () => {
-        destroy(route('dashboard.categories.destroy', category.id), {
+        destroy(route('dashboard.products.destroy', product.id), {
             onSuccess,
             preserveScroll: true,
         });
@@ -101,14 +106,14 @@ function DeleteCategoryForm({
     return (
         <>
             <DialogDescription>
-                Are you sure you want to delete the category "{category.title}"?
+                Are you sure you want to delete the product "{product.title}"?
                 This action cannot be undone.
             </DialogDescription>
             <DialogFooter className="mt-4">
                 <Button
                     variant="destructive"
                     onClick={handleDelete}
-                    disabled={processing}
+                    disabled={processing} className={classes.delete_button}
                 >
                     {processing ? 'Deleting...' : 'Delete'}
                 </Button>
@@ -117,30 +122,7 @@ function DeleteCategoryForm({
     );
 }
 
-function CategoryActionDialog({
-    children,
-    title,
-    open,
-    onOpenChange,
-}: PropsWithChildren<{
-    title: string;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-}>) {
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            {children}
-        </Dialog>
-    );
-}
-
-export function AddCategoryAction({
-    category,
-    onSuccess,
-}: {
-    category?: CategoryHierarchy;
-    onSuccess: () => void;
-}) {
+export function AddProductAction({ onSuccess }: { onSuccess: () => void }) {
     const [isOpen, setIsOpen] = useState(false);
     const handleSuccess = () => {
         onSuccess();
@@ -152,66 +134,81 @@ export function AddCategoryAction({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className={styles.plus_icon}
+                    className={classes.action_icon}
                 >
                     <Plus className={styles.plus_icon} />
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Add Child to "{category?.title}"</DialogTitle>
+                    <DialogTitle>Add Product</DialogTitle>
                 </DialogHeader>
-                <AddEditCategoryForm
-                    category={category}
-                    onSuccess={handleSuccess}
-                />
+                <AddEditProductForm onSuccess={handleSuccess} />
             </DialogContent>
         </Dialog>
     );
 }
 
-export function EditCategoryAction({
-    category,
+export function EditProductAction({
+    product,
     onSuccess,
 }: {
-    category: CategoryHierarchy;
+    product: Product;
     onSuccess: () => void;
 }) {
+    const [productData, setProductData] = useState<Product | null>(null);
     const [isOpen, setIsOpen] = useState(false);
+
     const handleSuccess = () => {
         onSuccess();
         setIsOpen(false);
     };
+
+    const handleOpen = () => {
+        setIsOpen(true);
+        fetch(route('dashboard.product.show', { product_id: product.id }))
+            .then((response) => response.json())
+            .then((data) => {
+                setProductData(data.product);
+                console.log('Fetching product data for edit:', data.product);
+            });
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button
                     variant="ghost"
                     size="icon"
-                    className={styles.pencil_icon}
+                    onClick={handleOpen}
+                    className={classes.action_icon}
                 >
                     <Pencil className={styles.action_icon} />
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Edit "{category.title}"</DialogTitle>
+                    <DialogTitle>Edit "{product.title}"</DialogTitle>
                 </DialogHeader>
-                <AddEditCategoryForm
-                    category={category}
-                    isEdit
-                    onSuccess={handleSuccess}
-                />
+                {productData ? (
+                    <AddEditProductForm
+                        product={productData}
+                        isEdit
+                        onSuccess={handleSuccess}
+                    />
+                ) : (
+                    <p>Loading...</p>
+                )}
             </DialogContent>
         </Dialog>
     );
 }
 
-export function DeleteCategoryAction({
-    category,
+export function DeleteProductAction({
+    product,
     onSuccess,
 }: {
-    category: CategoryHierarchy;
+    product: Product;
     onSuccess: () => void;
 }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -225,17 +222,17 @@ export function DeleteCategoryAction({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className={`text-destructive ${styles.delete_icon}`}
+                    className={`text-destructive ${classes.delete_icon}`}
                 >
-                    <Trash2 className={styles.delete_icon} />
+                    <Trash2 className={styles.action_icon} />
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Delete Category</DialogTitle>
+                    <DialogTitle>Delete Product</DialogTitle>
                 </DialogHeader>
-                <DeleteCategoryForm
-                    category={category}
+                <DeleteProductForm
+                    product={product}
                     onSuccess={handleSuccess}
                 />
             </DialogContent>

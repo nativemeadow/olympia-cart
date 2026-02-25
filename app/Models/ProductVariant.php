@@ -23,6 +23,8 @@ class ProductVariant extends Model
         'stripe_price_id',
     ];
 
+    protected $appends = ['extended_properties'];
+
     /**
      * Get the parent product that this variant belongs to.
      */
@@ -43,5 +45,17 @@ class ProductVariant extends Model
             'product_variant_id',              // The foreign key on the pivot table for this model
             'attribute_value_id'               // The foreign key on the pivot table for the related model
         );
+    }
+
+    /**
+     * Accessor for extended properties.
+     *
+     * @return array
+     */
+    public function getExtendedPropertiesAttribute()
+    {
+        return $this->attributeValues->mapWithKeys(function ($attributeValue) {
+            return [$attributeValue->attribute->name => $attributeValue->value];
+        });
     }
 }

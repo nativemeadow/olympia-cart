@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { CategoryHierarchy } from '@/types';
+import { Product as ProductType } from '@/types/model-types';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Package } from 'lucide-react';
 import {
     AddCategoryAction,
     DeleteCategoryAction,
     EditCategoryAction,
 } from './category-actions';
+import {
+    EditProductAction,
+    DeleteProductAction,
+} from '../products/product-actions';
 import { router } from '@inertiajs/react';
 import styles from './categories.module.css';
 
@@ -16,10 +21,12 @@ interface CategoryNodeProps {
 
 const CategoryNode: React.FC<CategoryNodeProps> = ({ category }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const isNode = category.children && category.children.length > 0;
+    const hasChildren = category.children && category.children.length > 0;
+    const hasProducts = category.products && category.products.length > 0;
+    const isExpandable = hasChildren || hasProducts;
 
     const handleToggle = () => {
-        if (isNode) {
+        if (isExpandable) {
             setIsOpen(!isOpen);
         }
     };
@@ -34,7 +41,7 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({ category }) => {
     return (
         <div className={styles.node}>
             <div className={styles.node_header}>
-                {isNode ? (
+                {isExpandable ? (
                     <Button
                         variant="ghost"
                         size="icon"
@@ -48,7 +55,6 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({ category }) => {
                         )}
                     </Button>
                 ) : (
-                    // This is a leaf, add some padding to align it with nodes
                     <div className={styles.toggle_placeholder}></div>
                 )}
                 <span className={styles.node_title}>{category.title}</span>
@@ -67,11 +73,40 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({ category }) => {
                     />
                 </div>
             </div>
-            {isNode && isOpen && (
+            {isOpen && (
                 <div className={styles.children_container}>
-                    {category.children?.map((child) => (
-                        <CategoryNode key={child.id} category={child} />
-                    ))}
+                    {hasChildren &&
+                        category.children?.map((child) => (
+                            <CategoryNode key={child.id} category={child} />
+                        ))}
+                    {hasProducts &&
+                        category.products?.map((product: ProductType) => (
+                            <div
+                                key={`product-${product.id}`}
+                                className={`${styles.node} ${styles.product_node}`}
+                            >
+                                <div className={styles.node_header}>
+                                    <div className={styles.toggle_placeholder}>
+                                        <Package
+                                            className={styles.product_icon}
+                                        />
+                                    </div>
+                                    <span className={styles.node_title}>
+                                        {product.title}
+                                    </span>
+                                    <div className={styles.actions}>
+                                        <EditProductAction
+                                            product={product}
+                                            onSuccess={handleSuccess}
+                                        />
+                                        <DeleteProductAction
+                                            product={product}
+                                            onSuccess={handleSuccess}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                 </div>
             )}
         </div>
