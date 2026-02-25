@@ -27,7 +27,7 @@ import { ImageTypeOptions } from './readImageFile';
 import { useImagePreview } from '@/hooks/useImagePreview';
 import Toastify from 'toastify-js';
 import 'toastify-js/src/toastify.css';
-import { FaPencilAlt } from 'react-icons/fa';
+import { Pencil } from 'lucide-react';
 
 type UpdateImageProps = {
     media: Media;
@@ -124,7 +124,7 @@ const UpdateImage = ({ media }: UpdateImageProps) => {
                     onClick={openModal}
                     aria-label={`Edit ${media.title}`}
                 >
-                    <FaPencilAlt className="h-4 w-4" />
+                    <Pencil className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
             <DialogContent>

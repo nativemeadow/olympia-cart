@@ -34,14 +34,22 @@
 .node_header {
     display: flex;
     align-items: center;
+    border-radius: 0.375rem; /* rounded-md */
+    padding: 0.25rem; /* p-1 */
+    transition: background-color 0.2s ease-in-out;
+}
+
+.node_header:hover {
+    background-color: var(--accent);
 }
 
 .node_header:hover .actions {
-    display: flex;
+    opacity: 1;
 }
 
 .toggle_button {
     margin-right: 0.5rem; /* mr-2 */
+    cursor: pointer;
 }
 
 .chevron_icon {
@@ -61,8 +69,10 @@
 
 .actions {
     margin-left: auto;
-    display: none;
+    display: flex;
     align-items: center;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
 }
 
 .children_container {
@@ -74,4 +84,27 @@
 .action_icon {
     height: 1rem; /* h-4 */
     width: 1rem; /* w-4 */
+}
+
+.product_node {
+    margin-left: 0; /* Reset margin for product node */
+}
+
+.product_icon {
+    height: 1rem; /* h-4 */
+    width: 1rem; /* w-4 */
+    color: var(--muted-foreground);
+    margin-right: 0.5rem; /* mr-2 */
+}
+
+.pencil_icon {
+    cursor: pointer;
+}
+
+.plus_icon {
+    cursor: pointer;
+}
+
+.delete_icon {
+    cursor: pointer;
 }

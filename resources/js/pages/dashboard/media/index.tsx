@@ -34,7 +34,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { FaTrash } from 'react-icons/fa';
+import { Trash2 } from 'lucide-react';
 
 type MediaProps = {
     media: Paginated<Media>;
@@ -167,7 +167,7 @@ const MediaComponent = ({ media, filters }: MediaProps & PageProps) => {
                                     size="icon"
                                     onClick={() => setMediaToDelete(image)}
                                 >
-                                    <FaTrash className="h-4 w-4 text-white" />
+                                    <Trash2 className="h-4 w-4 text-white" />
                                 </Button>
                             </div>
                         </div>
