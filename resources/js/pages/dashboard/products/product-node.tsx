@@ -61,18 +61,19 @@ const ProductNode: React.FC<ProductNodeProps> = ({ category }) => {
                 </div>
                 <span className={styles.node_title}>{category.title}</span>
                 <div className={styles.actions}>
-                    <AddCategoryAction
+                    <AddProductAction onSuccess={handleSuccess} />
+                    {/* <AddCategoryAction
                         category={category}
                         onSuccess={handleSuccess}
-                    />
-                    <EditCategoryAction
+                    /> */}
+                    {/* <EditCategoryAction
                         category={category}
                         onSuccess={handleSuccess}
                     />
                     <DeleteCategoryAction
                         category={category}
                         onSuccess={handleSuccess}
-                    />
+                    /> */}
                 </div>
             </div>
             {isOpen && (
@@ -104,9 +105,9 @@ const ProductNode: React.FC<ProductNodeProps> = ({ category }) => {
                                             product={product}
                                             onSuccess={handleSuccess}
                                         />
-                                        <AddProductAction
+                                        {/* <AddProductAction
                                             onSuccess={handleSuccess}
-                                        />
+                                        /> */}
                                         <DeleteProductAction
                                             product={product}
                                             onSuccess={handleSuccess}

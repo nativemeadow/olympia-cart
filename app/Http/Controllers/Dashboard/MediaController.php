@@ -94,7 +94,7 @@ class MediaController extends Controller
 
         Media::create([
             'title' => $validated['title'],
-            'file_path' => $storagePath,
+            'file_path' => $storagePath . '/',
             'description' => $validated['description'] ?? null,
             'alt_text' => $validated['alt_text'] ?? null,
             'file_name' => $file->getClientOriginalName(),
@@ -159,7 +159,7 @@ class MediaController extends Controller
             $path = $file->storeAs($directory, $file->getClientOriginalName(), 'public');
 
             // 4. Update the model's file-specific properties.
-            $media->file_path = $directory;
+            $media->file_path = $directory . '/';
             $media->file_name = $file->getClientOriginalName(); // Use the original client name
             $media->mime_type = $file->getMimeType();
             $media->size = $file->getSize();

@@ -18,6 +18,7 @@ class AttributeFactory extends Factory
     {
         return [
             'name' => $this->faker->unique()->word(), // e.g., "Color", "Size"
+            'data_type' => $this->faker->randomElement(['string', 'integer', 'float', 'boolean']), // Example data types
         ];
     }
 }

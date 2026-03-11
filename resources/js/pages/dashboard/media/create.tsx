@@ -31,8 +31,10 @@ import 'toastify-js/src/toastify.css';
 // it's rendered, it gets a fresh set of state from its hooks.
 const NewImageForm = ({
     setIsOpen,
+    imageType,
 }: {
     setIsOpen: (isOpen: boolean) => void;
+    imageType?: string;
 }) => {
     const { file, fileName, fileSize, previewSrc, handleFileChange } =
         useImagePreview();
@@ -48,7 +50,7 @@ const NewImageForm = ({
         description: '',
         alt_text: '',
         file: null,
-        type: '',
+        type: imageType ?? '',
     });
 
     // Sync the file from the hook with the form state
@@ -95,7 +97,7 @@ const NewImageForm = ({
     };
 
     return (
-        <DialogContent>
+        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
                 <DialogTitle>Upload New Image</DialogTitle>
                 <DialogDescription>
@@ -282,7 +284,11 @@ const NewImageForm = ({
     );
 };
 
-const NewImage = () => {
+type Props = {
+    imageType?: string;
+};
+
+const NewImage = ({ imageType }: Props) => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -292,8 +298,8 @@ const NewImage = () => {
                     <Button variant="outline">New Image</Button>
                 </DialogTrigger>
                 {/*
-                  Conditionally render the form component. When it's not rendered,
-                  its state is destroyed. When it is rendered, it's created fresh.
+                    Conditionally render the form component. When it's not rendered,
+                    its state is destroyed. When it is rendered, it's created fresh.
                 */}
                 {isOpen && <NewImageForm setIsOpen={setIsOpen} />}
             </Dialog>

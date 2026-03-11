@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Product } from '@/types/model-types';
+import { Attributes, Product } from '@/types/model-types';
 import { useForm } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import {
@@ -19,6 +20,8 @@ import {
     useEffect,
     useState,
 } from 'react';
+
+import ProductForm from './product-form';
 import styles from '../categories/categories.module.css';
 import classes from './products.module.css';
 
@@ -113,7 +116,8 @@ function DeleteProductForm({
                 <Button
                     variant="destructive"
                     onClick={handleDelete}
-                    disabled={processing} className={classes.delete_button}
+                    disabled={processing}
+                    className={classes.delete_button}
                 >
                     {processing ? 'Deleting...' : 'Delete'}
                 </Button>
@@ -124,26 +128,55 @@ function DeleteProductForm({
 
 export function AddProductAction({ onSuccess }: { onSuccess: () => void }) {
     const [isOpen, setIsOpen] = useState(false);
+    const [attributes, setAttributes] = useState<Attributes[]>([]);
+
     const handleSuccess = () => {
         onSuccess();
         setIsOpen(false);
     };
+
+    const handleOpenAdd = () => {
+        setIsOpen(true);
+        fetch(route('dashboard.price.attributes'))
+            .then((response) => response.json())
+            .then((data) => {
+                setAttributes(data.allAttributes);
+                console.log(
+                    'Fetching price attributes for add:',
+                    data.allAttributes,
+                );
+            });
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button
                     variant="ghost"
                     size="icon"
+                    onClick={handleOpenAdd}
                     className={classes.action_icon}
                 >
                     <Plus className={styles.plus_icon} />
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className={classes.form_dialog}>
                 <DialogHeader>
                     <DialogTitle>Add Product</DialogTitle>
                 </DialogHeader>
-                <AddEditProductForm onSuccess={handleSuccess} />
+                <ProductForm
+                    attributes={attributes}
+                    isEdit={false}
+                    onSuccess={handleSuccess}
+                />
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button type="submit" form="product-edit-form">
+                        Save
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );
@@ -157,6 +190,7 @@ export function EditProductAction({
     onSuccess: () => void;
 }) {
     const [productData, setProductData] = useState<Product | null>(null);
+    const [attributes, setAttributes] = useState<Attributes[]>([]);
     const [isOpen, setIsOpen] = useState(false);
 
     const handleSuccess = () => {
@@ -170,6 +204,7 @@ export function EditProductAction({
             .then((response) => response.json())
             .then((data) => {
                 setProductData(data.product);
+                setAttributes(data.allAttributes);
                 console.log('Fetching product data for edit:', data.product);
             });
     };
@@ -186,19 +221,33 @@ export function EditProductAction({
                     <Pencil className={styles.action_icon} />
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent
+                className={classes.form_dialog}
+                onInteractOutside={(e) => e.preventDefault()}
+            >
                 <DialogHeader>
                     <DialogTitle>Edit "{product.title}"</DialogTitle>
                 </DialogHeader>
-                {productData ? (
-                    <AddEditProductForm
-                        product={productData}
-                        isEdit
-                        onSuccess={handleSuccess}
-                    />
-                ) : (
-                    <p>Loading...</p>
-                )}
+                <div className={classes.scrollable_content}>
+                    {productData ? (
+                        <ProductForm
+                            product={productData}
+                            attributes={attributes}
+                            isEdit={true}
+                            onSuccess={handleSuccess}
+                        />
+                    ) : (
+                        <p>Loading...</p>
+                    )}
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button type="submit" form="product-edit-form">
+                        Save
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );

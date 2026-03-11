@@ -31,9 +31,10 @@ import { Pencil } from 'lucide-react';
 
 type UpdateImageProps = {
     media: Media;
+    imageType?: string;
 };
 
-const UpdateImage = ({ media }: UpdateImageProps) => {
+const UpdateImage = ({ media, imageType }: UpdateImageProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const {
         file,
@@ -52,7 +53,7 @@ const UpdateImage = ({ media }: UpdateImageProps) => {
             name: media.file_name,
             alt_text: media.alt_text ?? '',
             file: null as File | null,
-            type: media.type ?? '',
+            type: imageType ?? media.type ?? '',
         });
 
     // Sync the file from the hook with the form state
@@ -70,7 +71,7 @@ const UpdateImage = ({ media }: UpdateImageProps) => {
             name: media.file_name,
             alt_text: media.alt_text ?? '',
             file: null,
-            type: media.type ?? '',
+            type: imageType ?? media.type ?? '',
         });
     };
 
@@ -81,7 +82,7 @@ const UpdateImage = ({ media }: UpdateImageProps) => {
     };
 
     const imagePath =
-        media.type === import.meta.env.VITE_PRODUCTS_IMAGE_TYPE
+        (imageType ?? media.type) === import.meta.env.VITE_PRODUCTS_IMAGE_TYPE
             ? (import.meta.env.VITE_PRODUCT_IMAGE_FOLDER ?? 'products')
             : (import.meta.env.VITE_CATEGORY_IMAGE_FOLDER ?? 'category_images');
 
@@ -127,7 +128,7 @@ const UpdateImage = ({ media }: UpdateImageProps) => {
                     <Pencil className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent onInteractOutside={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle>Update Image</DialogTitle>
                     <DialogDescription>

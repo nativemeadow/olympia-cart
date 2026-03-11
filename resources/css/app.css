@@ -297,6 +297,11 @@
     }
 }
 
+.wide-dialog {
+    max-width: 90vw !important;
+    width: 90vw !important;
+}
+
 .logo {
     max-width: 100%;
     height: auto;

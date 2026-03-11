@@ -23,7 +23,7 @@ class ProductVariant extends Model
         'stripe_price_id',
     ];
 
-    protected $appends = ['extended_properties'];
+    protected $appends = ['extended_properties', 'price_image', 'title', 'description'];
 
     /**
      * Get the parent product that this variant belongs to.
@@ -57,5 +57,55 @@ class ProductVariant extends Model
         return $this->attributeValues->mapWithKeys(function ($attributeValue) {
             return [$attributeValue->attribute->name => $attributeValue->value];
         });
+    }
+
+    public function getPriceImageAttribute(): ?Media
+    {
+        $this->loadMissing('attributeValues.attribute');
+
+        $imageValue = $this->attributeValues
+            ->first(function ($attributeValue) {
+                return strcasecmp($attributeValue->attribute?->name ?? '', 'image') === 0;
+            })
+            ?->value;
+
+        if (!$imageValue) {
+            return null;
+        }
+
+        // Handles values like "blue-tile.jpg" or "/uploads/blue-tile.jpg"
+        $fileName = basename($imageValue);
+
+        return Media::query()
+            ->where('file_name', $fileName)
+            ->first();
+    }
+
+    public function getTitleAttribute(): string
+    {
+        $this->loadMissing('attributeValues.attribute');
+
+        $titleParts = $this->attributeValues
+            ->filter(function ($attributeValue) {
+                return strcasecmp($attributeValue->attribute?->name ?? '', 'title') === 0;
+            })
+            ->pluck('value')
+            ->toArray();
+
+        return implode(' - ', $titleParts);
+    }
+
+    public function getDescriptionAttribute(): string
+    {
+        $this->loadMissing('attributeValues.attribute');
+
+        $descriptionParts = $this->attributeValues
+            ->filter(function ($attributeValue) {
+                return strcasecmp($attributeValue->attribute?->name ?? '', 'description') === 0;
+            })
+            ->pluck('value')
+            ->toArray();
+
+        return implode(' - ', $descriptionParts);
     }
 }
