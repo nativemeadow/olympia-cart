@@ -63,26 +63,43 @@ export type Product = {
     // Relationships
     prices?: Price[];
     categories?: Category[];
+    media?: Media[];
 };
 
 export type Price = {
     id: number;
     product_id: number;
     sku?: string | null;
+    //title?: string | null;
+    //description?: string | null;
+    //image?: string | null;
+    price: number;
+    // currency: string;
+    // unit?: string | null;
+    // size?: string | null;
+    // coverage?: string | null;
+    // coverage_value?: number | null;
+    // online_minimum?: number | null;
+    // created_at: string;
+    // updated_at: string;
+    // Relationships
+    extended_properties?: ExtendedProps;
+    product?: Product;
     title?: string | null;
     description?: string | null;
-    image?: string | null;
-    price: number;
-    currency: string;
-    unit?: string | null;
-    size?: string | null;
-    coverage?: string | null;
-    coverage_value?: number | null;
-    online_minimum?: number | null;
+    price_image?: Media | null;
+};
+
+export type Attributes = {
+    id: number;
+    name: string;
+    data_type: string;
     created_at: string;
     updated_at: string;
-    // Relationships
-    product?: Product;
+};
+
+export type ExtendedProps = {
+    [key: string]: string | number | boolean | null | undefined;
 };
 
 export type Address = {

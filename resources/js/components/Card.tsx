@@ -1,4 +1,4 @@
-import { Product, Price } from '@/types/model-types';
+import { Product } from '@/types/model-types';
 
 import classes from './Card.module.css';
 

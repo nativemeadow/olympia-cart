@@ -10,6 +10,13 @@ import '../css/app.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+// 1. Define the resolver function here
+const resolve = (name: string) =>
+    resolvePageComponent<any>(
+        `./pages/${name}.tsx`,
+        import.meta.glob('./pages/**/*.tsx'),
+    );
+
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: async (name) => {
@@ -33,21 +40,7 @@ createInertiaApp({
         return page;
     },
     setup({ el, App, props }) {
-        console.log(props); // Add this line
         const root = createRoot(el);
-
-        // This logic checks if the page was reloaded. If so, it makes a fresh
-        // visit to get the latest data from the server, preventing stale data.
-        const navigationEntry = window.performance.getEntriesByType(
-            'navigation',
-        )[0] as PerformanceNavigationTiming;
-        if (navigationEntry && navigationEntry.type === 'reload') {
-            router.visit(window.location.href, {
-                replace: true,
-                preserveState: true,
-                preserveScroll: true,
-            });
-        }
 
         root.render(
             <App

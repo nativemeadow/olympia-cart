@@ -31,11 +31,17 @@ Route::prefix('dashboard')
             'products',
         ])->name('products');
 
+        Route::get('/product/media/{sort_column?}/{order?}/{search_term?}', [ProductController::class, 'productMedia'])->name('product.media');
+
         Route::get('/product/{product_id}', [
             ProductController::class,
             'show',
         ])->name('product.show');
 
+        Route::get('/price/attributes', [
+            ProductController::class,
+            'getPriceAttributes',
+        ])->name('price.attributes');
 
         Route::get('/customers', [CustomersController::class, 'getAll'])->name(
             'customers',
@@ -51,7 +57,6 @@ Route::prefix('dashboard')
         Route::get('/media/{media}/edit', [MediaController::class, 'edit'])->name('media.edit');
         Route::put('/media/{media}', [MediaController::class, 'update'])->name('media.update');
         Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
-
 
         Route::get('/users', function () {
             return Inertia::render('dashboard/users/index');
