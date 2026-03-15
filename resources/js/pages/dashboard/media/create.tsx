@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
     Dialog,
     DialogClose,
@@ -26,6 +27,7 @@ import { ImageTypeOptions } from './readImageFile';
 import { useImagePreview } from '@/hooks/useImagePreview';
 import Toastify from 'toastify-js';
 import 'toastify-js/src/toastify.css';
+import { formatBytes } from '@/utils/strings';
 
 // By moving the form into its own component, we ensure that every time
 // it's rendered, it gets a fresh set of state from its hooks.
@@ -38,25 +40,29 @@ const NewImageForm = ({
 }) => {
     const { file, fileName, fileSize, previewSrc, handleFileChange } =
         useImagePreview();
+    const [isProcessing, setIsProcessing] = useState(false);
 
-    const { data, setData, post, processing, errors, clearErrors } = useForm<{
+    const { data, setData, errors, clearErrors, setError } = useForm<{
         title: string;
         description: string;
         alt_text: string;
         file: File | null;
         type: string;
+        size?: number;
     }>({
         title: '',
         description: '',
         alt_text: '',
         file: null,
         type: imageType ?? '',
+        size: undefined,
     });
 
     // Sync the file from the hook with the form state
     useEffect(() => {
         setData('file', file);
-    }, [file]);
+        setData('size', fileSize);
+    }, [file, fileSize]);
 
     // Set the title from the file name, if the title is empty
     useEffect(() => {
@@ -67,33 +73,54 @@ const NewImageForm = ({
         }
     }, [fileName]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('dashboard.media.store'), {
-            onSuccess: () => {
-                setIsOpen(false); // Close the dialog on success
-            },
-            onError: () => {
-                // display error message sent from the server in a toast
-                if (errors.file) {
-                    Toastify({
-                        text: errors.file,
-                        duration: 6000,
-                        position: 'center',
-                        backgroundColor: 'red',
-                        close: true,
-                    }).showToast();
-                } else {
-                    Toastify({
-                        text: 'An error occurred while uploading the image. Please try again.',
-                        duration: 6000,
-                        position: 'center',
-                        backgroundColor: 'red',
-                        close: true,
-                    }).showToast();
-                }
-            },
-        });
+        setIsProcessing(true);
+        clearErrors();
+
+        const formData = new FormData();
+        formData.append('title', data.title);
+        formData.append('description', data.description);
+        formData.append('alt_text', data.alt_text);
+        formData.append('type', data.type);
+        if (data.file) {
+            formData.append('file', data.file);
+        }
+
+        try {
+            await axios.post(route('dashboard.media.store'), formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            setIsOpen(false);
+            // Optionally, you can use Inertia router to visit the page again
+            // to refresh the media list, or just reload.
+            window.location.reload();
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response?.status === 422) {
+                // Handle validation errors
+                const validationErrors = error.response.data.errors;
+                Object.keys(validationErrors).forEach((key) => {
+                    setError(
+                        key as keyof typeof data,
+                        validationErrors[key][0],
+                    );
+                });
+            } else {
+                // Handle other errors (e.g., network error, server 500)
+                Toastify({
+                    text: 'An unexpected error occurred. Please try again.',
+                    duration: 6000,
+                    position: 'center',
+                    backgroundColor: 'red',
+                    close: true,
+                }).showToast();
+                console.error('Submission error:', error);
+            }
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     return (
@@ -264,6 +291,16 @@ const NewImageForm = ({
                             className="col-span-3 col-start-2"
                         />
                     </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="alt_text" className="text-right">
+                            Size
+                        </Label>
+                        <div>
+                            {data.size !== undefined
+                                ? formatBytes(fileSize ?? 0)
+                                : ''}
+                        </div>
+                    </div>
                 </div>
             </form>
             <DialogFooter>
@@ -272,7 +309,7 @@ const NewImageForm = ({
                 </DialogClose>
                 <Button
                     color="primary"
-                    disabled={processing}
+                    disabled={isProcessing}
                     className="w-full rounded bg-yellow-700 text-xl text-white"
                     type="submit"
                     form="new-image-form"
@@ -301,7 +338,9 @@ const NewImage = ({ imageType }: Props) => {
                     Conditionally render the form component. When it's not rendered,
                     its state is destroyed. When it is rendered, it's created fresh.
                 */}
-                {isOpen && <NewImageForm setIsOpen={setIsOpen} />}
+                {isOpen && (
+                    <NewImageForm setIsOpen={setIsOpen} imageType={imageType} />
+                )}
             </Dialog>
         </div>
     );
