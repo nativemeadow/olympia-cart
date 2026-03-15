@@ -6,7 +6,11 @@ use App\Models\Product;
 use App\Models\Media;
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
+use App\Models\AttributeValue;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -58,19 +62,269 @@ class ProductController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    private function handleDerivedAttributes($priceData, $attributeName = null, $isCreate = true)
     {
-        // This is handled by the DashboardController, which is fine.
+        $attributesToSync = [];
+
+        // Handle attribute
+        if (!empty($priceData[$attributeName])) {
+            $attribute = Attribute::firstOrCreate(['name' => ucfirst($attributeName), 'data_type' => 'string']);
+            $attributeValue = $isCreate
+                ? AttributeValue::firstOrCreate(['attribute_id' => $attribute->id, 'value' => $priceData[$attributeName]])
+                : AttributeValue::updateOrCreate(
+                    ['attribute_id' => $attribute->id, 'value' => $priceData[$attributeName]]
+                );
+            $attributesToSync[] = $attributeValue->id;
+        }
+        return $attributesToSync;
+    }
+
+    private function handleImageAttribute($priceData, $isCreate = true)
+    {
+        $attributesToSync = [];
+        if (!empty($priceData['image'])) {
+            $attribute = Attribute::firstOrCreate(['name' => 'Image', 'data_type' => 'string']);
+            $image_path = $priceData['image']['file_path'] . $priceData['image']['file_name'];
+            $attributeValue = $isCreate
+                ? AttributeValue::firstOrCreate(['attribute_id' => $attribute->id, 'value' => $image_path])
+                : AttributeValue::updateOrCreate(
+                    ['attribute_id' => $attribute->id, 'value' => $image_path]
+                );
+            $attributesToSync[] = $attributeValue->id;
+        }
+        return $attributesToSync;
+    }
+
+    public function store(Request $request, $categoryId)
+    {
+        $validatedData = $request->validate([
+            'product.title' => 'required|string|max:255',
+            'product.sku' => 'required|string|max:255|unique:products,sku',
+            'product.slug' => 'required|string|max:255|unique:products,slug',
+            'product.description' => 'nullable|string',
+            'product.image' => 'nullable|string|max:255',
+            'product.status' => 'required|boolean',
+            'product.categories.*.id' => 'required_with:product.categories|integer|exists:categories,id',
+            'product.prices' => 'required|array|min:1',
+            'product.prices.*.sku' => 'required|string|max:255|unique:product_variants,sku',
+            'product.prices.*.price' => 'required|numeric|min:1',
+            'product.prices.*.extended_properties' => 'nullable|array',
+            'product.prices.*.title' => 'nullable|string',
+            'product.prices.*.description' => 'nullable|string',
+            'product.prices.*.image' => 'nullable|array',
+        ], [
+            'product.title.required' => 'The product title is required.',
+            'product.sku.required' => 'The product SKU is required.',
+            'product.sku.unique' => 'The product SKU must be unique.',
+            'product.slug.required' => 'The product slug is required.',
+            'product.slug.unique' => 'The product slug must be unique.',
+            'product.status.required' => 'The product status is required.',
+            'product.status.boolean' => 'The product must have a status.',
+            'product.categories.*.id.required_with' => 'Each category must have an ID.',
+            'product.categories.*.id.integer' => 'Each category ID must be an integer.',
+            'product.categories.*.id.exists' => 'Each category ID must exist in the categories table.',
+            'product.prices.required' => 'At least one price is required.',
+            'product.prices.*.sku.required' => 'Price must have a SKU.',
+            'product.prices.*.sku.unique' => 'Price SKU must be unique.',
+            'product.prices.*.price.required' => 'Price must have a value.',
+            'product.prices.*.price.numeric' => 'Price value must be numeric.',
+            'product.prices.*.price.min' => 'Price value must be at least 1.',
+        ]);
+
+        $productData = $validatedData['product'];
+
+        DB::beginTransaction();
+
+        try {
+            $product = Product::create([
+                'title' => $productData['title'],
+                'uuid' => Str::uuid(),
+                'sku' => $productData['sku'],
+                'slug' => $productData['slug'],
+                'description' => $productData['description'],
+                'image' => $productData['image'],
+                'status' => $productData['status'],
+            ]);
+
+            if (isset($productData['categories'])) {
+                $product->categories()->sync(array_column($productData['categories'], 'id'));
+            } elseif ($categoryId) {
+                $product->categories()->sync([$categoryId]);
+            }
+
+            foreach ($productData['prices'] as $priceData) {
+                $variant = $product->variants()->create([
+                    'sku' => $priceData['sku'],
+                    'price' => $priceData['price'],
+                ]);
+
+                $attributesToSync = [];
+
+                // Handle title
+                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttributes($priceData, 'title'));
+
+                // Handle description
+                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttributes($priceData, 'description'));
+
+                // Handle image
+                $attributesToSync = array_merge($attributesToSync, $this->handleImageAttribute($priceData));
+
+                // Handle extended_properties
+                if (isset($priceData['extended_properties'])) {
+                    foreach ($priceData['extended_properties'] as $name => $value) {
+                        if (!empty($value)) {
+                            $attribute = Attribute::where('name', $name)->first();
+                            if ($attribute) {
+                                $attributeValue = AttributeValue::firstOrCreate([
+                                    'attribute_id' => $attribute->id,
+                                    'value' => $value,
+                                ]);
+                                $attributesToSync[] = $attributeValue->id;
+                            }
+                        }
+                    }
+                }
+
+                $variant->attributeValues()->sync($attributesToSync);
+            }
+
+            DB::commit();
+
+            return redirect()->route('dashboard.products')->with('success', 'Product created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        // This is handled by the DashboardController, which is fine.
+        $product = Product::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'product.title' => 'required|string|max:255',
+            'product.sku' => ['required', 'string', 'max:255', Rule::unique('products', 'sku')->ignore($product->id)],
+            'product.slug' => ['required', 'string', 'max:255', Rule::unique('products', 'slug')->ignore($product->id)],
+            'product.description' => 'nullable|string',
+            'product.image' => 'nullable|string|max:255',
+            'product.status' => 'required|boolean',
+            'product.categories.*.id' => 'required_with:product.categories|integer|exists:categories,id',
+            'product.prices' => 'required|array|min:1',
+            'product.prices.*.id' => 'nullable|integer',
+            'product.prices.*.sku' => ['required', 'string', 'max:255', Rule::unique('product_variants', 'sku')->where(function ($query) use ($request) {
+                $priceIds = collect($request->input('product.prices'))->pluck('id')->filter();
+                if ($priceIds->isNotEmpty()) {
+                    return $query->whereNotIn('id', $priceIds);
+                }
+            })],
+            'product.prices.*.price' => 'required|numeric|min:1',
+            'product.prices.*.extended_properties' => 'nullable|array',
+            'product.prices.*.title' => 'nullable|string',
+            'product.prices.*.description' => 'nullable|string',
+            'product.prices.*.image' => 'nullable|array',
+        ], [
+            'product.title.required' => 'The product title is required.',
+            'product.sku.required' => 'The product SKU is required.',
+            'product.sku.unique' => 'The product SKU must be unique.',
+            'product.slug.required' => 'The product slug is required.',
+            'product.slug.unique' => 'The product slug must be unique.',
+            'product.status.required' => 'The product status is required.',
+            'product.status.boolean' => 'The product must have a status.',
+            'product.categories.*.id.required_with' => 'Each category must have an ID.',
+            'product.categories.*.id.integer' => 'Each category ID must be an integer.',
+            'product.categories.*.id.exists' => 'Each category ID must exist in the categories table.',
+            'product.prices.required' => 'At least one price is required.',
+            'product.prices.*.sku.required' => 'Each price must have a SKU.',
+            'product.prices.*.sku.unique' => 'Price SKU must be unique.',
+            'product.prices.*.price.required' => 'Price must have a price value.',
+            'product.prices.*.price.numeric' => 'Price value must be numeric.',
+            'product.prices.*.price.min' => 'Price must be at least 1.',
+        ]);
+
+        $productData = $validatedData['product'];
+
+        DB::beginTransaction();
+
+        try {
+            $product->update([
+                'title' => $productData['title'],
+                'sku' => $productData['sku'],
+                'slug' => $productData['slug'],
+                'description' => $productData['description'],
+                'image' => $productData['image'],
+                'status' => $productData['status'],
+            ]);
+
+            if (isset($productData['categories'])) {
+                $product->categories()->sync(array_column($productData['categories'], 'id'));
+            }
+
+            $priceIds = [];
+
+            foreach ($productData['prices'] as $priceData) {
+                $variant = $product->variants()->updateOrCreate(
+                    ['id' => $priceData['id'] ?? null],
+                    [
+                        'sku' => $priceData['sku'],
+                        'price' => $priceData['price'],
+                    ]
+                );
+                $priceIds[] = $variant->id;
+
+                $attributesToSync = [];
+
+                // Handle title
+                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttributes($priceData, 'title'));
+
+                // Handle description
+                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttributes($priceData, 'description'));
+
+                // Handle image
+                $attributesToSync = array_merge($attributesToSync, $this->handleImageAttribute($priceData, false));
+                // if (!empty($priceData['image'])) {
+                //     $attribute = Attribute::firstOrCreate(['name' => 'Image', 'data_type' => 'string']);
+                //     $image_path = $priceData['image']['file_path'] . $priceData['image']['file_name'];
+                //     $attributeValue = AttributeValue::updateOrCreate(
+                //         ['attribute_id' => $attribute->id, 'value' => $image_path]
+                //     );
+                //     $attributesToSync[] = $attributeValue->id;
+                // }
+
+                // Handle extended_properties
+                if (isset($priceData['extended_properties'])) {
+                    foreach ($priceData['extended_properties'] as $name => $value) {
+                        if (!empty($value)) {
+                            $attribute = Attribute::where('name', $name)->first();
+                            if ($attribute) {
+                                $attributeValue = AttributeValue::updateOrCreate(
+                                    ['attribute_id' => $attribute->id, 'value' => $value]
+                                );
+                                $attributesToSync[] = $attributeValue->id;
+                            }
+                        }
+                    }
+                }
+
+                $variant->attributeValues()->sync($attributesToSync);
+            }
+
+            // Delete variants that are no longer in the request
+            $product->variants()->whereNotIn('id', $priceIds)->delete();
+
+            DB::commit();
+            return redirect()->route('dashboard.products')->with('success', 'Product updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     public function destroy($id)
     {
-        // This is handled by the DashboardController, which is fine.
+        $product = Product::findOrFail($id);
+        $product->delete();
+
+        return redirect()->route('dashboard.products')->with('success', 'Product deleted successfully.');
     }
 
     public function productMedia(Request $request)

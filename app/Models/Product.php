@@ -15,12 +15,12 @@ class Product extends Model
     protected $fillable = [
         'id',
         'uuid',
-        'name',
         'slug',
         'sku',
         'title',
         'description',
         'image',
+        'status',
         'category_id',
         'created_at',
         'updated_at',

@@ -87,7 +87,8 @@ export type Price = {
     product?: Product;
     title?: string | null;
     description?: string | null;
-    price_image?: Media | null;
+    image?: Media | null;
+    attribute_values?: AttributeValue[];
 };
 
 export type Attributes = {

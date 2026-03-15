@@ -88,6 +88,9 @@ Route::post('/clear-guest-session', [CheckoutStepsController::class, 'clearGuest
 
 Route::inertia('/session', 'session/index')->name('session.index');
 
+Route::get('/phpinfo', function () {
+    phpinfo();
+});
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

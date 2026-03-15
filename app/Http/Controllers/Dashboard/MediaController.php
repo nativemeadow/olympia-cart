@@ -56,17 +56,23 @@ class MediaController extends Controller
 
     public function store(Request $request)
     {
+
+        $maxSizeInKb = env('UPLOAD_MAX_FILE_SIZE', 3072); // Value in kilobytes
+        $maxSizeInMb = $maxSizeInKb / 1024;
+
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
             'file_name' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'alt_text' => 'nullable|string|max:255',
-            'file' => 'required|file|mimes:jpg,jpeg,png,gif,pdf,webp|max:2048',
+            'file' => 'required|file|mimes:jpg,jpeg,png,gif,pdf,webp|max:' . $maxSizeInKb,
             'type' => 'required|string|in:products,product-categories,faq,other',
+        ], [
+            'file.max' => "The file size exceeds the maximum allowed size of {$maxSizeInMb}MB. Please choose a smaller file.",
         ]);
 
         if (!$request->hasFile('file')) {
-            return redirect()->back()->withErrors(['file' => 'No file uploaded.']);
+            return back()->withErrors(['file' => 'No file uploaded.']);
         }
 
         // before we save the file we need to see if the file already exists in the storage, if it does we should not save it again, instead we should just create a new record in the database with the existing file path and name
@@ -115,13 +121,18 @@ class MediaController extends Controller
 
     public function update(Request $request, Media $media)
     {
+        $maxSizeInKb = env('UPLOAD_MAX_FILE_SIZE', 3072); // Value in kilobytes
+        $maxSizeInMb = $maxSizeInKb / 1024;
+
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'alt_text' => 'nullable|string|max:255',
             'type' => 'sometimes|string|in:products,product-categories,faq,other',
             'file_name' => 'sometimes|string|max:255',
-            'file' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf,webp|max:2048', // Changed to nullable
+            'file' => "nullable|file|mimes:jpg,jpeg,png,gif,pdf,webp|max:{$maxSizeInKb}", // Changed to nullable
+        ], [
+            'file.max' => "The file size exceeds the maximum allowed size of {$maxSizeInMb}MB. Please choose a smaller file.",
         ]);
 
         // Update text-based fields from the request.
@@ -137,13 +148,9 @@ class MediaController extends Controller
             // determine if the file already exists in the storage, if it does we should not save it again, instead we should just update the existing record in the database with the existing file path and name
             $existingMedia = Media::where('file_name', $request->file('file')->getClientOriginalName())->first();
 
-            // if the file already exists we send an error message back to the 
-            // user and not the same file name is not allowed to be uploaded 
-            // twice, we want to prevent orphaned files in the storage and 
-            // also prevent confusion for the users when they see multiple 
-            // files with the same name
+            // if the file already exists we send an error message back to the user
             if ($existingMedia && $request->file('file')->getClientOriginalName() !== $media->file_name) {
-                return redirect()->back()->withErrors(['file' => 'A file with the same name already exists. Please rename your file and try again.']);
+                return back()->withErrors(['file' => 'A file with the same name already exists. Please rename your file and try again.']);
             }
 
             $file = $request->file('file');

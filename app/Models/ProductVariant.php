@@ -23,7 +23,7 @@ class ProductVariant extends Model
         'stripe_price_id',
     ];
 
-    protected $appends = ['extended_properties', 'price_image', 'title', 'description'];
+    protected $appends = ['extended_properties', 'image', 'title', 'description'];
 
     /**
      * Get the parent product that this variant belongs to.
@@ -59,7 +59,7 @@ class ProductVariant extends Model
         });
     }
 
-    public function getPriceImageAttribute(): ?Media
+    public function getImageAttribute(): ?Media
     {
         $this->loadMissing('attributeValues.attribute');
 

@@ -3,6 +3,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
     max-width: 100%;
+    align-items: start;
 }
 
 .right_column {
@@ -10,6 +11,9 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    position: sticky;
+    top: 0;
+    align-self: start; /* Stick to the top of the grid row */
 }
 
 .center_column {
@@ -17,6 +21,9 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    top: 0;
+    align-self: start;
+    overflow-y: auto;
 }
 
 .left_column {
@@ -24,6 +31,9 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    position: sticky;
+    top: 0;
+    align-self: start;
 }
 
 .separator {
@@ -111,6 +121,7 @@
     bottom: 0.5rem; /* bottom-2 */
     opacity: 0;
     transition: opacity 150ms ease-in-out;
+    cursor: pointer;
 }
 
 .pencilIcon {
@@ -153,9 +164,8 @@
 
 .inputSkuPrice {
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
     gap: 1rem;
-    justify-content: space-between;
 }
 
 .inputItem {
@@ -181,8 +191,28 @@
     color: var(--color-red-600);
 }
 
+.addPriceButton {
+    cursor: pointer;
+    color: var(--color-green-600);
+}
+
+.addMediaButton {
+    cursor: pointer;
+    color: var(--color-blue-600);
+}
+
 .priceFields {
     display: flex;
     align-items: flex-end;
     gap: 1rem;
+}
+
+.radioGroup {
+    display: flex;
+    gap: 1rem;
+    margin-left: 1rem;
+}
+
+.label {
+    margin-left: 0.5rem;
 }

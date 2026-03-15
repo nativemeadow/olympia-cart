@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CategoryHierarchy } from '@/types';
 import { Product as ProductType } from '@/types/model-types';
 import { Button } from '@/components/ui/button';
@@ -8,12 +8,9 @@ import {
     EditProductAction,
     DeleteProductAction,
 } from './product-actions';
-import {
-    AddCategoryAction,
-    DeleteCategoryAction,
-    EditCategoryAction,
-} from '../categories/category-actions';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
+import Toastify from 'toastify-js';
+import 'toastify-js/src/toastify.css';
 import styles from './products.module.css';
 import classes from './products.module.css';
 
@@ -23,16 +20,31 @@ interface ProductNodeProps {
 
 const ProductNode: React.FC<ProductNodeProps> = ({ category }) => {
     const [isOpen, setIsOpen] = useState(true); // Default to open
+    const { props } = usePage();
     const hasChildren = category.children && category.children.length > 0;
     const hasProducts = category.products && category.products.length > 0;
     const isExpandable = hasChildren || hasProducts;
+
+    useEffect(() => {
+        const flash = props.flash as { success?: string };
+        if (flash && flash.success) {
+            Toastify({
+                text: flash.success,
+                duration: 3000,
+                close: true,
+                gravity: 'top',
+                position: 'right',
+                backgroundColor: 'linear-gradient(to right, #00b09b, #96c93d)',
+            }).showToast();
+        }
+    }, [props.flash]);
 
     const handleToggle = () => {
         if (isExpandable) setIsOpen(!isOpen);
     };
 
     const handleSuccess = () => {
-        router.visit(route('dashboard.products.index'), {
+        router.visit(route('dashboard.products'), {
             only: ['categories'],
             preserveScroll: true,
         });
@@ -61,19 +73,10 @@ const ProductNode: React.FC<ProductNodeProps> = ({ category }) => {
                 </div>
                 <span className={styles.node_title}>{category.title}</span>
                 <div className={styles.actions}>
-                    <AddProductAction onSuccess={handleSuccess} />
-                    {/* <AddCategoryAction
-                        category={category}
+                    <AddProductAction
                         onSuccess={handleSuccess}
-                    /> */}
-                    {/* <EditCategoryAction
-                        category={category}
-                        onSuccess={handleSuccess}
+                        categoryId={category.id}
                     />
-                    <DeleteCategoryAction
-                        category={category}
-                        onSuccess={handleSuccess}
-                    /> */}
                 </div>
             </div>
             {isOpen && (
@@ -105,9 +108,6 @@ const ProductNode: React.FC<ProductNodeProps> = ({ category }) => {
                                             product={product}
                                             onSuccess={handleSuccess}
                                         />
-                                        {/* <AddProductAction
-                                            onSuccess={handleSuccess}
-                                        /> */}
                                         <DeleteProductAction
                                             product={product}
                                             onSuccess={handleSuccess}

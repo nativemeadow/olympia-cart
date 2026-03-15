@@ -14,6 +14,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
@@ -21,90 +22,125 @@ import { Label } from '@/components/ui/label';
 import cx from 'clsx';
 import { Product, Price, ExtendedProps, Attributes } from '@/types/model-types';
 import { useForm } from '@inertiajs/react';
-import { InputError } from '@/components/ui/input-error';
 import classes from './product-form.module.css';
 import EditorComponent from '@/components/text-editor';
 import { Media } from '@/types/model-types';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import MediaSelectionModal from '@/pages/dashboard/media/media-selection-modal';
-
-type PageProps<T = {}> = T & {
-    auth: any;
-    flash: any;
-};
+import '@/../css/errors.css';
+import { DeletePriceForm } from './delete-price';
+import {} from '@heroui/react';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { T } from 'vitest/dist/chunks/reporters.d.BFLkQcL6.js';
 
 const initialProduct = (): Product => ({
     id: 0,
-    title: '',
     uuid: '',
-    description: '',
+    title: '',
     sku: '',
     slug: '',
-    status: false,
+    description: '',
+    image: '',
+    status: true,
+    categories: [],
+    prices: [],
+    media: [],
     created_at: '',
     updated_at: '',
-    prices: [initialPrice()],
-    categories: [],
-    media: [],
 });
 
 const initialPrice = (attributes?: Attributes[]): Price => {
-    const extended_properties = attributes?.reduce((acc, attr) => {
-        acc[attr.name] = attr.data_type === 'decimal' ? 0 : '';
-        return acc;
-    }, {} as ExtendedProps);
-
-    const product = {
-        id: 0,
+    const extended_properties: ExtendedProps = {};
+    if (attributes) {
+        attributes.forEach((attr) => {
+            extended_properties[attr.name] = '';
+        });
+    }
+    return {
+        id: Date.now(), // Temporary unique ID
         product_id: 0,
         sku: '',
         price: 0,
         title: '',
         description: '',
-        extended_properties: extended_properties || {},
-        price_image: null as Media | null,
+        image: null,
+        extended_properties: extended_properties,
     };
-
-    return product;
 };
-
-const excludeKeys = ['Image', 'Title', 'Description'];
 
 const PrepareProductData = (
     product: Product,
     attributes?: Attributes[],
 ): Product => {
-    product.prices?.forEach((price) => {
-        attributes?.forEach((attr) => {
-            if (
-                price.extended_properties &&
-                !price.extended_properties[attr.name]
-            ) {
-                price.extended_properties[attr.name] =
-                    attr.data_type === 'decimal' ? 0 : '';
+    const processedPrices = product.prices?.map((price) => {
+        const newPrice: Price = { ...initialPrice(attributes), ...price };
+        newPrice.extended_properties = { ...newPrice.extended_properties };
+
+        price.attribute_values?.forEach((attrValue) => {
+            if (attrValue.attribute) {
+                const attrName = attrValue.attribute.name;
+                if (attrName === 'Title') {
+                    newPrice.title = attrValue.value;
+                } else if (attrName === 'Description') {
+                    newPrice.description = attrValue.value;
+                } else if (attrName === 'Image') {
+                    // This assumes the value is a path that can be resolved to a media object
+                    // This part might need more complex logic if you need to fetch the full Media object
+                } else if (newPrice.extended_properties) {
+                    newPrice.extended_properties[attrName] = attrValue.value;
+                }
             }
         });
+        return newPrice;
     });
-    console.log('Prepared product data:', product);
-    return product;
+
+    return {
+        ...product,
+        prices: processedPrices,
+    };
 };
 
-type ProductFormData = {
+interface ProductFormData {
     product: Product;
+}
+
+interface FieldWrapperProps {
+    children: React.ReactNode;
+    error?: string;
+}
+
+const FieldWrapper: React.FC<FieldWrapperProps> = ({ children, error }) => {
+    return (
+        <div className="error-container">
+            {children}
+            {error && <div className="input-error-bubble">{error}</div>}
+        </div>
+    );
 };
 
 const ProductForm = ({
     product,
+    categoryId,
     attributes,
     isEdit = false,
     onSuccess,
 }: {
     product?: Product;
+    categoryId?: number;
     attributes?: Attributes[];
     isEdit?: boolean;
     onSuccess: () => void;
 }) => {
-    const { data, setData, post, put, processing, errors, reset } =
+    const [priceStrings, setPriceStrings] = useState<{ [key: string]: string }>(
+        {},
+    );
+    const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(isEdit);
+
+    const { data, setData, post, put, processing, errors, reset, clearErrors } =
         useForm<ProductFormData>();
 
     useEffect(() => {
@@ -120,18 +156,14 @@ const ProductForm = ({
     console.log('ProductForm data:', data);
     console.log('ProductForm attributes:', attributes);
 
-    const [editingPriceImage, setEditingPriceImage] = useState<number | null>(
-        null,
-    );
-
-    const handleImageSelect = (image: Media) => {
-        if (editingPriceImage !== null) {
+    const handleImageSelect = (image: Media, priceId?: number) => {
+        if (priceId !== undefined) {
             if (!data.product.prices) return;
             const updatedPrices = data.product.prices.map((price) => {
-                if (price.id === editingPriceImage) {
+                if (price.id === priceId) {
                     return {
                         ...price,
-                        price_image: image,
+                        image: image,
                         extended_properties: {
                             ...price.extended_properties,
                             Image: String(image.id),
@@ -142,9 +174,9 @@ const ProductForm = ({
             });
 
             setData('product.prices', updatedPrices);
-            setEditingPriceImage(null);
         } else {
             setData('product.media', [image]);
+            setData('product.image', image.file_name);
         }
     };
 
@@ -159,7 +191,7 @@ const ProductForm = ({
         if (isEdit && product) {
             put(route('dashboard.products.update', product.id), options);
         } else {
-            post(route('dashboard.products.store'), options);
+            post(route('dashboard.products.store', categoryId), options);
         }
     };
 
@@ -207,52 +239,132 @@ const ProductForm = ({
                                 >
                                     Title
                                 </Label>
-                                <Input
-                                    id="title"
-                                    type="text"
-                                    value={data.product.title}
-                                    onChange={(e) =>
-                                        setData('product.title', e.target.value)
-                                    }
-                                    className={classes.input}
-                                />
-                                <InputError
-                                    message={errors['product.title'] || ''}
-                                />
+                                <FieldWrapper error={errors['product.title']}>
+                                    <Input
+                                        id="title"
+                                        type="text"
+                                        value={data.product.title}
+                                        onChange={(e) => {
+                                            clearErrors('product.title');
+                                            const newTitle = e.target.value;
+                                            setData('product.title', newTitle);
+                                            if (!isSlugManuallyEdited) {
+                                                clearErrors('product.slug');
+                                                const newSlug = newTitle
+                                                    .toLowerCase()
+                                                    .replace(
+                                                        /[^a-z0-9\s-]/g,
+                                                        '',
+                                                    )
+                                                    .replace(/\s+/g, '-')
+                                                    .replace(/-+/g, '-');
+                                                setData(
+                                                    'product.slug',
+                                                    newSlug,
+                                                );
+                                            }
+                                        }}
+                                        className={cx(classes.input, {
+                                            'input-with-error':
+                                                errors['product.title'],
+                                        })}
+                                    />
+                                </FieldWrapper>
                             </div>
                             <div>
                                 <Label htmlFor="sku" className={classes.label}>
                                     SKU
                                 </Label>
-                                <Input
-                                    id="sku"
-                                    type="text"
-                                    value={data.product.sku}
-                                    onChange={(e) =>
-                                        setData('product.sku', e.target.value)
-                                    }
-                                    className={classes.input}
-                                />
-                                <InputError
-                                    message={errors['product.sku'] || ''}
-                                />
+                                <FieldWrapper error={errors['product.sku']}>
+                                    <Input
+                                        id="sku"
+                                        type="text"
+                                        value={data.product.sku}
+                                        onChange={(e) => {
+                                            clearErrors('product.sku');
+                                            setData(
+                                                'product.sku',
+                                                e.target.value,
+                                            );
+                                        }}
+                                        className={cx(classes.input, {
+                                            'input-with-error':
+                                                errors['product.sku'],
+                                        })}
+                                    />
+                                </FieldWrapper>
                             </div>
                             <div>
                                 <Label htmlFor="slug" className={classes.label}>
                                     Slug
                                 </Label>
-                                <Input
-                                    id="slug"
-                                    type="text"
-                                    value={data.product.slug}
-                                    onChange={(e) =>
-                                        setData('product.slug', e.target.value)
-                                    }
-                                    className={classes.input}
-                                />
-                                <InputError
-                                    message={errors['product.slug'] || ''}
-                                />
+                                <FieldWrapper error={errors['product.slug']}>
+                                    <Input
+                                        id="slug"
+                                        type="text"
+                                        value={data.product.slug}
+                                        onChange={(e) => {
+                                            clearErrors('product.slug');
+                                            setData(
+                                                'product.slug',
+                                                e.target.value,
+                                            );
+                                            setIsSlugManuallyEdited(true);
+                                        }}
+                                        className={cx(classes.input, {
+                                            'input-with-error':
+                                                errors['product.slug'],
+                                        })}
+                                    />
+                                </FieldWrapper>
+                            </div>
+                            <div>
+                                <Label htmlFor="slug" className={classes.label}>
+                                    Status
+                                </Label>
+                                <FieldWrapper error={errors['product.status']}>
+                                    <RadioGroup
+                                        onValueChange={(value) => {
+                                            clearErrors('product.status');
+                                            setData(
+                                                'product.status',
+                                                value === '1',
+                                            );
+                                        }}
+                                        value={data.product.status ? '1' : '0'}
+                                        className={cx(classes.radioGroup, {
+                                            'input-with-error':
+                                                errors['product.status'],
+                                        })}
+                                    >
+                                        <div className={classes.radioItem}>
+                                            <RadioGroupItem
+                                                value="1"
+                                                id="status-active"
+                                                className={classes.radioInput}
+                                            />
+                                            <Label
+                                                htmlFor="status-active"
+                                                className={classes.label}
+                                            >
+                                                Active
+                                            </Label>
+                                        </div>
+                                        <div className={classes.radioItem}>
+                                            <RadioGroupItem
+                                                value="0"
+                                                id="status-inactive"
+                                                className={classes.radioInput}
+                                            />
+                                            <Label
+                                                htmlFor="status-inactive"
+                                                className={classes.label}
+                                            >
+                                                Inactive
+                                            </Label>
+                                        </div>
+                                    </RadioGroup>
+                                </FieldWrapper>
                             </div>
                             <div>
                                 <Label
@@ -261,20 +373,25 @@ const ProductForm = ({
                                 >
                                     Description
                                 </Label>
-                                <EditorComponent
-                                    id="description"
-                                    initialValue={
-                                        data.product.description || ''
-                                    }
-                                    handleEditorChange={(content: string) =>
-                                        setData('product.description', content)
-                                    }
-                                />
-                                <InputError
-                                    message={
-                                        errors['product.description'] || ''
-                                    }
-                                />
+                                <FieldWrapper
+                                    error={errors['product.description']}
+                                >
+                                    <EditorComponent
+                                        id="description"
+                                        initialValue={
+                                            data.product.description || ''
+                                        }
+                                        handleEditorChange={(
+                                            content: string,
+                                        ) => {
+                                            clearErrors('product.description');
+                                            setData(
+                                                'product.description',
+                                                content,
+                                            );
+                                        }}
+                                    />
+                                </FieldWrapper>
                             </div>
                             <div className={classes.imageContainer}>
                                 <h2>Image</h2>
@@ -318,21 +435,31 @@ const ProductForm = ({
                                                                 data.product.id
                                                             }
                                                         >
-                                                            <Button
-                                                                type="button"
-                                                                variant="outline"
-                                                                size="icon"
-                                                                className={
-                                                                    classes.editButton
-                                                                }
-                                                                aria-label="Select or change image"
-                                                            >
-                                                                <Pencil
-                                                                    className={
-                                                                        classes.pencilIcon
-                                                                    }
-                                                                />
-                                                            </Button>
+                                                            <Tooltip>
+                                                                <TooltipTrigger
+                                                                    asChild
+                                                                >
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="outline"
+                                                                        size="icon"
+                                                                        className={
+                                                                            classes.editButton
+                                                                        }
+                                                                        aria-label="Select or change image"
+                                                                    >
+                                                                        <Pencil
+                                                                            className={
+                                                                                classes.pencilIcon
+                                                                            }
+                                                                        />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    Select or
+                                                                    change image
+                                                                </TooltipContent>
+                                                            </Tooltip>
                                                         </MediaSelectionModal>
                                                     </figure>
                                                 </div>
@@ -341,7 +468,9 @@ const ProductForm = ({
                                     </>
                                 ) : (
                                     <MediaSelectionModal
-                                        onSelect={handleImageSelect}
+                                        onSelect={(image) =>
+                                            handleImageSelect(image)
+                                        }
                                         productId={data.product.id}
                                     >
                                         <div
@@ -363,22 +492,27 @@ const ProductForm = ({
                                     >
                                         Image File
                                     </Label>
-                                    <Input
-                                        id="image"
-                                        type="text"
-                                        disabled
-                                        value={data.product.image || ''}
-                                        onChange={(e) =>
-                                            setData(
-                                                'product.image',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className={classes.input}
-                                    />
-                                    <InputError
-                                        message={errors['product.image'] || ''}
-                                    />
+                                    <FieldWrapper
+                                        error={errors['product.image']}
+                                    >
+                                        <Input
+                                            id="image"
+                                            name="image"
+                                            type="text"
+                                            disabled
+                                            value={data.product.image || ''}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'product.image',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className={cx(classes.input, {
+                                                'input-with-error':
+                                                    errors['product.image'],
+                                            })}
+                                        />
+                                    </FieldWrapper>
                                 </div>
                             ) : null}
                         </CardContent>
@@ -396,17 +530,28 @@ const ProductForm = ({
                                     <span>
                                         Manage product prices and options.
                                     </span>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="icon"
-                                        title="Add new price option"
-                                        className={classes.addPriceButton}
-                                        aria-label="Add new price option"
-                                        onClick={addPrice}
-                                    >
-                                        <Plus className={classes.plusIcon} />
-                                    </Button>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="icon"
+                                                title="Add new price option"
+                                                className={
+                                                    classes.addPriceButton
+                                                }
+                                                aria-label="Add new price option"
+                                                onClick={addPrice}
+                                            >
+                                                <Plus
+                                                    className={classes.plusIcon}
+                                                />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            Add new price option
+                                        </TooltipContent>
+                                    </Tooltip>
                                 </CardDescription>
                             </CardHeader>
                             <CardContent
@@ -418,31 +563,39 @@ const ProductForm = ({
                                 <>
                                     {data.product?.prices?.map(
                                         (price, index) => (
-                                            <div key={`price-${price.id}`}>
-                                                <div key={price.id}>
+                                            <div key={index}>
+                                                <div
+                                                    className={
+                                                        classes.inputSkuPrice
+                                                    }
+                                                >
                                                     <div
                                                         className={
-                                                            classes.inputSkuPrice
+                                                            classes.priceFields
                                                         }
                                                     >
                                                         <div
                                                             className={
-                                                                classes.priceFields
+                                                                classes.inputItem
                                                             }
                                                         >
-                                                            <div
+                                                            <Label
+                                                                htmlFor="sku"
                                                                 className={
-                                                                    classes.inputItem
+                                                                    classes.label
                                                                 }
                                                             >
-                                                                <Label
-                                                                    htmlFor="sku"
-                                                                    className={
-                                                                        classes.label
-                                                                    }
-                                                                >
-                                                                    Sku
-                                                                </Label>
+                                                                Sku
+                                                            </Label>
+                                                            <FieldWrapper
+                                                                error={
+                                                                    (
+                                                                        errors as any
+                                                                    )[
+                                                                        `product.prices.${index}.sku`
+                                                                    ]
+                                                                }
+                                                            >
                                                                 <Input
                                                                     id={`sku-${price.id}`}
                                                                     type="text"
@@ -452,98 +605,126 @@ const ProductForm = ({
                                                                     }
                                                                     onChange={(
                                                                         e,
-                                                                    ) =>
+                                                                    ) => {
+                                                                        clearErrors(
+                                                                            `product.prices.${index}.sku` as any,
+                                                                        );
                                                                         setData(
                                                                             `product.prices.${index}.sku` as any,
                                                                             e
                                                                                 .target
                                                                                 .value,
-                                                                        )
-                                                                    }
-                                                                    className={
-                                                                        classes.skuInput
-                                                                    }
+                                                                        );
+                                                                    }}
+                                                                    className={cx(
+                                                                        classes.skuInput,
+                                                                        {
+                                                                            'input-with-error':
+                                                                                (
+                                                                                    errors as any
+                                                                                )[
+                                                                                    `product.prices.${index}.sku`
+                                                                                ],
+                                                                        },
+                                                                    )}
                                                                 />
-                                                                <InputError
-                                                                    message={
-                                                                        (
-                                                                            errors as any
-                                                                        )[
-                                                                            `product.prices.${index}.sku`
-                                                                        ] || ''
-                                                                    }
-                                                                />
-                                                            </div>
-                                                            <div
+                                                            </FieldWrapper>
+                                                        </div>
+                                                        <div
+                                                            className={
+                                                                classes.inputItem
+                                                            }
+                                                        >
+                                                            <Label
+                                                                htmlFor={`price-${price.id}`}
                                                                 className={
-                                                                    classes.inputItem
+                                                                    classes.label
                                                                 }
                                                             >
-                                                                <Label
-                                                                    htmlFor={`price-${price.id}`}
-                                                                    className={
-                                                                        classes.label
-                                                                    }
-                                                                >
-                                                                    Price
-                                                                </Label>
+                                                                Price
+                                                            </Label>
+                                                            <FieldWrapper
+                                                                error={
+                                                                    (
+                                                                        errors as any
+                                                                    )[
+                                                                        `product.prices.${index}.price`
+                                                                    ]
+                                                                }
+                                                            >
                                                                 <Input
                                                                     id={`price-${price.id}`}
                                                                     type="number"
-                                                                    value={Number(
-                                                                        price.price /
-                                                                            100,
-                                                                    ).toFixed(
-                                                                        2,
-                                                                    )}
-                                                                    onChange={(
-                                                                        e,
-                                                                    ) =>
-                                                                        setData(
-                                                                            `product.prices.${index}.price` as any,
-                                                                            parseFloat(
-                                                                                e
-                                                                                    .target
-                                                                                    .value,
-                                                                            ),
+                                                                    value={
+                                                                        priceStrings[
+                                                                            index
+                                                                        ] ??
+                                                                        (
+                                                                            price.price /
+                                                                            100
+                                                                        ).toFixed(
+                                                                            2,
                                                                         )
                                                                     }
-                                                                    className={
-                                                                        classes.priceInput
-                                                                    }
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) => {
+                                                                        clearErrors(
+                                                                            `product.prices.${index}.price` as any,
+                                                                        );
+                                                                        const newPriceStrings =
+                                                                            {
+                                                                                ...priceStrings,
+                                                                                [index]:
+                                                                                    e
+                                                                                        .target
+                                                                                        .value,
+                                                                            };
+                                                                        setPriceStrings(
+                                                                            newPriceStrings,
+                                                                        );
+
+                                                                        const valueInCents =
+                                                                            Math.round(
+                                                                                parseFloat(
+                                                                                    e
+                                                                                        .target
+                                                                                        .value,
+                                                                                ) *
+                                                                                    100,
+                                                                            );
+                                                                        if (
+                                                                            !isNaN(
+                                                                                valueInCents,
+                                                                            )
+                                                                        ) {
+                                                                            setData(
+                                                                                `product.prices.${index}.price` as any,
+                                                                                valueInCents,
+                                                                            );
+                                                                        }
+                                                                    }}
+                                                                    className={cx(
+                                                                        classes.priceInput,
+                                                                        {
+                                                                            'input-with-error':
+                                                                                (
+                                                                                    errors as any
+                                                                                )[
+                                                                                    `product.prices.${index}.price`
+                                                                                ],
+                                                                        },
+                                                                    )}
                                                                 />
-                                                                <InputError
-                                                                    message={
-                                                                        (
-                                                                            errors as any
-                                                                        )[
-                                                                            `product.prices.${index}.price`
-                                                                        ] || ''
-                                                                    }
-                                                                />
-                                                            </div>
+                                                            </FieldWrapper>
                                                         </div>
-                                                        <Button
-                                                            type="button"
-                                                            variant="outline"
-                                                            size="icon"
-                                                            title="Remove price option"
-                                                            className={
-                                                                classes.removePriceButton
+
+                                                        <DeletePriceForm
+                                                            priceId={price.id}
+                                                            removePrice={
+                                                                removePrice
                                                             }
-                                                            aria-label="Remove price option"
-                                                            onClick={() =>
-                                                                removePrice(
-                                                                    price.id,
-                                                                )
-                                                            }
-                                                        >
-                                                            <Trash2
-                                                                className={
-                                                                    classes.trashIcon
-                                                                }
-                                                            />
-                                                        </Button>
+                                                        />
                                                     </div>
 
                                                     <div>
@@ -555,31 +736,45 @@ const ProductForm = ({
                                                         >
                                                             Title
                                                         </Label>
-                                                        <Input
-                                                            id={`price-${price.id}-title`}
-                                                            type="text"
-                                                            value={
-                                                                price.title ||
-                                                                ''
-                                                            }
-                                                            onChange={(e) =>
-                                                                setData(
-                                                                    `product.prices.${index}.title` as any,
-                                                                    e.target
-                                                                        .value,
-                                                                )
-                                                            }
-                                                            className={
-                                                                classes.titleInput
-                                                            }
-                                                        />
-                                                        <InputError
-                                                            message={
+                                                        <FieldWrapper
+                                                            error={
                                                                 (errors as any)[
                                                                     `product.prices.${index}.title`
-                                                                ] || ''
+                                                                ]
                                                             }
-                                                        />
+                                                        >
+                                                            <Input
+                                                                id={`price-${price.id}-title`}
+                                                                type="text"
+                                                                value={
+                                                                    price.title ||
+                                                                    ''
+                                                                }
+                                                                onChange={(
+                                                                    e,
+                                                                ) => {
+                                                                    clearErrors(
+                                                                        `product.prices.${index}.title` as any,
+                                                                    );
+                                                                    setData(
+                                                                        `product.prices.${index}.title` as any,
+                                                                        e.target
+                                                                            .value,
+                                                                    );
+                                                                }}
+                                                                className={cx(
+                                                                    classes.titleInput,
+                                                                    {
+                                                                        'input-with-error':
+                                                                            (
+                                                                                errors as any
+                                                                            )[
+                                                                                `product.prices.${index}.title`
+                                                                            ],
+                                                                    },
+                                                                )}
+                                                            />
+                                                        </FieldWrapper>
                                                     </div>
 
                                                     <div>
@@ -591,34 +786,48 @@ const ProductForm = ({
                                                         >
                                                             Description
                                                         </Label>
-                                                        <Input
-                                                            id={`price-${price.id}-description`}
-                                                            type="text"
-                                                            value={
-                                                                price.description ||
-                                                                ''
-                                                            }
-                                                            onChange={(e) =>
-                                                                setData(
-                                                                    `product.prices.${index}.description` as any,
-                                                                    e.target
-                                                                        .value,
-                                                                )
-                                                            }
-                                                            className={
-                                                                classes.descriptionInput
-                                                            }
-                                                        />
-                                                        <InputError
-                                                            message={
+                                                        <FieldWrapper
+                                                            error={
                                                                 (errors as any)[
                                                                     `product.prices.${index}.description`
-                                                                ] || ''
+                                                                ]
                                                             }
-                                                        />
+                                                        >
+                                                            <Input
+                                                                id={`price-${price.id}-description`}
+                                                                type="text"
+                                                                value={
+                                                                    price.description ||
+                                                                    ''
+                                                                }
+                                                                onChange={(
+                                                                    e,
+                                                                ) => {
+                                                                    clearErrors(
+                                                                        `product.prices.${index}.description` as any,
+                                                                    );
+                                                                    setData(
+                                                                        `product.prices.${index}.description` as any,
+                                                                        e.target
+                                                                            .value,
+                                                                    );
+                                                                }}
+                                                                className={cx(
+                                                                    classes.descriptionInput,
+                                                                    {
+                                                                        'input-with-error':
+                                                                            (
+                                                                                errors as any
+                                                                            )[
+                                                                                `product.prices.${index}.description`
+                                                                            ],
+                                                                    },
+                                                                )}
+                                                            />
+                                                        </FieldWrapper>
                                                     </div>
 
-                                                    {price.price_image ? (
+                                                    {price.image ? (
                                                         <div
                                                             className={`${classes.mediaItem}`}
                                                         >
@@ -643,24 +852,29 @@ const ProductForm = ({
                                                                     >
                                                                         <img
                                                                             src={
-                                                                                `/${price.price_image?.file_path}` +
+                                                                                `/${price.image?.file_path}` +
                                                                                 price
-                                                                                    .price_image
+                                                                                    .image
                                                                                     ?.file_name
                                                                             }
                                                                             alt={
                                                                                 price
-                                                                                    .price_image
+                                                                                    .image
                                                                                     ?.alt_text ||
                                                                                 price
-                                                                                    .price_image
+                                                                                    .image
                                                                                     ?.title
                                                                             }
                                                                         />
                                                                     </figure>
                                                                     <MediaSelectionModal
-                                                                        onSelect={
-                                                                            handleImageSelect
+                                                                        onSelect={(
+                                                                            image,
+                                                                        ) =>
+                                                                            handleImageSelect(
+                                                                                image,
+                                                                                price.id,
+                                                                            )
                                                                         }
                                                                         productId={
                                                                             data
@@ -668,34 +882,44 @@ const ProductForm = ({
                                                                                 .id
                                                                         }
                                                                     >
-                                                                        <Button
-                                                                            type="button"
-                                                                            variant="outline"
-                                                                            size="icon"
-                                                                            className={
-                                                                                classes.editButton
-                                                                            }
-                                                                            aria-label="Select or change image"
-                                                                            onClick={() =>
-                                                                                setEditingPriceImage(
-                                                                                    price.id,
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            <Pencil
-                                                                                className={
-                                                                                    classes.pencilIcon
-                                                                                }
-                                                                            />
-                                                                        </Button>
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger
+                                                                                asChild
+                                                                            >
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="outline"
+                                                                                    size="icon"
+                                                                                    className={
+                                                                                        classes.editButton
+                                                                                    }
+                                                                                    aria-label="Select or change image"
+                                                                                >
+                                                                                    <Pencil
+                                                                                        className={
+                                                                                            classes.pencilIcon
+                                                                                        }
+                                                                                    />
+                                                                                </Button>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent>
+                                                                                Select
+                                                                                or
+                                                                                change
+                                                                                image
+                                                                            </TooltipContent>
+                                                                        </Tooltip>
                                                                     </MediaSelectionModal>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     ) : (
                                                         <MediaSelectionModal
-                                                            onSelect={
-                                                                handleImageSelect
+                                                            onSelect={(image) =>
+                                                                handleImageSelect(
+                                                                    image,
+                                                                    price.id,
+                                                                )
                                                             }
                                                             productId={
                                                                 data.product.id
@@ -728,17 +952,13 @@ const ProductForm = ({
                                                                 id={`price-${price.id}-file`}
                                                                 type="text"
                                                                 value={
-                                                                    data.product
-                                                                        .prices?.[
-                                                                        index
-                                                                    ]
-                                                                        .price_image
+                                                                    price.image
                                                                         ?.file_name ||
                                                                     ''
                                                                 }
                                                                 onChange={(e) =>
                                                                     setData(
-                                                                        `product.prices.${index}.price_image` as any,
+                                                                        `product.prices.${index}.image` as any,
                                                                         e.target
                                                                             .value,
                                                                     )
@@ -790,37 +1010,48 @@ const ProductForm = ({
                                                                                         key
                                                                                     }
                                                                                 </Label>
-                                                                                <Input
-                                                                                    id={`price-${price.id}-prop-${key}`}
-                                                                                    type="text"
-                                                                                    value={String(
-                                                                                        value ||
-                                                                                            '',
-                                                                                    )}
-                                                                                    onChange={(
-                                                                                        e,
-                                                                                    ) =>
-                                                                                        setData(
-                                                                                            `product.prices.${index}.extended_properties.${key}` as any,
-                                                                                            e
-                                                                                                .target
-                                                                                                .value,
-                                                                                        )
-                                                                                    }
-                                                                                    className={
-                                                                                        classes.extendedPropInput
-                                                                                    }
-                                                                                />
-                                                                                <InputError
-                                                                                    message={
+                                                                                <FieldWrapper
+                                                                                    error={
                                                                                         (
                                                                                             errors as any
                                                                                         )[
                                                                                             `product.prices.${index}.extended_properties.${propIndex}.value`
-                                                                                        ] ||
-                                                                                        ''
+                                                                                        ]
                                                                                     }
-                                                                                />
+                                                                                >
+                                                                                    <Input
+                                                                                        id={`price-${price.id}-prop-${key}`}
+                                                                                        type="text"
+                                                                                        value={String(
+                                                                                            value ||
+                                                                                                '',
+                                                                                        )}
+                                                                                        onChange={(
+                                                                                            e,
+                                                                                        ) => {
+                                                                                            clearErrors(
+                                                                                                `product.prices.${index}.extended_properties.${key}` as any,
+                                                                                            );
+                                                                                            setData(
+                                                                                                `product.prices.${index}.extended_properties.${key}` as any,
+                                                                                                e
+                                                                                                    .target
+                                                                                                    .value,
+                                                                                            );
+                                                                                        }}
+                                                                                        className={cx(
+                                                                                            classes.extendedPropInput,
+                                                                                            {
+                                                                                                'input-with-error':
+                                                                                                    (
+                                                                                                        errors as any
+                                                                                                    )[
+                                                                                                        `product.prices.${index}.extended_properties.${propIndex}.value`
+                                                                                                    ],
+                                                                                            },
+                                                                                        )}
+                                                                                    />
+                                                                                </FieldWrapper>
                                                                             </div>
                                                                         )}
                                                                     </React.Fragment>
@@ -847,3 +1078,5 @@ const ProductForm = ({
 };
 
 export default ProductForm;
+
+const excludeKeys = ['Title', 'Description', 'Image'];

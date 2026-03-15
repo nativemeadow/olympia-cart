@@ -38,6 +38,10 @@ Route::prefix('dashboard')
             'show',
         ])->name('product.show');
 
+        Route::post('/products/store/{categoryId}', [ProductController::class, 'store'])->name('products.store');
+        Route::put('/products/update/{product_id}', [ProductController::class, 'update'])->name('products.update');
+        Route::delete('/products/destroy/{product_id}', [ProductController::class, 'destroy'])->name('products.destroy');
+
         Route::get('/price/attributes', [
             ProductController::class,
             'getPriceAttributes',

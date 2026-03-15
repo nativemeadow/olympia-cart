@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
     Dialog,
     DialogClose,
@@ -25,6 +26,7 @@ import { useForm } from '@inertiajs/react';
 import { Media } from '@/types/model-types';
 import { ImageTypeOptions } from './readImageFile';
 import { useImagePreview } from '@/hooks/useImagePreview';
+import { formatBytes } from '@/utils/strings';
 import Toastify from 'toastify-js';
 import 'toastify-js/src/toastify.css';
 import { Pencil } from 'lucide-react';
@@ -36,6 +38,7 @@ type UpdateImageProps = {
 
 const UpdateImage = ({ media, imageType }: UpdateImageProps) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
     const {
         file,
         fileName,
@@ -45,16 +48,16 @@ const UpdateImage = ({ media, imageType }: UpdateImageProps) => {
         clearFile,
     } = useImagePreview();
 
-    const { data, setData, post, processing, errors, reset, clearErrors } =
-        useForm({
-            _method: 'PUT', // Method spoofing for file uploads
-            title: media.title,
-            description: media.description ?? '',
-            name: media.file_name,
-            alt_text: media.alt_text ?? '',
-            file: null as File | null,
-            type: imageType ?? media.type ?? '',
-        });
+    const { data, setData, errors, reset, clearErrors, setError } = useForm({
+        _method: 'PUT', // Method spoofing for file uploads
+        title: media.title,
+        description: media.description ?? '',
+        name: media.file_name,
+        alt_text: media.alt_text ?? '',
+        file: null as File | null,
+        type: imageType ?? media.type ?? '',
+        size: media.size ?? '',
+    });
 
     // Sync the file from the hook with the form state
     useEffect(() => {
@@ -72,6 +75,7 @@ const UpdateImage = ({ media, imageType }: UpdateImageProps) => {
             alt_text: media.alt_text ?? '',
             file: null,
             type: imageType ?? media.type ?? '',
+            size: media.size ?? '',
         });
     };
 
@@ -88,32 +92,55 @@ const UpdateImage = ({ media, imageType }: UpdateImageProps) => {
 
     const existingImageUrl = `/${imagePath}/${media.file_name}`;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Use `post` for multipart/form-data, with `_method: 'PATCH'` for spoofing
-        post(route('dashboard.media.update', media.id), {
-            onSuccess: () => closeModal(),
-            onError: () => {
-                // display error message sent from the server in a toast
-                if (errors.file) {
-                    Toastify({
-                        text: errors.file,
-                        duration: 6000,
-                        position: 'center',
-                        backgroundColor: 'red',
-                        close: true,
-                    }).showToast();
-                } else {
-                    Toastify({
-                        text: 'An error occurred while uploading the image. Please try again.',
-                        duration: 6000,
-                        position: 'center',
-                        backgroundColor: 'red',
-                        close: true,
-                    }).showToast();
-                }
-            },
-        });
+        setIsProcessing(true);
+        clearErrors();
+
+        const formData = new FormData();
+        formData.append('_method', 'PUT'); // Spoofing for Laravel
+        formData.append('title', data.title);
+        formData.append('description', data.description);
+        formData.append('alt_text', data.alt_text);
+        formData.append('type', data.type);
+        formData.append('file_name', data.name);
+
+        if (data.file) {
+            formData.append('file', data.file);
+        }
+
+        try {
+            await axios.post(
+                route('dashboard.media.update', media.id),
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                },
+            );
+            closeModal();
+            // Reload to see changes.
+            window.location.reload();
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response?.status === 422) {
+                const validationErrors = error.response.data.errors;
+                Object.keys(validationErrors).forEach((key) => {
+                    setError(key as any, validationErrors[key][0]);
+                });
+            } else {
+                Toastify({
+                    text: 'An unexpected error occurred. Please try again.',
+                    duration: 6000,
+                    position: 'center',
+                    backgroundColor: 'red',
+                    close: true,
+                }).showToast();
+                console.error('Submission error:', error);
+            }
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     return (
@@ -322,6 +349,10 @@ const UpdateImage = ({ media, imageType }: UpdateImageProps) => {
                                 className="col-span-3 col-start-2"
                             />
                         </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label className="text-right">Size</Label>
+                            <div>{formatBytes(data.size) ?? ''}</div>
+                        </div>
                     </div>
                 </form>
                 <DialogFooter>
@@ -332,7 +363,7 @@ const UpdateImage = ({ media, imageType }: UpdateImageProps) => {
                     </DialogClose>
                     <Button
                         color="primary"
-                        disabled={processing}
+                        disabled={isProcessing}
                         className="w-full rounded bg-yellow-700 text-xl text-white"
                         type="submit"
                         form="update-image-form"

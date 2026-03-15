@@ -6,14 +6,13 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog';
 import MediaComponent, {
     MediaProps as MediaComponentProps,
 } from '@/pages/dashboard/media';
 import { Media } from '@/types/model-types';
-import { Plus } from 'lucide-react';
 import React, { useState } from 'react';
+import classes from './media-selection-modal.module.css';
 
 type PageProps<T = {}> = T & {
     auth: any;
@@ -59,29 +58,33 @@ const MediaSelectionModal = ({
     };
 
     return (
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogTrigger asChild onClick={openMediaModal}>
+        <>
+            <div onClick={openMediaModal} style={{ display: 'inline-block' }}>
                 {children}
-            </DialogTrigger>
-            <DialogContent className="wide-dialog h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>Select an Image</DialogTitle>
-                </DialogHeader>
-                {modalMediaProps && (
-                    <MediaComponent
-                        {...modalMediaProps}
-                        isModal={true}
-                        onSelect={handleImageSelect}
-                        onUpdate={(newProps) => setModalMediaProps(newProps)}
-                    />
-                )}
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button variant="outline">Close</Button>
-                    </DialogClose>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+            </div>
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent className="wide-dialog h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Select an Image</DialogTitle>
+                    </DialogHeader>
+                    {modalMediaProps && (
+                        <MediaComponent
+                            {...modalMediaProps}
+                            isModal={true}
+                            onSelect={handleImageSelect}
+                            onUpdate={(newProps) =>
+                                setModalMediaProps(newProps)
+                            }
+                        />
+                    )}
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button variant="outline">Close</Button>
+                        </DialogClose>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 };
 
