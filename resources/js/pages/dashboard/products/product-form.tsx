@@ -216,6 +216,23 @@ const ProductForm = ({
         setData('product.prices', updatedPrices);
     };
 
+    const updatePrice = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        index: number,
+    ) => {
+        clearErrors(`product.prices.${index}.price` as any);
+        const newPriceStrings = {
+            ...priceStrings,
+            [index]: e.target.value,
+        };
+        setPriceStrings(newPriceStrings);
+
+        const valueInCents = Math.round(parseFloat(e.target.value) * 100);
+        if (!isNaN(valueInCents)) {
+            setData(`product.prices.${index}.price` as any, valueInCents);
+        }
+    };
+
     if (!data.product) {
         return <div>Loading...</div>; // Or a spinner component
     }
@@ -668,42 +685,12 @@ const ProductForm = ({
                                                                     }
                                                                     onChange={(
                                                                         e,
-                                                                    ) => {
-                                                                        clearErrors(
-                                                                            `product.prices.${index}.price` as any,
-                                                                        );
-                                                                        const newPriceStrings =
-                                                                            {
-                                                                                ...priceStrings,
-                                                                                [index]:
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                            };
-                                                                        setPriceStrings(
-                                                                            newPriceStrings,
-                                                                        );
-
-                                                                        const valueInCents =
-                                                                            Math.round(
-                                                                                parseFloat(
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                                ) *
-                                                                                    100,
-                                                                            );
-                                                                        if (
-                                                                            !isNaN(
-                                                                                valueInCents,
-                                                                            )
-                                                                        ) {
-                                                                            setData(
-                                                                                `product.prices.${index}.price` as any,
-                                                                                valueInCents,
-                                                                            );
-                                                                        }
-                                                                    }}
+                                                                    ) =>
+                                                                        updatePrice(
+                                                                            e,
+                                                                            index,
+                                                                        )
+                                                                    }
                                                                     className={cx(
                                                                         classes.priceInput,
                                                                         {

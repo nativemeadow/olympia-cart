@@ -65,6 +65,7 @@
 .chevron_icon {
     height: 1rem; /* h-4 */
     width: 1rem; /* w-4 */
+    cursor: pointer;
 }
 
 .action_icon {
@@ -76,6 +77,11 @@
 }
 
 .delete_icon {
+    cursor: pointer;
+}
+
+.expand_icon,
+.collapse_icon {
     cursor: pointer;
 }
 
