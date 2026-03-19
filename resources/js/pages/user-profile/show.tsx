@@ -20,13 +20,11 @@ export default function Show({
     status,
     orders,
     addresses,
-    organization,
 }: PageProps<{
     mustVerifyEmail: boolean;
     status?: string;
     orders: Order[];
     addresses: any[]; // Replace 'any' with your Address type
-    organization?: string | null;
 }>) {
     const [activeTab, setActiveTab] = useState('profile');
 
@@ -37,7 +35,6 @@ export default function Show({
                     <Profile
                         mustVerifyEmail={mustVerifyEmail}
                         status={status}
-                        organization={organization}
                     />
                 );
             case 'address':
@@ -53,7 +50,6 @@ export default function Show({
                     <Profile
                         mustVerifyEmail={mustVerifyEmail}
                         status={status}
-                        organization={organization}
                     />
                 );
         }

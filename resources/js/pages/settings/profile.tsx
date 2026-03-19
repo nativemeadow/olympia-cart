@@ -21,11 +21,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Profile({
     mustVerifyEmail,
     status,
-    organization,
 }: {
     mustVerifyEmail: boolean;
     status?: string;
-    organization?: string | null;
 }) {
     const { auth } = usePage<SharedData>().props;
 
@@ -38,7 +36,7 @@ export default function Profile({
             <div className="space-y-6">
                 <HeadingSmall
                     title="Profile information"
-                    description="Update your name, email address, and organization"
+                    description="Update your name and email address"
                 />
 
                 <Form
@@ -110,25 +108,6 @@ export default function Profile({
                                     className="mt-2"
                                     message={errors.email}
                                 />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="organization">
-                                    Organization name
-                                </Label>
-                                <Input
-                                    id="organization"
-                                    className="mt-1 block w-full"
-                                    defaultValue={organization ?? ''}
-                                    name="organization"
-                                    autoComplete="organization"
-                                    placeholder="Organization name (optional)"
-                                />
-                                <InputError
-                                    className="mt-2"
-                                    message={errors.organization}
-                                />
-                            </div>
                             </div>
 
                             {mustVerifyEmail &&

@@ -20,7 +20,6 @@ class UserProfileController extends Controller
             'address' => $customer ? $customer->addresses : null,
             'status' => session('status'),
             'orders' => $customer->orders()->with('items')->latest()->get(),
-            'organization' => $customer ? $customer->company : null,
         ]);
     }
 }
