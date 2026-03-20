@@ -81,6 +81,19 @@ const StepFive = ({ customer }: { customer: CustomerData }) => {
         };
 
         fetchOrder();
+
+        // Disable back button logic
+        window.history.replaceState(null, '', window.location.href);
+
+        const handlePopState = () => {
+            window.location.href = '/'; // Redirect or show a message
+        };
+
+        window.addEventListener('popstate', handlePopState);
+
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
     }, []);
 
     useEffect(() => {

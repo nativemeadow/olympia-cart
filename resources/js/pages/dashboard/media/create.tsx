@@ -23,6 +23,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Media } from '@/types/model-types';
 import { ImageTypeOptions } from './readImageFile';
 import { useImagePreview } from '@/hooks/useImagePreview';
 import Toastify from 'toastify-js';
@@ -34,9 +35,11 @@ import { formatBytes } from '@/utils/strings';
 const NewImageForm = ({
     setIsOpen,
     imageType,
+    onImageAdded,
 }: {
     setIsOpen: (isOpen: boolean) => void;
     imageType?: string;
+    onImageAdded: (newImage: Media) => void;
 }) => {
     const { file, fileName, fileSize, previewSrc, handleFileChange } =
         useImagePreview();
@@ -88,15 +91,17 @@ const NewImageForm = ({
         }
 
         try {
-            await axios.post(route('dashboard.media.store'), formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
+            const response = await axios.post(
+                route('dashboard.media.store'),
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
                 },
-            });
+            );
+            onImageAdded(response.data.media);
             setIsOpen(false);
-            // Optionally, you can use Inertia router to visit the page again
-            // to refresh the media list, or just reload.
-            window.location.reload();
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 422) {
                 // Handle validation errors
@@ -323,9 +328,10 @@ const NewImageForm = ({
 
 type Props = {
     imageType?: string;
+    onImageAdded: (newImage: Media) => void;
 };
 
-const NewImage = ({ imageType }: Props) => {
+const NewImage = ({ imageType, onImageAdded }: Props) => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -339,7 +345,11 @@ const NewImage = ({ imageType }: Props) => {
                     its state is destroyed. When it is rendered, it's created fresh.
                 */}
                 {isOpen && (
-                    <NewImageForm setIsOpen={setIsOpen} imageType={imageType} />
+                    <NewImageForm
+                        setIsOpen={setIsOpen}
+                        imageType={imageType}
+                        onImageAdded={onImageAdded}
+                    />
                 )}
             </Dialog>
         </div>

@@ -34,9 +34,14 @@ import { Pencil } from 'lucide-react';
 type UpdateImageProps = {
     media: Media;
     imageType?: string;
+    onImageUpdated: (updatedImage: Media) => void;
 };
 
-const UpdateImage = ({ media, imageType }: UpdateImageProps) => {
+const UpdateImage = ({
+    media,
+    imageType,
+    onImageUpdated,
+}: UpdateImageProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const {
@@ -110,7 +115,7 @@ const UpdateImage = ({ media, imageType }: UpdateImageProps) => {
         }
 
         try {
-            await axios.post(
+            const response = await axios.post(
                 route('dashboard.media.update', media.id),
                 formData,
                 {
@@ -119,9 +124,8 @@ const UpdateImage = ({ media, imageType }: UpdateImageProps) => {
                     },
                 },
             );
+            onImageUpdated(response.data.media);
             closeModal();
-            // Reload to see changes.
-            window.location.reload();
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 422) {
                 const validationErrors = error.response.data.errors;

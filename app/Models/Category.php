@@ -48,6 +48,7 @@ class Category extends Model
     {
         return $this->belongsToMany(Product::class)
             ->withPivot('sku', 'product_order')
-            ->withTimestamps();
+            ->withTimestamps()
+            ->orderBy('product_order');
     }
 }

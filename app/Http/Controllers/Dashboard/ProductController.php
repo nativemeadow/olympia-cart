@@ -84,11 +84,11 @@ class ProductController extends Controller
         $attributesToSync = [];
         if (!empty($priceData['image'])) {
             $attribute = Attribute::firstOrCreate(['name' => 'Image', 'data_type' => 'string']);
-            $image_path = $priceData['image']['file_path'] . $priceData['image']['file_name'];
+            $image_name = $priceData['image']['file_name'];
             $attributeValue = $isCreate
-                ? AttributeValue::firstOrCreate(['attribute_id' => $attribute->id, 'value' => $image_path])
+                ? AttributeValue::firstOrCreate(['attribute_id' => $attribute->id, 'value' => $image_name])
                 : AttributeValue::updateOrCreate(
-                    ['attribute_id' => $attribute->id, 'value' => $image_path]
+                    ['attribute_id' => $attribute->id, 'value' => $image_name]
                 );
             $attributesToSync[] = $attributeValue->id;
         }
@@ -106,7 +106,7 @@ class ProductController extends Controller
             'product.status' => 'required|boolean',
             'product.categories.*.id' => 'required_with:product.categories|integer|exists:categories,id',
             'product.prices' => 'required|array|min:1',
-            'product.prices.*.sku' => 'required|string|max:255|unique:product_variants,sku',
+            'product.prices.*.sku' => 'nullable|string|max:255|unique:product_variants,sku',
             'product.prices.*.price' => 'required|numeric|min:1',
             'product.prices.*.extended_properties' => 'nullable|array',
             'product.prices.*.title' => 'nullable|string',
@@ -152,6 +152,20 @@ class ProductController extends Controller
                 $product->categories()->sync([$categoryId]);
             }
 
+            // update the category_product join table with the product id and the category id, 
+            // we also need to add the sort order for the product in the category, we can set 
+            // it to the max sort order + 1 for that category
+            $maxOrder = DB::table('category_product')
+                ->where('category_id', $categoryId)
+                ->max('product_order');
+
+            $product->categories()->sync([
+                $categoryId => [
+                    'product_order' => $maxOrder + 1,
+                    'sku' => $productData['sku'],
+                ]
+            ]);
+
             foreach ($productData['prices'] as $priceData) {
                 $variant = $product->variants()->create([
                     'sku' => $priceData['sku'],
@@ -193,7 +207,7 @@ class ProductController extends Controller
             return redirect()->route('dashboard.products')->with('success', 'Product created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => $e->getMessage()]);
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
@@ -211,7 +225,7 @@ class ProductController extends Controller
             'product.categories.*.id' => 'required_with:product.categories|integer|exists:categories,id',
             'product.prices' => 'required|array|min:1',
             'product.prices.*.id' => 'nullable|integer',
-            'product.prices.*.sku' => ['required', 'string', 'max:255', Rule::unique('product_variants', 'sku')->where(function ($query) use ($request) {
+            'product.prices.*.sku' => ['nullable', 'string', 'max:255', Rule::unique('product_variants', 'sku')->where(function ($query) use ($request) {
                 $priceIds = collect($request->input('product.prices'))->pluck('id')->filter();
                 if ($priceIds->isNotEmpty()) {
                     return $query->whereNotIn('id', $priceIds);
@@ -261,6 +275,14 @@ class ProductController extends Controller
 
             $priceIds = [];
 
+            // update the sku in the category_product pivot table if the product sku has changed
+            if (isset($productData['categories'])) {
+                foreach ($productData['categories'] as $categoryData) {
+                    $categoryId = $categoryData['id'];
+                    DB::table('category_product')->where('category_id', $categoryId)->where('product_id', $product->id)->update(['sku' => $productData['sku']]);
+                }
+            }
+
             foreach ($productData['prices'] as $priceData) {
                 $variant = $product->variants()->updateOrCreate(
                     ['id' => $priceData['id'] ?? null],
@@ -281,14 +303,6 @@ class ProductController extends Controller
 
                 // Handle image
                 $attributesToSync = array_merge($attributesToSync, $this->handleImageAttribute($priceData, false));
-                // if (!empty($priceData['image'])) {
-                //     $attribute = Attribute::firstOrCreate(['name' => 'Image', 'data_type' => 'string']);
-                //     $image_path = $priceData['image']['file_path'] . $priceData['image']['file_name'];
-                //     $attributeValue = AttributeValue::updateOrCreate(
-                //         ['attribute_id' => $attribute->id, 'value' => $image_path]
-                //     );
-                //     $attributesToSync[] = $attributeValue->id;
-                // }
 
                 // Handle extended_properties
                 if (isset($priceData['extended_properties'])) {
@@ -367,5 +381,14 @@ class ProductController extends Controller
             ],
             'filters' => $request->only(['sort_column', 'order', 'per_page', 'search_term']),
         ]);
+    }
+
+    public function reorderProducts($orderArray)
+    {
+        foreach ($orderArray as $index => $productId) {
+            Product::where('id', $productId)->update(['sort_order' => $index]);
+        }
+
+        return response()->json(['message' => 'Products reordered successfully.']);
     }
 }

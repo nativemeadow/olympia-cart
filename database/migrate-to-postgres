@@ -1,0 +1,2 @@
+#!/bin/zsh
+pgloader "sqlite://database.sqlite" "postgresql://jmcclint:cheetah%21@127.0.0.1:5432/Olympia_Ecommerce"

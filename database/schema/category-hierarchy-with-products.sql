@@ -41,6 +41,7 @@ SELECT
     c.slug AS category_slug,
     c.description AS category_description,
     cp.product_id AS product_id,
+    cp.product_order AS product_order,
     p.status AS product_status,
     p.uuid AS product_uuid,
     p.title AS product_title,
@@ -55,4 +56,5 @@ FROM
     LEFT JOIN products p ON cp.product_id = p.id
 ORDER BY
     ch."order",
+    product_order ASC,
     ch.path;
