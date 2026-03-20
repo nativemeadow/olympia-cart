@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/layouts/dashboard-layout';
 import { Paginated, PageProps } from '@/types';
 import { Media } from '@/types/model-types';
@@ -58,8 +58,28 @@ const MediaComponent = ({
         onUpdate?: (props: PageProps<MediaProps>) => void;
         isModal?: boolean;
     }) => {
-    const { data, links, meta } = media;
+    const { links, meta } = media;
+    const [mediaItems, setMediaItems] = useState<Media[]>(media.data);
     const [mediaToDelete, setMediaToDelete] = useState<Media | null>(null);
+
+    useEffect(() => {
+        setMediaItems(media.data);
+    }, [media.data]);
+
+    const handleImageAdded = (newImage: Media) => {
+        setMediaItems((prevItems) => [newImage, ...prevItems]);
+        if (onSelect) {
+            onSelect(newImage);
+        }
+    };
+
+    const handleImageUpdated = (updatedImage: Media) => {
+        setMediaItems((prevItems) =>
+            prevItems.map((item) =>
+                item.id === updatedImage.id ? updatedImage : item,
+            ),
+        );
+    };
 
     const handleModalNavigation = async (url: string) => {
         if (!url || !onUpdate) return;
@@ -125,8 +145,15 @@ const MediaComponent = ({
     const handleDelete = () => {
         if (mediaToDelete) {
             router.delete(route('dashboard.media.destroy', mediaToDelete.id), {
-                onSuccess: () => setMediaToDelete(null),
-                preserveState: false, // Reload the page to see the changes
+                onSuccess: () => {
+                    setMediaItems((prevItems) =>
+                        prevItems.filter(
+                            (item) => item.id !== mediaToDelete.id,
+                        ),
+                    );
+                    setMediaToDelete(null);
+                },
+                preserveState: true,
             });
         }
     };
@@ -142,7 +169,7 @@ const MediaComponent = ({
                 </>
             )}
             <div className="flex items-center justify-between gap-2">
-                <UploadNewImage />
+                <UploadNewImage onImageAdded={handleImageAdded} />
                 <div className="flex flex-grow items-center justify-end gap-2">
                     <Input
                         name="search"
@@ -185,7 +212,7 @@ const MediaComponent = ({
                 </div>
             </div>
             <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                {data.map((image) => (
+                {mediaItems.map((image) => (
                     <div key={image.id} className="flex flex-col gap-2">
                         <div className="group relative">
                             <figure className="aspect-square w-full overflow-hidden rounded-md border">
@@ -206,7 +233,10 @@ const MediaComponent = ({
                                     </Button>
                                 ) : (
                                     <>
-                                        <UpdateImage media={image} />
+                                        <UpdateImage
+                                            media={image}
+                                            onImageUpdated={handleImageUpdated}
+                                        />
                                         <Button
                                             variant="destructive"
                                             size="icon"

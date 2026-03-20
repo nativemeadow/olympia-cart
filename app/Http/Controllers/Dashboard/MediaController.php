@@ -98,7 +98,7 @@ class MediaController extends Controller
             $validated['title'] = str_replace(['_', '-'], ' ', pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
         }
 
-        Media::create([
+        $newMedia = Media::create([
             'title' => $validated['title'],
             'file_path' => $storagePath . '/',
             'description' => $validated['description'] ?? null,
@@ -109,7 +109,9 @@ class MediaController extends Controller
             'type' => $request->type,
         ]);
 
-        return redirect()->route('dashboard.media')->with('success', 'Media uploaded successfully.');
+        $newMedia->url = asset($newMedia->file_path);
+
+        return response()->json(['media' => $newMedia, 'message' => 'Media uploaded successfully.']);
     }
 
     public function edit(Media $media)
@@ -175,7 +177,9 @@ class MediaController extends Controller
         // Save all changes to the database.
         $media->save();
 
-        return redirect()->back()->with('success', 'Media updated successfully.');
+        $media->url = asset($media->file_path);
+
+        return response()->json(['media' => $media, 'message' => 'Media updated successfully.']);
     }
 
     public function destroy(Media $media)

@@ -53,6 +53,7 @@
     position: relative; /* group relative */
 }
 
+
 .mediaFigure {
     width: 100%; /* w-full */
     overflow: hidden;
@@ -62,6 +63,30 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Spinner overlay styles - placed at the end to avoid breaking CSS */
+.savingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.7);
+    z-index: 9999;
+}
+.savingSpinner {
+    font-size: 3rem;
+    color: #2563eb;
+    animation: savingSpin 1s linear infinite;
+}
+
+@keyframes savingSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .mediaImage {
@@ -215,4 +240,11 @@
 
 .label {
     margin-left: 0.5rem;
+}
+
+.errorDialogContent {
+    white-space: pre-wrap; /* This will respect newlines and wrap text */
+    word-break: break-word; /* This will break long words to prevent overflow */
+    max-height: 400px;
+    overflow-y: auto;
 }

@@ -23,8 +23,8 @@ class SearchIndex extends Model
     public function search(string $searchTerm)
     {
         return DB::table($this->table)
-            ->select('*', DB::raw('rank')) // Select all columns and the FTS5 rank
-            ->whereRaw('search_index MATCH ?', [$searchTerm])
+            ->selectRaw('*, ts_rank(search_vector, websearch_to_tsquery(\'english\', ?)) as rank', [$searchTerm])
+            ->whereRaw('search_vector @@ websearch_to_tsquery(\'english\', ?)', [$searchTerm])
             ->orderBy('rank', 'desc')
             ->get();
     }

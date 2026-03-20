@@ -6,6 +6,7 @@ use App\Http\Controllers\Dashboard\MediaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Dashboard\ProductOrderController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -41,6 +42,10 @@ Route::prefix('dashboard')
         Route::post('/products/store/{categoryId}', [ProductController::class, 'store'])->name('products.store');
         Route::put('/products/update/{product_id}', [ProductController::class, 'update'])->name('products.update');
         Route::delete('/products/destroy/{product_id}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+        Route::put('/products/order', ProductOrderController::class)->name(
+            'products.order',
+        );
 
         Route::get('/price/attributes', [
             ProductController::class,

@@ -1,6 +1,7 @@
 import DashboardLayout from '@/layouts/dashboard-layout';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { CategoryHierarchy } from '@/types';
+import { Product as ProductType } from '@/types/model-types';
 import ProductNode from './product-node';
 import classes from './products.module.css';
 import { useState, useEffect } from 'react';
@@ -54,6 +55,24 @@ export default function Products({ categories }: CategoriesIndexProps) {
         setOpenNodes(allIds);
     };
 
+    const handleProductOrderChange = (
+        categoryId: number,
+        products: ProductType[],
+    ) => {
+        const product_order = products.map((product, index) => ({
+            product_id: product.id,
+            product_order: index,
+        }));
+
+        router.put(
+            route('dashboard.products.order'),
+            { category_id: categoryId, products: product_order },
+            {
+                preserveScroll: true,
+            },
+        );
+    };
+
     return (
         <DashboardLayout>
             <Head title="Products" />
@@ -90,6 +109,7 @@ export default function Products({ categories }: CategoriesIndexProps) {
                         category={category}
                         openNodes={openNodes}
                         toggleNode={toggleNode}
+                        onProductOrderChange={handleProductOrderChange}
                     />
                 ))}
             </div>

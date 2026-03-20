@@ -57,9 +57,13 @@
 
 .product_icon {
     margin-right: 0.5rem; /* mr-2 */
-    height: 1rem; /* h-4 */
-    width: 1rem; /* w-4 */
-    color: var(--muted-foreground);
+    width: 16px;
+    height: 16px;
+    color: #666;
+}
+
+.drop_target {
+    border-top: 2px solid blue;
 }
 
 .chevron_icon {
@@ -94,4 +98,22 @@
     height: 90vh;
     display: flex;
     flex-direction: column;
+}
+
+.product_node {
+    margin-left: 0; /* Reset margin for product node */
+}
+
+.drag_handle_icon_container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem; /* w-10, same as toggle_button_placeholder */
+    cursor: grab;
+}
+
+.drag_handle_icon {
+    width: 1rem; /* w-4 */
+    height: 1rem; /* h-4 */
+    color: #999;
 }
