@@ -123,62 +123,49 @@ const ProductNode: React.FC<ProductNodeProps> = ({
     return (
         <div className={classes.node}>
             <div className={classes.node_header}>
-                <div className={classes.node_icon_container}>
-                    {isExpandable ? (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={handleToggle}
-                            className={classes.action_icon}
-                        >
-                            {isOpen ? (
-                                <ChevronDown className={classes.chevron_icon} />
-                            ) : (
-                                <ChevronRight
-                                    className={classes.chevron_icon}
-                                />
-                            )}
-                        </Button>
-                    ) : (
-                        <span /> // Empty span to maintain alignment
-                    )}
+                {isExpandable ? (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggle();
+                        }}
+                        className={classes.toggle_button}
+                    >
+                        {isOpen ? (
+                            <ChevronDown className={classes.chevron_icon} />
+                        ) : (
+                            <ChevronRight className={classes.chevron_icon} />
+                        )}
+                    </Button>
+                ) : (
+                    <div className={classes.toggle_button_placeholder} />
+                )}
+                <div className={classes.node_title}>
+                    <span className={classes.category_title}>
+                        {category.title}
+                    </span>
                 </div>
-                <span className={classes.node_title}>{category.title}</span>
                 <div className={classes.actions}>
                     <AddProductAction
-                        onSuccess={handleSuccess}
                         categoryId={category.id}
+                        onSuccess={handleSuccess}
                     />
                 </div>
             </div>
             {isOpen && (
                 <div className={classes.children_container}>
-                    {/* Render Child Categories */}
-                    {hasChildren &&
-                        category.children?.map((child) => (
-                            <ProductNode
-                                key={child.id}
-                                category={child}
-                                openNodes={openNodes}
-                                toggleNode={toggleNode}
-                                onProductOrderChange={onProductOrderChange}
-                            />
-                        ))}
-
-                    {/* Render Products */}
                     {hasProducts &&
-                        products?.map((product: ProductType) => (
+                        products.map((product) => (
                             <div
-                                key={`product-${product.id}`}
-                                id={`product-${product.id}`}
-                                className={`${classes.node} ${
-                                    classes.product_node
-                                } ${
+                                key={product.id}
+                                className={`${classes.product_item} ${
                                     dropTargetId === product.id
                                         ? classes.drop_target
                                         : ''
                                 }`}
-                                draggable="true"
+                                draggable
                                 onDragStart={(e) =>
                                     handleDragStart(e, product.id)
                                 }
@@ -188,38 +175,41 @@ const ProductNode: React.FC<ProductNodeProps> = ({
                                 onDragLeave={handleDragLeave}
                                 onDrop={(e) => handleDrop(e, product.id)}
                             >
-                                <div className={classes.node_header}>
-                                    <div
-                                        className={
-                                            classes.drag_handle_icon_container
-                                        }
-                                    >
-                                        <GripVertical
-                                            className={classes.drag_handle_icon}
-                                        />
-                                    </div>
-                                    <div
-                                        className={classes.node_icon_container}
-                                    >
-                                        <Package
-                                            className={classes.product_icon}
-                                        />
-                                    </div>
-                                    <span className={classes.node_title}>
-                                        {product.title}
-                                    </span>
-                                    <div className={classes.actions}>
-                                        <EditProductAction
-                                            product={product}
-                                            onSuccess={handleSuccess}
-                                        />
-                                        <DeleteProductAction
-                                            product={product}
-                                            onSuccess={handleSuccess}
-                                        />
-                                    </div>
+                                <div
+                                    className={
+                                        classes.drag_handle_icon_container
+                                    }
+                                >
+                                    <GripVertical
+                                        className={classes.drag_handle_icon}
+                                    />
+                                </div>
+                                <Package className={classes.product_icon} />
+                                <div className={classes.node_title}>
+                                    <span>{product.title}</span>
+                                </div>
+                                <div className={classes.actions}>
+                                    <EditProductAction
+                                        product={product}
+                                        onSuccess={handleSuccess}
+                                    />
+                                    <DeleteProductAction
+                                        product={product}
+                                        onSuccess={handleSuccess}
+                                    />
                                 </div>
                             </div>
+                        ))}
+                    {hasChildren &&
+                        category.children &&
+                        category.children.map((child) => (
+                            <ProductNode
+                                key={child.id}
+                                category={child}
+                                openNodes={openNodes}
+                                toggleNode={toggleNode}
+                                onProductOrderChange={onProductOrderChange}
+                            />
                         ))}
                 </div>
             )}

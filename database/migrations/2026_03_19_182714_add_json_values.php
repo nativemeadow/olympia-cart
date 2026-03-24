@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('attributes', function (Blueprint $table) {
             //
-            $table->json('list-of-values')->nullable()->after('type');
+            $table->json('list_of_values')->nullable()->after('type');
         });
     }
 
@@ -24,7 +24,7 @@ return new class extends Migration
     {
         Schema::table('attributes', function (Blueprint $table) {
             //
-            $table->dropColumn('list-of-values');
+            $table->dropColumn('list_of_values');
         });
     }
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { CategoryHierarchy } from '@/types';
 import { Product as ProductType } from '@/types/model-types';
 import { Button } from '@/components/ui/button';
@@ -14,20 +14,22 @@ import {
 } from '../products/product-actions';
 import { router } from '@inertiajs/react';
 import styles from './categories.module.css';
+import { useCategoryExpanded } from '@/context/CategoryExpandedContext';
 
 interface CategoryNodeProps {
     category: CategoryHierarchy;
 }
 
 const CategoryNode: React.FC<CategoryNodeProps> = ({ category }) => {
-    const [isOpen, setIsOpen] = useState(false);
+    const { expanded, toggle } = useCategoryExpanded();
+    const isOpen = expanded.has(category.id);
     const hasChildren = category.children && category.children.length > 0;
     const hasProducts = category.products && category.products.length > 0;
     const isExpandable = hasChildren || hasProducts;
 
     const handleToggle = () => {
         if (isExpandable) {
-            setIsOpen(!isOpen);
+            toggle(category.id);
         }
     };
 
@@ -35,6 +37,7 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({ category }) => {
         router.visit(route('dashboard.categories.index'), {
             only: ['categories'],
             preserveScroll: true,
+            preserveState: true,
         });
     };
 

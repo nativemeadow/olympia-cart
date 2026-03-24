@@ -15,6 +15,7 @@ class Attribute extends Model
     protected $fillable = [
         'name',
         'data_type',
+        "list_of_values",
     ];
 
     public function values(): HasMany

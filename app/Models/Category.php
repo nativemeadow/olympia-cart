@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,6 +20,8 @@ class Category extends Model
         'url',
         'image',
         'is_active',
+        'created_at',
+        'updated_at',
     ];
     /**
      * The parent categories of this category.
@@ -50,5 +55,11 @@ class Category extends Model
             ->withPivot('sku', 'product_order')
             ->withTimestamps()
             ->orderBy('product_order');
+    }
+
+
+    function media(): HasOne
+    {
+        return $this->hasOne(Media::class,  'file_name', 'image');
     }
 }

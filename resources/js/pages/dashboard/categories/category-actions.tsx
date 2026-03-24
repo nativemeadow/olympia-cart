@@ -8,79 +8,13 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { CategoryHierarchy } from '@/types';
 import { useForm } from '@inertiajs/react';
+import CategoryForm from './category-form';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { FormEventHandler, PropsWithChildren, useState } from 'react';
-import styles from './categories.module.css';
-
-type CategoryFormData = {
-    title: string;
-    parent_id: number | null;
-};
-
-function AddEditCategoryForm({
-    category,
-    isEdit = false,
-    onSuccess,
-}: {
-    category?: CategoryHierarchy;
-    isEdit?: boolean;
-    onSuccess: () => void;
-}) {
-    const { data, setData, post, put, processing, errors, reset } =
-        useForm<CategoryFormData>({
-            title: category?.title || '',
-            parent_id: isEdit
-                ? category?.parent_id || null
-                : category?.id || null,
-        });
-
-    const handleSubmit: FormEventHandler = (e) => {
-        e.preventDefault();
-        const options = {
-            onSuccess: () => {
-                reset();
-                onSuccess();
-            },
-        };
-        if (isEdit && category) {
-            put(route('dashboard.categories.update', category.id), options);
-        } else {
-            post(route('dashboard.categories.store'), options);
-        }
-    };
-
-    return (
-        <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="title" className="text-right">
-                        Title
-                    </Label>
-                    <Input
-                        id="title"
-                        value={data.title}
-                        onChange={(e) => setData('title', e.target.value)}
-                        className="col-span-3"
-                    />
-                    {errors.title && (
-                        <p className="col-span-4 text-center text-sm text-red-600">
-                            {errors.title}
-                        </p>
-                    )}
-                </div>
-            </div>
-            <DialogFooter>
-                <Button type="submit" disabled={processing}>
-                    {processing ? 'Saving...' : 'Save'}
-                </Button>
-            </DialogFooter>
-        </form>
-    );
-}
+import { PropsWithChildren, useState } from 'react';
+import classes from './categories.module.css';
+import { useCategoryExpanded } from '@/context/CategoryExpandedContext';
 
 function DeleteCategoryForm({
     category,
@@ -117,32 +51,35 @@ function DeleteCategoryForm({
     );
 }
 
-function CategoryActionDialog({
-    children,
-    title,
-    open,
-    onOpenChange,
-}: PropsWithChildren<{
-    title: string;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-}>) {
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            {children}
-        </Dialog>
-    );
-}
+// function CategoryActionDialog({
+//     children,
+//     title,
+//     open,
+//     onOpenChange,
+// }: PropsWithChildren<{
+//     title: string;
+//     open: boolean;
+//     onOpenChange: (open: boolean) => void;
+// }>) {
+//     return (
+//         <Dialog open={open} onOpenChange={onOpenChange}>
+//             {children}
+//         </Dialog>
+//     );
+// }
 
 export function AddCategoryAction({
     category,
     onSuccess,
 }: {
-    category?: CategoryHierarchy;
+    category: CategoryHierarchy;
     onSuccess: () => void;
 }) {
     const [isOpen, setIsOpen] = useState(false);
+    const { expand } = useCategoryExpanded();
+
     const handleSuccess = () => {
+        expand(category.id);
         onSuccess();
         setIsOpen(false);
     };
@@ -152,19 +89,21 @@ export function AddCategoryAction({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className={styles.plus_icon}
+                    className={classes.plus_icon}
                 >
-                    <Plus className={styles.plus_icon} />
+                    <Plus className={classes.plus_icon} />
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent onInteractOutside={(e) => e.preventDefault()}>
                 <DialogHeader>
-                    <DialogTitle>Add Child to "{category?.title}"</DialogTitle>
+                    <DialogTitle>Add Child to "{category.title}"</DialogTitle>
                 </DialogHeader>
-                <AddEditCategoryForm
-                    category={category}
-                    onSuccess={handleSuccess}
-                />
+                <div className={classes.formContainer}>
+                    <CategoryForm
+                        category={category}
+                        onSuccess={handleSuccess}
+                    />
+                </div>
             </DialogContent>
         </Dialog>
     );
@@ -178,7 +117,14 @@ export function EditCategoryAction({
     onSuccess: () => void;
 }) {
     const [isOpen, setIsOpen] = useState(false);
+    const { expandAll } = useCategoryExpanded();
+
     const handleSuccess = () => {
+        const idsToExpand = [category.id];
+        if (category.parent_id) {
+            idsToExpand.push(category.parent_id);
+        }
+        expandAll(idsToExpand);
         onSuccess();
         setIsOpen(false);
     };
@@ -188,20 +134,22 @@ export function EditCategoryAction({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className={styles.pencil_icon}
+                    className={classes.pencil_icon}
                 >
-                    <Pencil className={styles.action_icon} />
+                    <Pencil className={classes.action_icon} />
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent onInteractOutside={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle>Edit "{category.title}"</DialogTitle>
                 </DialogHeader>
-                <AddEditCategoryForm
-                    category={category}
-                    isEdit
-                    onSuccess={handleSuccess}
-                />
+                <div className={classes.formContainer}>
+                    <CategoryForm
+                        category={category}
+                        isEdit
+                        onSuccess={handleSuccess}
+                    />
+                </div>
             </DialogContent>
         </Dialog>
     );
@@ -225,9 +173,9 @@ export function DeleteCategoryAction({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className={`text-destructive ${styles.delete_icon}`}
+                    className={`text-destructive ${classes.delete_icon}`}
                 >
-                    <Trash2 className={styles.delete_icon} />
+                    <Trash2 className={classes.delete_icon} />
                 </Button>
             </DialogTrigger>
             <DialogContent>

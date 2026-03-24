@@ -24,3 +24,11 @@ export function formatBytes(bytes: number, decimals = 2) {
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
+
+export const generateSlug = (title: string): string => {
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // remove non-alphanumeric characters except spaces and hyphens
+        .replace(/\s+/g, '-') // replace spaces with hyphens
+        .replace(/-+/g, '-'); // remove consecutive hyphens
+};

@@ -33,12 +33,14 @@ export type Category = {
     slug: string;
     description?: string | null;
     image?: string | null;
+    is_active: boolean;
     created_at: string;
     updated_at: string;
     // Relationships
     parents?: Category[];
     children?: Category[];
     products?: Product[];
+    media?: Media;
 };
 
 export type Categories = Array<{
@@ -70,19 +72,7 @@ export type Price = {
     id: number;
     product_id: number;
     sku?: string | null;
-    //title?: string | null;
-    //description?: string | null;
-    //image?: string | null;
     price: number;
-    // currency: string;
-    // unit?: string | null;
-    // size?: string | null;
-    // coverage?: string | null;
-    // coverage_value?: number | null;
-    // online_minimum?: number | null;
-    // created_at: string;
-    // updated_at: string;
-    // Relationships
     extended_properties?: ExtendedProps;
     product?: Product;
     title?: string | null;
@@ -95,8 +85,18 @@ export type Attributes = {
     id: number;
     name: string;
     data_type: string;
+    list_of_values?: JSON | null;
     created_at: string;
     updated_at: string;
+};
+
+export type AttributeValue = {
+    id: number;
+    attribute_id: number;
+    value: string;
+    created_at: string;
+    updated_at: string;
+    attribute?: Attributes;
 };
 
 export type ExtendedProps = {
