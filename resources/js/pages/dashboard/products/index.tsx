@@ -76,11 +76,16 @@ export default function Products({ categories }: CategoriesIndexProps) {
     return (
         <DashboardLayout>
             <Head title="Products" />
-            <div className="mb-4 flex items-center justify-between">
-                <h1 className="text-lg font-semibold md:text-2xl">
-                    Manage Products
-                </h1>
-                <div className="flex gap-2">
+            <div className={classes.headerContainer}>
+                <div>
+                    <h1 className={classes.title}>Manage Products</h1>
+                    <p className={classes.description}>
+                        This is where you will manage your product catalog and
+                        inventory.
+                    </p>
+                </div>
+
+                <div className={classes.toolbar}>
                     <Button
                         variant="outline"
                         onClick={expandAll}
@@ -98,10 +103,6 @@ export default function Products({ categories }: CategoriesIndexProps) {
                 </div>
             </div>
 
-            <p className="text-sm text-muted-foreground">
-                This is where you will manage your product catalog and
-                inventory.
-            </p>
             <div className={classes.container}>
                 {categories.map((category) => (
                     <ProductNode

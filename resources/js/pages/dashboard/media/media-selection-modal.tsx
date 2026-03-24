@@ -19,15 +19,17 @@ type PageProps<T = {}> = T & {
     flash: any;
 };
 
-interface MediaSelectionModalProps {
+type MediaSelectionModalProps = {
     onSelect: (image: Media) => void;
-    productId: number;
-    children: React.ReactNode;
-}
+    mediaType: 'product' | 'category';
+    entityId?: number;
+    children?: React.ReactNode;
+};
 
 const MediaSelectionModal = ({
     onSelect,
-    productId,
+    mediaType = 'product',
+    entityId,
     children,
 }: MediaSelectionModalProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,12 +37,21 @@ const MediaSelectionModal = ({
         useState<PageProps<MediaComponentProps> | null>(null);
 
     const openMediaModal = async () => {
+        // The modal can be opened without an entityId for general selection
+        // if (!entityId) {
+        //     console.error('No entityId provided for media selection.');
+        //     return;
+        // }
+
         try {
-            const response = await fetch(
-                route('dashboard.product.media', {
-                    product_id: productId,
-                }),
-            );
+            const routeName =
+                mediaType === 'category'
+                    ? 'dashboard.category.media'
+                    : 'dashboard.product.media';
+
+            const params = entityId ? { id: entityId } : {};
+
+            const response = await fetch(route(routeName, params));
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }

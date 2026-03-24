@@ -55,7 +55,7 @@ class ProductController extends Controller
 
     public function getPriceAttributes()
     {
-        $attributes = Attribute::with('values')->get(['name', 'data_type']);
+        $attributes = Attribute::with('values')->get(['name', 'data_type', 'list_of_values']);
 
         return response()->json([
             'allAttributes' => $attributes,
@@ -146,24 +146,16 @@ class ProductController extends Controller
                 'status' => $productData['status'],
             ]);
 
-            if (isset($productData['categories'])) {
-                $product->categories()->sync(array_column($productData['categories'], 'id'));
-            } elseif ($categoryId) {
-                $product->categories()->sync([$categoryId]);
-            }
-
-            // update the category_product join table with the product id and the category id, 
-            // we also need to add the sort order for the product in the category, we can set 
-            // it to the max sort order + 1 for that category
+            // A new product is always created within a single category context.
+            // We calculate the order for the product within that category.
             $maxOrder = DB::table('category_product')
                 ->where('category_id', $categoryId)
                 ->max('product_order');
 
-            $product->categories()->sync([
-                $categoryId => [
-                    'product_order' => $maxOrder + 1,
-                    'sku' => $productData['sku'],
-                ]
+            // Attach the product to its primary category with the correct order and SKU.
+            $product->categories()->attach($categoryId, [
+                'product_order' => ($maxOrder ?? 0) + 1,
+                'sku' => $productData['sku'],
             ]);
 
             foreach ($productData['prices'] as $priceData) {
@@ -349,9 +341,12 @@ class ProductController extends Controller
         $searchTerm = $request->query('search_term', '');
 
         $media = Media::query()
+            ->where('type', 'products')
             ->when($searchTerm, function ($query, $searchTerm) {
-                $query->where('title', 'like', "%{$searchTerm}%")
-                    ->orWhere('alt_text', 'like', "%{$searchTerm}%");
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('title', 'like', "%{$searchTerm}%")
+                        ->orWhere('alt_text', 'like', "%{$searchTerm}%");
+                });
             })
             ->orderBy($sort, $order)
             ->paginate($perPage)
@@ -383,12 +378,12 @@ class ProductController extends Controller
         ]);
     }
 
-    public function reorderProducts($orderArray)
-    {
-        foreach ($orderArray as $index => $productId) {
-            Product::where('id', $productId)->update(['sort_order' => $index]);
-        }
+    // public function reorderProducts($orderArray)
+    // {
+    //     foreach ($orderArray as $index => $productId) {
+    //         Product::where('id', $productId)->update(['sort_order' => $index]);
+    //     }
 
-        return response()->json(['message' => 'Products reordered successfully.']);
-    }
+    //     return response()->json(['message' => 'Products reordered successfully.']);
+    // }
 }

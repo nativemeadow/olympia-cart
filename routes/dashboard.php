@@ -27,6 +27,13 @@ Route::prefix('dashboard')
             'edit',
         ]);
 
+        Route::get('/category/media/{sort_column?}/{order?}/{search_term?}', [CategoryController::class, 'categoryMedia'])->name('category.media');
+
+        Route::post('/category/store/{parentId}', [CategoryController::class, 'store'])->name('category.store');
+        Route::put('/category/update/{categoryId}', [CategoryController::class, 'update'])->name('category.update');
+        Route::delete('/category/destroy/{categoryId}', [CategoryController::class, 'destroy'])->name('category.destroy');
+
+
         Route::get('/products', [
             DashboardController::class,
             'products',

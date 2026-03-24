@@ -149,11 +149,17 @@ export type CategoryHierarchy = {
     title: string;
     slug: string;
     parent_id: number | null;
+    image?: string | null;
+    description?: string | null;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
     order: number;
     level: number;
     path: string;
     children?: CategoryHierarchy[];
     products?: Product[];
+    media?: Media | null;
 };
 
 export type Paginated<T> = {
@@ -186,4 +192,13 @@ export type User = {
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+};
+
+export type UseFormSetData = (
+    field: string,
+    value: string | number | boolean | null,
+) => void;
+
+export type FormErrors = {
+    [field: string]: string[]; // Each field can have an array of error messages
 };

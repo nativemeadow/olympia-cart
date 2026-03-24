@@ -25,9 +25,26 @@ class DashboardController extends Controller
     public function categories()
     {
         $query = File::get(database_path('schema/category-hierarchy.sql'));
-        $categories = DB::select($query);
+        $results = DB::select($query);
 
-        $categories = $this->buildHierarchy(json_decode(json_encode($categories), true));
+        $categoriesData = [];
+        foreach ($results as $row) {
+            $category = (array) $row;
+            $media = [];
+
+            // Extract media fields into a nested array
+            foreach ($category as $key => $value) {
+                if (strpos($key, 'media_') === 0) {
+                    $media[str_replace('media_', '', $key)] = $value;
+                    unset($category[$key]);
+                }
+            }
+
+            $category['media'] = $media['id'] ? $media : null;
+            $categoriesData[] = $category;
+        }
+
+        $categories = $this->buildHierarchy($categoriesData);
 
         return Inertia::render('dashboard/categories/index', [
             'categories' => $categories,

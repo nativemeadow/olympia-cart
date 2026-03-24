@@ -66,7 +66,7 @@ class MediaController extends Controller
             'description' => 'nullable|string',
             'alt_text' => 'nullable|string|max:255',
             'file' => 'required|file|mimes:jpg,jpeg,png,gif,pdf,webp|max:' . $maxSizeInKb,
-            'type' => 'required|string|in:products,product-categories,faq,other',
+            'type' => 'required|string|in:products,categories,faq,other',
         ], [
             'file.max' => "The file size exceeds the maximum allowed size of {$maxSizeInMb}MB. Please choose a smaller file.",
         ]);
@@ -130,7 +130,7 @@ class MediaController extends Controller
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'alt_text' => 'nullable|string|max:255',
-            'type' => 'sometimes|string|in:products,product-categories,faq,other',
+            'type' => 'sometimes|string|in:products,categories,faq,other',
             'file_name' => 'sometimes|string|max:255',
             'file' => "nullable|file|mimes:jpg,jpeg,png,gif,pdf,webp|max:{$maxSizeInKb}", // Changed to nullable
         ], [
@@ -143,8 +143,8 @@ class MediaController extends Controller
         // Handle the file upload only if a new file is present.
         if ($request->hasFile('file')) {
             // 1. Delete the old file to prevent orphaned files.
-            if ($media->file_path) {
-                Storage::disk('public')->delete($media->file_path);
+            if ($media->file_path && $media->file_name) {
+                Storage::disk('public')->delete($media->file_path . $media->file_name);
             }
 
             // determine if the file already exists in the storage, if it does we should not save it again, instead we should just update the existing record in the database with the existing file path and name
@@ -185,7 +185,9 @@ class MediaController extends Controller
     public function destroy(Media $media)
     {
         // Delete the file from storage
-        Storage::disk('public')->delete($media->file_path);
+        if ($media->file_path && $media->file_name) {
+            Storage::disk('public')->delete($media->file_path . $media->file_name);
+        }
 
         // Delete the record from the database
         $media->delete();

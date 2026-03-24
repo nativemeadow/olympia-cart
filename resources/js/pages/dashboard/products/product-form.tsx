@@ -27,6 +27,7 @@ import EditorComponent from '@/components/text-editor';
 import { Media } from '@/types/model-types';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import MediaSelectionModal from '@/pages/dashboard/media/media-selection-modal';
+import { generateSlug } from '@/utils/strings';
 import '@/../css/errors.css';
 import { DeletePriceForm } from './delete-price';
 import {
@@ -35,15 +36,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { ImSpinner } from 'react-icons/im';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import AlertDialogComponent from '@/components/AlertDialog';
 
 const initialProduct = (): Product => ({
     id: 0,
@@ -70,7 +63,7 @@ const initialPrice = (attributes?: Attributes[]): Price => {
             extended_properties[attr.name] = '';
         });
     }
-    return {
+    const defaultExtendedProps = {
         id: Date.now(), // Temporary unique ID
         product_id: 0,
         sku: '',
@@ -80,6 +73,7 @@ const initialPrice = (attributes?: Attributes[]): Price => {
         image: null,
         extended_properties: extended_properties,
     };
+    return defaultExtendedProps;
 };
 
 const PrepareProductData = (
@@ -87,7 +81,16 @@ const PrepareProductData = (
     attributes?: Attributes[],
 ): Product => {
     const processedPrices = product.prices?.map((price) => {
-        const newPrice: Price = { ...initialPrice(attributes), ...price };
+        const initial = initialPrice(attributes);
+        const newPrice: Price = {
+            ...initial,
+            ...price,
+            extended_properties: {
+                ...initial.extended_properties,
+                ...price.extended_properties,
+            },
+        };
+
         newPrice.extended_properties = { ...newPrice.extended_properties };
 
         price.attribute_values?.forEach((attrValue) => {
@@ -117,14 +120,14 @@ const PrepareProductData = (
     };
 };
 
-interface ProductFormData {
+type ProductFormData = {
     product: Product;
-}
+};
 
-interface FieldWrapperProps {
+type FieldWrapperProps = {
     children: React.ReactNode;
     error?: string;
-}
+};
 
 const FieldWrapper: React.FC<FieldWrapperProps> = ({ children, error }) => {
     return (
@@ -280,31 +283,13 @@ const ProductForm = ({
 
     return (
         <>
-            <AlertDialog
+            <AlertDialogComponent
                 open={errorDialogOpen}
                 onOpenChange={setErrorDialogOpen}
-            >
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Error</AlertDialogTitle>
-                        <AlertDialogDescription
-                            className={classes.errorDialogContent}
-                        >
-                            {errorDialogMessage}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogAction
-                            onClick={() => setErrorDialogOpen(false)}
-                        >
-                            Close
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-            {/* {errors && errors.error && (
-                <div className="mb-4 text-red-500">{errors.error}</div>
-            )} */}
+                title="Error"
+                description={errorDialogMessage}
+                onClose={() => setErrorDialogOpen(false)}
+            />
             {isSaving && (
                 <div className={classes.savingOverlay}>
                     <div className={classes.savingSpinner}>
@@ -355,17 +340,9 @@ const ProductForm = ({
                                                 );
                                                 if (!isSlugManuallyEdited) {
                                                     clearErrors('product.slug');
-                                                    const newSlug = newTitle
-                                                        .toLowerCase()
-                                                        .replace(
-                                                            /[^a-z0-9\s-]/g,
-                                                            '',
-                                                        )
-                                                        .replace(/\s+/g, '-')
-                                                        .replace(/-+/g, '-');
                                                     setData(
                                                         'product.slug',
-                                                        newSlug,
+                                                        generateSlug(newTitle),
                                                     );
                                                 }
                                             }}
@@ -560,11 +537,12 @@ const ProductForm = ({
                                                                     onSelect={
                                                                         handleImageSelect
                                                                     }
-                                                                    productId={
+                                                                    entityId={
                                                                         data
                                                                             .product
                                                                             .id
                                                                     }
+                                                                    mediaType="product"
                                                                 >
                                                                     <Tooltip>
                                                                         <TooltipTrigger
@@ -605,7 +583,8 @@ const ProductForm = ({
                                             onSelect={(image) =>
                                                 handleImageSelect(image)
                                             }
-                                            productId={data.product.id}
+                                            entityId={data.product.id}
+                                            mediaType="product"
                                         >
                                             <div
                                                 className={
@@ -990,11 +969,12 @@ const ProductForm = ({
                                                                                     price.id,
                                                                                 )
                                                                             }
-                                                                            productId={
+                                                                            entityId={
                                                                                 data
                                                                                     .product
                                                                                     .id
                                                                             }
+                                                                            mediaType="product"
                                                                         >
                                                                             <Tooltip>
                                                                                 <TooltipTrigger
@@ -1037,10 +1017,11 @@ const ProductForm = ({
                                                                         price.id,
                                                                     )
                                                                 }
-                                                                productId={
+                                                                entityId={
                                                                     data.product
                                                                         .id
                                                                 }
+                                                                mediaType="product"
                                                             >
                                                                 <div
                                                                     className={
