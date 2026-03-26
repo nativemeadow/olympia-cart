@@ -37,12 +37,6 @@ const MediaSelectionModal = ({
         useState<PageProps<MediaComponentProps> | null>(null);
 
     const openMediaModal = async () => {
-        // The modal can be opened without an entityId for general selection
-        // if (!entityId) {
-        //     console.error('No entityId provided for media selection.');
-        //     return;
-        // }
-
         try {
             const routeName =
                 mediaType === 'category'
@@ -86,6 +80,7 @@ const MediaSelectionModal = ({
                             onUpdate={(newProps) =>
                                 setModalMediaProps(newProps)
                             }
+                            mediaType={mediaType}
                         />
                     )}
                     <DialogFooter>

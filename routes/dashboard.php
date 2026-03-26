@@ -7,6 +7,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Dashboard\ProductOrderController;
+use App\Http\Controllers\Dashboard\CategoryOrderController;
+use App\Http\Controllers\Dashboard\CustomersOrdersController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -20,6 +22,10 @@ Route::prefix('dashboard')
             'categories',
         ])->name('categories.index');
 
+        Route::put('categories/order', CategoryOrderController::class)->name(
+            'categories.order',
+        );
+
         Route::resource('categories', CategoryController::class)->except([
             'index',
             'create',
@@ -32,7 +38,6 @@ Route::prefix('dashboard')
         Route::post('/category/store/{parentId}', [CategoryController::class, 'store'])->name('category.store');
         Route::put('/category/update/{categoryId}', [CategoryController::class, 'update'])->name('category.update');
         Route::delete('/category/destroy/{categoryId}', [CategoryController::class, 'destroy'])->name('category.destroy');
-
 
         Route::get('/products', [
             DashboardController::class,
@@ -67,7 +72,12 @@ Route::prefix('dashboard')
             'orders',
         );
 
-        Route::get('/media/{sort_column?}/{order?}/{search_term?}', [MediaController::class, 'index'])->name('media');
+        Route::get('/customer-orders', [CustomersOrdersController::class, 'index'])->name('customer.orders');
+
+        Route::get('/media/{sort_column?}/{order?}/{search_term?}', [
+            MediaController::class,
+            'index',
+        ])->name('media');
 
         Route::post('/media', [MediaController::class, 'store'])->name('media.store');
         Route::get('/media/{media}/edit', [MediaController::class, 'edit'])->name('media.edit');

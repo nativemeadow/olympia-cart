@@ -136,112 +136,6 @@ export default function CategoryForm({
     return (
         <form onSubmit={handleSubmit}>
             <div className={classes.formGrid}>
-                <div className={classes.fieldRow}>
-                    <Label htmlFor="title" className={classes.label}>
-                        Title
-                    </Label>
-                    <div className={classes.inputWrapper}>
-                        <Input
-                            id="title"
-                            value={data.title}
-                            onChange={(e) => {
-                                setData('title', e.target.value);
-                                if (!isSlugManuallyEdited) {
-                                    clearErrors('title');
-                                    setData(
-                                        'slug',
-                                        generateSlug(e.target.value),
-                                    );
-                                }
-                            }}
-                        />
-                        {errors.title && (
-                            <p className={classes.errorText}>{errors.title}</p>
-                        )}
-                    </div>
-                </div>
-                <div className={classes.fieldRow}>
-                    <Label htmlFor="slug" className={classes.label}>
-                        Slug
-                    </Label>
-                    <div className={classes.inputWrapper}>
-                        <Input
-                            id="slug"
-                            value={data.slug}
-                            onChange={(e) => {
-                                setData('slug', e.target.value);
-                                setIsSlugManuallyEdited(true);
-                            }}
-                        />
-                        {errors.slug && (
-                            <p className={classes.errorText}>{errors.slug}</p>
-                        )}
-                    </div>
-                </div>
-                <div className={classes.descriptionContainer}>
-                    <Label htmlFor="description" className={classes.label}>
-                        Description
-                    </Label>
-                    <FieldWrapper error={errors.description}>
-                        <EditorComponent
-                            id="description"
-                            initialValue={data.description || ''}
-                            handleEditorChange={(content: string) => {
-                                clearErrors('description');
-                                setData('description', content);
-                            }}
-                        />
-                    </FieldWrapper>
-                    {errors.description && (
-                        <p className={classes.errorText}>
-                            {errors.description}
-                        </p>
-                    )}
-                </div>
-                <div>
-                    <Label htmlFor="slug" className={classes.label}>
-                        Status
-                    </Label>
-                    <FieldWrapper error={errors['is_active']}>
-                        <RadioGroup
-                            onValueChange={(value) => {
-                                clearErrors('is_active');
-                                setData('is_active', value === '1');
-                            }}
-                            value={data.is_active ? '1' : '0'}
-                            className={cx(classes.radioGroup, {
-                                'input-with-error': errors['is_active'],
-                            })}
-                        >
-                            <div className={classes.radioItem}>
-                                <RadioGroupItem
-                                    value="1"
-                                    id="status-active"
-                                    className={classes.radioInput}
-                                />
-                                <Label
-                                    htmlFor="status-active"
-                                    className={classes.label}
-                                >
-                                    Active
-                                </Label>
-                            </div>
-                            <div className={classes.radioItem}>
-                                <RadioGroupItem
-                                    value="0"
-                                    id="status-inactive"
-                                    className={classes.radioInput}
-                                />
-                                <Label
-                                    htmlFor="status-inactive"
-                                    className={classes.label}
-                                >
-                                    Inactive
-                                </Label>
-                            </div>
-                        </RadioGroup>
-                    </FieldWrapper>
-                </div>
                 <div className={classes.imageContainer}>
                     <h2>Image</h2>
                     {data.media ? (
@@ -305,8 +199,6 @@ export default function CategoryForm({
                             <Button type="button">Select Image</Button>
                         </MediaSelectionModal>
                     )}
-                </div>
-                <div className={classes.descriptionContainer}>
                     {data.media ? (
                         <div>
                             <Label htmlFor="image" className={classes.label}>
@@ -329,6 +221,119 @@ export default function CategoryForm({
                             </FieldWrapper>
                         </div>
                     ) : null}
+                </div>
+
+                <div className={classes.fieldsContainer}>
+                    <div className={classes.fieldRow}>
+                        <Label htmlFor="title" className={classes.label}>
+                            Title
+                        </Label>
+                        <div className={classes.inputWrapper}>
+                            <Input
+                                id="title"
+                                value={data.title}
+                                onChange={(e) => {
+                                    setData('title', e.target.value);
+                                    if (!isSlugManuallyEdited) {
+                                        clearErrors('title');
+                                        setData(
+                                            'slug',
+                                            generateSlug(e.target.value),
+                                        );
+                                    }
+                                }}
+                            />
+                            {errors.title && (
+                                <p className={classes.errorText}>
+                                    {errors.title}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                    <div className={classes.fieldRow}>
+                        <Label htmlFor="slug" className={classes.label}>
+                            Slug
+                        </Label>
+                        <div className={classes.inputWrapper}>
+                            <Input
+                                id="slug"
+                                value={data.slug}
+                                onChange={(e) => {
+                                    setData('slug', e.target.value);
+                                    setIsSlugManuallyEdited(true);
+                                }}
+                            />
+                            {errors.slug && (
+                                <p className={classes.errorText}>
+                                    {errors.slug}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                    <div className={classes.descriptionContainer}>
+                        <Label htmlFor="description" className={classes.label}>
+                            Description
+                        </Label>
+                        <FieldWrapper error={errors.description}>
+                            <EditorComponent
+                                id="description"
+                                initialValue={data.description || ''}
+                                handleEditorChange={(content: string) => {
+                                    clearErrors('description');
+                                    setData('description', content);
+                                }}
+                            />
+                        </FieldWrapper>
+                        {errors.description && (
+                            <p className={classes.errorText}>
+                                {errors.description}
+                            </p>
+                        )}
+                    </div>
+                    <div>
+                        <Label htmlFor="slug" className={classes.label}>
+                            Status
+                        </Label>
+                        <FieldWrapper error={errors['is_active']}>
+                            <RadioGroup
+                                onValueChange={(value) => {
+                                    clearErrors('is_active');
+                                    setData('is_active', value === '1');
+                                }}
+                                value={data.is_active ? '1' : '0'}
+                                className={cx(classes.radioGroup, {
+                                    'input-with-error': errors['is_active'],
+                                })}
+                            >
+                                <div className={classes.radioItem}>
+                                    <RadioGroupItem
+                                        value="1"
+                                        id="status-active"
+                                        className={classes.radioInput}
+                                    />
+                                    <Label
+                                        htmlFor="status-active"
+                                        className={classes.label}
+                                    >
+                                        Active
+                                    </Label>
+                                </div>
+                                <div className={classes.radioItem}>
+                                    <RadioGroupItem
+                                        value="0"
+                                        id="status-inactive"
+                                        className={classes.radioInput}
+                                    />
+                                    <Label
+                                        htmlFor="status-inactive"
+                                        className={classes.label}
+                                    >
+                                        Inactive
+                                    </Label>
+                                </div>
+                            </RadioGroup>
+                        </FieldWrapper>
+                    </div>
                 </div>
             </div>
             <DialogFooter>

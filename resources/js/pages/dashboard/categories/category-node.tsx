@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CategoryHierarchy } from '@/types';
 import { Product as ProductType } from '@/types/model-types';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronRight, Package } from 'lucide-react';
+import { ChevronDown, ChevronRight, Package, GripVertical } from 'lucide-react';
 import {
     AddCategoryAction,
     DeleteCategoryAction,
@@ -18,19 +18,50 @@ import { useCategoryExpanded } from '@/context/CategoryExpandedContext';
 
 interface CategoryNodeProps {
     category: CategoryHierarchy;
+    onDragStart: (categoryId: number) => void;
+    onDrop: (categoryId: number) => void;
 }
 
-const CategoryNode: React.FC<CategoryNodeProps> = ({ category }) => {
+const CategoryNode: React.FC<CategoryNodeProps> = ({
+    category,
+    onDragStart,
+    onDrop,
+}) => {
     const { expanded, toggle } = useCategoryExpanded();
     const isOpen = expanded.has(category.id);
     const hasChildren = category.children && category.children.length > 0;
     const hasProducts = category.products && category.products.length > 0;
     const isExpandable = hasChildren || hasProducts;
+    const [isDragOver, setIsDragOver] = useState(false);
+    const [dropTargetId, setDropTargetId] = useState<number | null>(null);
 
     const handleToggle = () => {
         if (isExpandable) {
             toggle(category.id);
         }
+    };
+
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+        e.dataTransfer.effectAllowed = 'move';
+        onDragStart(category.id);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragOver(true);
+        setDropTargetId(category.id);
+    };
+
+    const handleDragLeave = () => {
+        setIsDragOver(false);
+        setDropTargetId(null);
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        onDrop(category.id);
+        setIsDragOver(false);
+        setDropTargetId(null);
     };
 
     const handleSuccess = () => {
@@ -43,7 +74,20 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({ category }) => {
 
     return (
         <div className={styles.node}>
-            <div className={styles.node_header}>
+            <div
+                id={`category-${category.id}`}
+                className={`${styles.node_header} ${isDragOver ? styles.drag_over : ''} ${
+                    dropTargetId === category.id ? styles.drop_target : ''
+                }`}
+                draggable
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+            >
+                <div className={styles.drag_handle_icon_container}>
+                    <GripVertical className={styles.drag_handle_icon} />
+                </div>
                 {isExpandable ? (
                     <Button
                         variant="ghost"
@@ -77,36 +121,35 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({ category }) => {
                 </div>
             </div>
             {isOpen && (
-                <div className={styles.children_container}>
+                <div className={styles.node_children}>
                     {hasChildren &&
                         category.children?.map((child) => (
-                            <CategoryNode key={child.id} category={child} />
+                            <CategoryNode
+                                key={child.id}
+                                category={child}
+                                onDragStart={onDragStart}
+                                onDrop={onDrop}
+                            />
                         ))}
                     {hasProducts &&
                         category.products?.map((product: ProductType) => (
                             <div
                                 key={`product-${product.id}`}
-                                className={`${styles.node} ${styles.product_node}`}
+                                className={styles.product_node}
                             >
-                                <div className={styles.node_header}>
-                                    <div className={styles.toggle_placeholder}>
-                                        <Package
-                                            className={styles.product_icon}
-                                        />
-                                    </div>
-                                    <span className={styles.node_title}>
-                                        {product.title}
-                                    </span>
-                                    <div className={styles.actions}>
-                                        <EditProductAction
-                                            product={product}
-                                            onSuccess={handleSuccess}
-                                        />
-                                        <DeleteProductAction
-                                            product={product}
-                                            onSuccess={handleSuccess}
-                                        />
-                                    </div>
+                                <Package className={styles.product_node_icon} />
+                                <span className={styles.product_node_title}>
+                                    {product.title}
+                                </span>
+                                <div className={styles.actions}>
+                                    <EditProductAction
+                                        product={product}
+                                        onSuccess={handleSuccess}
+                                    />
+                                    <DeleteProductAction
+                                        product={product}
+                                        onSuccess={handleSuccess}
+                                    />
                                 </div>
                             </div>
                         ))}
