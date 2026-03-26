@@ -61,6 +61,17 @@ const NewImageForm = ({
         size: undefined,
     });
 
+    useEffect(() => {
+        setData(
+            'type',
+            imageType && imageType === 'product'
+                ? 'products'
+                : imageType === 'category'
+                  ? 'categories'
+                  : '',
+        );
+    }, [imageType]);
+
     // Sync the file from the hook with the form state
     useEffect(() => {
         setData('file', file);
@@ -245,6 +256,7 @@ const NewImageForm = ({
                             Image Type
                         </Label>
                         <Select
+                            value={data.type}
                             onValueChange={(value) => {
                                 clearErrors('type');
                                 setData('type', value);

@@ -52,11 +52,13 @@ const MediaComponent = ({
     onSelect,
     onUpdate,
     isModal,
+    mediaType,
 }: MediaProps &
     PageProps & {
         onSelect?: (image: Media) => void;
         onUpdate?: (props: PageProps<MediaProps>) => void;
         isModal?: boolean;
+        mediaType?: 'product' | 'category';
     }) => {
     const { links, meta } = media;
     const [mediaItems, setMediaItems] = useState<Media[]>(media.data);
@@ -169,7 +171,10 @@ const MediaComponent = ({
                 </>
             )}
             <div className="flex items-center justify-between gap-2">
-                <UploadNewImage onImageAdded={handleImageAdded} />
+                <UploadNewImage
+                    onImageAdded={handleImageAdded}
+                    imageType={mediaType}
+                />
                 <div className="flex flex-grow items-center justify-end gap-2">
                     <Input
                         name="search"

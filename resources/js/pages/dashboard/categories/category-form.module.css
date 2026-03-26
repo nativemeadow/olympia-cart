@@ -10,9 +10,16 @@
 
 .formGrid {
     display: grid;
+    grid-template-columns: 1fr 2fr;
     gap: 1rem; /* gap-4 */
     padding-top: 1rem; /* py-4 */
     padding-bottom: 1rem; /* py-4 */
+}
+
+.fieldsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .fieldRow {
@@ -86,6 +93,28 @@
     position: relative; /* group relative */
 }
 
+.imageContainer {
+    position: relative;
+}
+
+.imageContainer:hover .editButton {
+    opacity: 1;
+}
+
+.editButton {
+    position: absolute;
+    right: 0.5rem; /* right-2 */
+    bottom: 0.5rem; /* bottom-2 */
+    opacity: 0;
+    transition: opacity 150ms ease-in-out;
+    cursor: pointer;
+}
+
+.pencilIcon {
+    height: 1rem; /* h-4 */
+    width: 1rem; /* w-4 */
+}
+
 .addImagePlaceholder {
     display: flex;
     height: 12rem; /* h-48 */
@@ -99,9 +128,10 @@
 }
 
 .product_image_preview {
+    /* max-height: 500px;
     width: 100%;
-    height: 12rem; /* h-48 */
-    object-fit: contain;
+    height: 12rem;*/ /* h-48 */
+    /* object-fit: contain;*/
     border-radius: 0.375rem; /* rounded-md */
     border: 1px solid var(--border);
 }

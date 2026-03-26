@@ -94,7 +94,10 @@ export function AddCategoryAction({
                     <Plus className={classes.plus_icon} />
                 </Button>
             </DialogTrigger>
-            <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+            <DialogContent
+                className={classes.form_dialog}
+                onInteractOutside={(e) => e.preventDefault()}
+            >
                 <DialogHeader>
                     <DialogTitle>Add Child to "{category.title}"</DialogTitle>
                 </DialogHeader>
@@ -139,7 +142,10 @@ export function EditCategoryAction({
                     <Pencil className={classes.action_icon} />
                 </Button>
             </DialogTrigger>
-            <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+            <DialogContent
+                className={classes.form_dialog}
+                onInteractOutside={(e) => e.preventDefault()}
+            >
                 <DialogHeader>
                     <DialogTitle>Edit "{category.title}"</DialogTitle>
                 </DialogHeader>

@@ -28,7 +28,7 @@
 
 /* From category-node.tsx */
 .node {
-    margin-left: 1rem; /* ml-4 */
+    /* margin-left: 1rem; */ /* ml-4 */
 }
 
 .node_header {
@@ -59,12 +59,18 @@
 
 .toggle_placeholder {
     margin-right: 0.5rem; /* mr-2 */
-    width: 2.5rem; /* w-10, same as button size=icon */
+    /* width: 2.5rem; */
 }
 
 .node_title {
     font-size: 1rem; /* text-md */
     line-height: 1.5rem;
+}
+
+.node_children {
+    padding-left: 2.5rem; /* Indent children to align with parent title */
+    border-left: 1px solid var(--border);
+    margin-left: 1.25rem; /* Align border with the middle of the toggle icon */
 }
 
 .actions {
@@ -110,7 +116,7 @@
 }
 
 .formContainer {
-    max-height: 50vh;
+    max-height: 60vh;
     overflow-y: auto;
     margin-left: -1rem; /* -mx-4 */
     margin-right: -1rem; /* -mx-4 */
@@ -135,4 +141,27 @@
 .toolbar {
     display: flex;
     gap: 0.5rem; /* 8px */
+}
+
+.form_dialog {
+    max-width: 80vw;
+    width: 80vw;
+}
+
+.drag_handle_icon_container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    cursor: grab;
+}
+
+.drag_handle_icon {
+    width: 1rem; /* w-4 */
+    height: 1rem; /* h-4 */
+    color: #999;
+}
+
+.drop_target {
+    border-top: 2px solid blue;
 }

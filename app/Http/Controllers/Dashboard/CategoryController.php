@@ -156,7 +156,7 @@ class CategoryController extends Controller
     {
         // Check if the category has any products associated with it.
         if ($category->products()->exists()) {
-            return  redirect()->route('dashboard.index')->with(
+            return  redirect()->route('dashboard.categories.index')->with(
                 'error',
                 'Cannot delete category. It is associated with products.',
             );
@@ -164,7 +164,7 @@ class CategoryController extends Controller
 
         // Check if the category has any children.
         if ($category->children()->exists()) {
-            return  redirect()->route('dashboard.index')->with(
+            return  redirect()->route('dashboard.categories.index')->with(
                 'error',
                 'Cannot delete category. It has child categories.',
             );
@@ -172,7 +172,7 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return  redirect()->route('dashboard.index')->with(
+        return  redirect()->route('dashboard.categories.index')->with(
             'success',
             'Category deleted.',
         );
