@@ -161,7 +161,3 @@
     height: 1rem; /* h-4 */
     color: #999;
 }
-
-.drop_target {
-    border-top: 2px solid blue;
-}

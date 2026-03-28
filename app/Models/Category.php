@@ -23,6 +23,7 @@ class Category extends Model
         'created_at',
         'updated_at',
     ];
+
     /**
      * The parent categories of this category.
      */
@@ -47,6 +48,19 @@ class Category extends Model
             'parent_id',
             'child_id'
         );
+    }
+
+    public function getBreadcrumb()
+    {
+        $breadcrumb = [$this->title];
+        $parent = $this->parents()->first(); // Get the first parent
+
+        while ($parent) {
+            array_unshift($breadcrumb, $parent->title);
+            $parent = $parent->parents()->first();
+        }
+
+        return implode(' > ', $breadcrumb);
     }
 
     public function products()

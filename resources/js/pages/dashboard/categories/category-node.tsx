@@ -33,7 +33,6 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
     const hasProducts = category.products && category.products.length > 0;
     const isExpandable = hasChildren || hasProducts;
     const [isDragOver, setIsDragOver] = useState(false);
-    const [dropTargetId, setDropTargetId] = useState<number | null>(null);
 
     const handleToggle = () => {
         if (isExpandable) {
@@ -49,19 +48,16 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDragOver(true);
-        setDropTargetId(category.id);
     };
 
     const handleDragLeave = () => {
         setIsDragOver(false);
-        setDropTargetId(null);
     };
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         onDrop(category.id);
         setIsDragOver(false);
-        setDropTargetId(null);
     };
 
     const handleSuccess = () => {
@@ -76,9 +72,7 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
         <div className={styles.node}>
             <div
                 id={`category-${category.id}`}
-                className={`${styles.node_header} ${isDragOver ? styles.drag_over : ''} ${
-                    dropTargetId === category.id ? styles.drop_target : ''
-                }`}
+                className={`${styles.node_header} ${isDragOver ? styles.drag_over : ''}`}
                 draggable
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}

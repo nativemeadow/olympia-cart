@@ -3,7 +3,7 @@
 use App\Http\Controllers\Dashboard\CategoryController;
 use App\Http\Controllers\Dashboard\ProductController;
 use App\Http\Controllers\Dashboard\MediaController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Dashboard\ProductOrderController;

@@ -1,18 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dashboard;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
-use Inertia\Response;
-
-use App\Models\Category;
-use App\Models\Product;
-use App\Models\Order;
-use App\Models\Customer;
-use App\Models\User;
 
 class DashboardController extends Controller
 {

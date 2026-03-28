@@ -7,6 +7,7 @@ use App\Models\Media;
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
+use App\Models\Category;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,10 +16,52 @@ use Inertia\Inertia;
 
 class ProductController extends Controller
 {
+    private function getCategoryTree()
+    {
+        $categories = Category::all();
+        $categoryMap = $categories->keyBy('id');
+        $tree = collect();
+
+        foreach ($categories as $category) {
+            // Unset relations to avoid circular references in JSON
+            $category->unsetRelation('parents');
+            $category->unsetRelation('children');
+
+            $parentId = DB::table('category_category')
+                ->where('child_id', $category->id)
+                ->value('parent_id');
+
+            if ($parentId && $categoryMap->has($parentId)) {
+                $parent = $categoryMap->get($parentId);
+                if (!$parent->relationLoaded('children')) {
+                    $parent->setRelation('children', collect());
+                }
+                $parent->getRelation('children')->push($category);
+            } else {
+                $tree->push($category);
+            }
+        }
+
+        // This function is needed to ensure children are properly formatted
+        $formatForHierarchy = function ($categories) use (&$formatForHierarchy) {
+            return $categories->map(function ($category) use (&$formatForHierarchy) {
+                if ($category->relationLoaded('children') && $category->getRelation('children')->isNotEmpty()) {
+                    $category->setRelation('children', $formatForHierarchy($category->getRelation('children')));
+                } else {
+                    // Ensure children is always an array, even if empty
+                    $category->setRelation('children', collect());
+                }
+                return $category;
+            });
+        };
+
+        return $formatForHierarchy($tree);
+    }
+
+
     //
     public function show($product_id)
     {
-        // get the product with its categories and variants and variants associated with the product
         $product = Product::with([
             'categories',
             'variants' => function ($query) {
@@ -30,6 +73,11 @@ class ProductController extends Controller
         if (!$product) {
             return response()->json(['product' => null], 404);
         }
+
+        // Manually build breadcrumbs for each category
+        $product->categories->each(function ($category) {
+            $category->breadcrumb = $category->getBreadcrumb();
+        });
 
         $productArray = $product->toArray();
 
@@ -46,19 +94,23 @@ class ProductController extends Controller
         }
 
         $allAttributes = Attribute::distinct()->get(['name', 'data_type']);
+        $allCategories = $this->getCategoryTree();
 
         return response()->json([
             'product' => $productArray,
             'allAttributes' => $allAttributes,
+            'allCategories' => $allCategories,
         ]);
     }
 
     public function getPriceAttributes()
     {
         $attributes = Attribute::with('values')->get(['name', 'data_type', 'list_of_values']);
+        $allCategories = $this->getCategoryTree();
 
         return response()->json([
             'allAttributes' => $attributes,
+            'allCategories' => $allCategories,
         ]);
     }
 
@@ -128,7 +180,7 @@ class ProductController extends Controller
             'product.prices.*.sku.unique' => 'Price SKU must be unique.',
             'product.prices.*.price.required' => 'Price must have a value.',
             'product.prices.*.price.numeric' => 'Price value must be numeric.',
-            'product.prices.*.price.min' => 'Price value must be at least 1.',
+            'product.prices.*.price.min' => 'Price must be at least 1.',
         ]);
 
         $productData = $validatedData['product'];
@@ -262,18 +314,46 @@ class ProductController extends Controller
             ]);
 
             if (isset($productData['categories'])) {
-                $product->categories()->sync(array_column($productData['categories'], 'id'));
+                $categoryIds = array_column($productData['categories'], 'id');
+
+                // Get the current categories to compare
+                $currentCategoryIds = $product->categories()->pluck('categories.id')->toArray();
+
+                // Categories to be added are the ones in the new list but not in the old one
+                $categoriesToAdd = array_diff($categoryIds, $currentCategoryIds);
+
+                foreach ($categoriesToAdd as $categoryId) {
+                    // For newly associated categories, add them with a calculated order
+                    $maxOrder = DB::table('category_product')
+                        ->where('category_id', $categoryId)
+                        ->max('product_order');
+
+                    $product->categories()->attach($categoryId, [
+                        'product_order' => ($maxOrder ?? 0) + 1,
+                        'sku' => $productData['sku'],
+                    ]);
+                }
+
+                // Categories to be removed
+                $categoriesToRemove = array_diff($currentCategoryIds, $categoryIds);
+                if (!empty($categoriesToRemove)) {
+                    $product->categories()->detach($categoriesToRemove);
+                }
+
+                // For categories that remain, just update the SKU if it has changed
+                $categoriesToUpdate = array_intersect($currentCategoryIds, $categoryIds);
+                foreach ($categoriesToUpdate as $categoryId) {
+                    DB::table('category_product')
+                        ->where('category_id', $categoryId)
+                        ->where('product_id', $product->id)
+                        ->update(['sku' => $productData['sku']]);
+                }
+            } else {
+                // If no categories are provided, detach all
+                $product->categories()->detach();
             }
 
             $priceIds = [];
-
-            // update the sku in the category_product pivot table if the product sku has changed
-            if (isset($productData['categories'])) {
-                foreach ($productData['categories'] as $categoryData) {
-                    $categoryId = $categoryData['id'];
-                    DB::table('category_product')->where('category_id', $categoryId)->where('product_id', $product->id)->update(['sku' => $productData['sku']]);
-                }
-            }
 
             foreach ($productData['prices'] as $priceData) {
                 $variant = $product->variants()->updateOrCreate(

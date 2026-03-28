@@ -37,6 +37,13 @@ import {
 } from '@/components/ui/tooltip';
 import { ImSpinner } from 'react-icons/im';
 import AlertDialogComponent from '@/components/AlertDialog';
+import { Category } from '@/types/model-types';
+import { CategoryHierarchy } from '@/types';
+import CategoryManagement from './CategoryManagement';
+import {
+    CategoryExpandedProvider,
+    useCategoryExpanded,
+} from '@/context/CategoryExpandedContext';
 
 const initialProduct = (): Product => ({
     id: 0,
@@ -144,12 +151,14 @@ const ProductForm = ({
     attributes,
     isEdit = false,
     onSuccess,
+    allCategories,
 }: {
     product?: Product;
     categoryId?: number;
     attributes?: Attributes[];
     isEdit?: boolean;
     onSuccess: () => void;
+    allCategories: CategoryHierarchy[];
 }) => {
     const [priceStrings, setPriceStrings] = useState<{ [key: string]: string }>(
         {},
@@ -193,6 +202,10 @@ const ProductForm = ({
             setData('product.media', [image]);
             setData('product.image', image.file_name);
         }
+    };
+
+    const handleCategoriesChange = (categories: Category[]) => {
+        setData('product.categories', categories);
     };
 
     const handleSubmit: FormEventHandler = (e) => {
@@ -438,30 +451,18 @@ const ProductForm = ({
                                                 <RadioGroupItem
                                                     value="1"
                                                     id="status-active"
-                                                    className={
-                                                        classes.radioInput
-                                                    }
                                                 />
-                                                <Label
-                                                    htmlFor="status-active"
-                                                    className={classes.label}
-                                                >
+                                                <Label htmlFor="status-active">
                                                     Active
                                                 </Label>
                                             </div>
                                             <div className={classes.radioItem}>
                                                 <RadioGroupItem
                                                     value="0"
-                                                    id="status-inactive"
-                                                    className={
-                                                        classes.radioInput
-                                                    }
+                                                    id="status-draft"
                                                 />
-                                                <Label
-                                                    htmlFor="status-inactive"
-                                                    className={classes.label}
-                                                >
-                                                    Inactive
+                                                <Label htmlFor="status-draft">
+                                                    Draft
                                                 </Label>
                                             </div>
                                         </RadioGroup>
@@ -496,6 +497,7 @@ const ProductForm = ({
                                         />
                                     </FieldWrapper>
                                 </div>
+                                <Separator className="my-6" />
                                 <div className={classes.imageContainer}>
                                     <h2>Image</h2>
                                     {data.product.media &&
@@ -632,6 +634,24 @@ const ProductForm = ({
                         </Card>
                     </div>
                     <div className={classes.right_column}>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Categories</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <CategoryExpandedProvider>
+                                    <CategoryManagement
+                                        allCategories={allCategories}
+                                        associatedCategories={
+                                            data.product.categories || []
+                                        }
+                                        onCategoriesChange={
+                                            handleCategoriesChange
+                                        }
+                                    />
+                                </CategoryExpandedProvider>
+                            </CardContent>
+                        </Card>
                         {/* Add fields for prices and categories here */}
                         {data.product?.prices && (
                             <Card>
@@ -1179,6 +1199,14 @@ const ProductForm = ({
                     </div>
                 </div>
             </form>
+
+            <AlertDialogComponent
+                open={errorDialogOpen}
+                onOpenChange={setErrorDialogOpen}
+                title="Error"
+                description={errorDialogMessage}
+                onClose={() => setErrorDialogOpen(false)}
+            />
         </>
     );
 };

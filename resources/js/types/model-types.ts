@@ -37,6 +37,7 @@ export type Category = {
     created_at: string;
     updated_at: string;
     // Relationships
+    breadcrumb?: string;
     parents?: Category[];
     children?: Category[];
     products?: Product[];

@@ -24,7 +24,8 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Attributes, Product } from '@/types/model-types';
+import { Attributes, Product, Category } from '@/types/model-types';
+import { CategoryHierarchy } from '@/types';
 import { useForm } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -81,6 +82,7 @@ export function AddProductAction({
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [attributes, setAttributes] = useState<Attributes[]>([]);
+    const [allCategories, setAllCategories] = useState<CategoryHierarchy[]>([]);
 
     const handleSuccess = () => {
         setIsOpen(false);
@@ -93,6 +95,7 @@ export function AddProductAction({
             .then((response) => response.json())
             .then((data) => {
                 setAttributes(data.allAttributes);
+                setAllCategories(data.allCategories);
                 console.log(
                     'Fetching price attributes for add:',
                     data.allAttributes,
@@ -130,6 +133,7 @@ export function AddProductAction({
                         categoryId={categoryId}
                         isEdit={false}
                         onSuccess={handleSuccess}
+                        allCategories={allCategories}
                     />
                 </div>
                 <DialogFooter>
@@ -154,6 +158,7 @@ export function EditProductAction({
 }) {
     const [productData, setProductData] = useState<Product | null>(null);
     const [attributes, setAttributes] = useState<Attributes[]>([]);
+    const [allCategories, setAllCategories] = useState<CategoryHierarchy[]>([]);
     const [isOpen, setIsOpen] = useState(false);
 
     const handleSuccess = () => {
@@ -168,6 +173,7 @@ export function EditProductAction({
             .then((data) => {
                 setProductData(data.product);
                 setAttributes(data.allAttributes);
+                setAllCategories(data.allCategories);
                 console.log('Fetching product data for edit:', data.product);
             });
     };
@@ -203,6 +209,7 @@ export function EditProductAction({
                             attributes={attributes}
                             isEdit={true}
                             onSuccess={handleSuccess}
+                            allCategories={allCategories}
                         />
                     ) : (
                         <p>Loading...</p>
