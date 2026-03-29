@@ -6,6 +6,8 @@ import ProductNode from './product-node';
 import classes from './products.module.css';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import Toastify from 'toastify-js';
+import axios from 'axios';
 
 type CategoriesIndexProps = {
     categories: CategoryHierarchy[];
@@ -55,7 +57,7 @@ export default function Products({ categories }: CategoriesIndexProps) {
         setOpenNodes(allIds);
     };
 
-    const handleProductOrderChange = (
+    const handleProductOrderChange = async (
         categoryId: number,
         products: ProductType[],
     ) => {
@@ -64,13 +66,33 @@ export default function Products({ categories }: CategoriesIndexProps) {
             product_order: index,
         }));
 
-        router.put(
-            route('dashboard.products.order'),
-            { category_id: categoryId, products: product_order },
-            {
-                preserveScroll: true,
-            },
-        );
+        axios
+            .put(route('dashboard.products.order'), {
+                category_id: categoryId,
+                products: product_order,
+            })
+            .then(() => {
+                Toastify({
+                    text: 'Product order updated successfully.',
+                    duration: 3000,
+                    close: true,
+                    gravity: 'top',
+                    position: 'right',
+                    backgroundColor:
+                        'linear-gradient(to right, #00b09b, #96c93d)',
+                }).showToast();
+            })
+            .catch((error) => {
+                console.error(error);
+                Toastify({
+                    text: 'Failed to reorder products. Please try again.',
+                    duration: 3000,
+                    close: true,
+                    gravity: 'top',
+                    position: 'right',
+                    backgroundColor: 'red',
+                }).showToast();
+            });
     };
 
     return (
@@ -102,7 +124,6 @@ export default function Products({ categories }: CategoriesIndexProps) {
                     </Button>
                 </div>
             </div>
-
             <div className={classes.container}>
                 {categories.map((category) => (
                     <ProductNode

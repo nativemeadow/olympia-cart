@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 
 class ProductOrderController extends Controller
@@ -33,6 +32,8 @@ class ProductOrderController extends Controller
             }
         });
 
-        return redirect()->back()->with('success', 'Product order updated successfully.');
+        return json_encode([
+            'message' => 'Product order updated successfully.',
+        ]);
     }
 }

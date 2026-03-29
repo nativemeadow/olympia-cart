@@ -76,6 +76,7 @@ const ProductNode: React.FC<ProductNodeProps> = ({
     ) => {
         setDraggedProductId(productId);
         e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', `${category.id}:${productId}`);
     };
 
     const handleDragOver = (
@@ -83,6 +84,17 @@ const ProductNode: React.FC<ProductNodeProps> = ({
         targetProductId: number,
     ) => {
         e.preventDefault();
+        const draggedData = e.dataTransfer.getData('text/plain');
+        if (!draggedData) return;
+
+        const [sourceCategoryId] = draggedData.split(':');
+        if (Number(sourceCategoryId) !== category.id) {
+            e.dataTransfer.dropEffect = 'none';
+            setDropTargetId(null);
+            return;
+        }
+
+        e.dataTransfer.dropEffect = 'move';
         if (targetProductId !== dropTargetId) {
             setDropTargetId(targetProductId);
         }
@@ -92,11 +104,22 @@ const ProductNode: React.FC<ProductNodeProps> = ({
         setDropTargetId(null);
     };
 
+    const handleDragEnd = () => {
+        setDraggedProductId(null);
+        setDropTargetId(null);
+    };
+
     const handleDrop = (
         e: React.DragEvent<HTMLDivElement>,
         targetProductId: number,
     ) => {
         e.preventDefault();
+        const draggedData = e.dataTransfer.getData('text/plain');
+        if (!draggedData) return;
+        const [sourceCategoryId] = draggedData.split(':');
+        if (Number(sourceCategoryId) !== category.id) {
+            return;
+        }
         if (draggedProductId === null || draggedProductId === targetProductId) {
             return;
         }
@@ -174,6 +197,7 @@ const ProductNode: React.FC<ProductNodeProps> = ({
                                 }
                                 onDragLeave={handleDragLeave}
                                 onDrop={(e) => handleDrop(e, product.id)}
+                                onDragEnd={handleDragEnd}
                             >
                                 <div
                                     className={
