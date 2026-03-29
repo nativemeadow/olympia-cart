@@ -10,7 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CategoryHierarchy } from '@/types';
 import { Category } from '@/types/model-types';
-import { useCategoryExpanded } from '@/context/CategoryExpandedContext';
+import {
+    useCategoryExpanded,
+    CategoryExpandedProvider,
+} from '@/context/CategoryExpandedContext';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import classes from './category-selection-modal.module.css';
 
@@ -19,6 +22,13 @@ interface CategoryNodeProps {
     selectedCategories: Set<number>;
     onCategoryToggle: (categoryId: number) => void;
 }
+
+const getAllCategoryIds = (categories: CategoryHierarchy[]): number[] => {
+    return categories.flatMap((category) => [
+        category.id,
+        ...(category.children ? getAllCategoryIds(category.children) : []),
+    ]);
+};
 
 const CategoryNodeWithCheckbox: React.FC<CategoryNodeProps> = ({
     category,
@@ -91,23 +101,22 @@ interface CategorySelectionModalProps {
     onSave: (selectedCategories: Category[]) => void;
 }
 
-const CategorySelectionModal: React.FC<CategorySelectionModalProps> = ({
-    isOpen,
-    onClose,
-    allCategories,
-    selectedCategories,
-    onSave,
-}) => {
+const CategorySelectionModalContent: React.FC<
+    Omit<CategorySelectionModalProps, 'isOpen' | 'onClose'> & {
+        onClose: () => void;
+    }
+> = ({ allCategories, selectedCategories, onSave, onClose }) => {
     const [currentSelectedIds, setCurrentSelectedIds] = useState<Set<number>>(
         new Set(),
     );
+    const { expandAll, collapseAll } = useCategoryExpanded();
 
     console.log('all Categories in Modal:', allCategories);
     console.log('Selected Categories in Modal:', selectedCategories);
 
     useEffect(() => {
         setCurrentSelectedIds(new Set(selectedCategories.map((c) => c.id)));
-    }, [selectedCategories, isOpen]);
+    }, [selectedCategories]);
 
     const handleCategoryToggle = (categoryId: number) => {
         setCurrentSelectedIds((prev) => {
@@ -137,31 +146,70 @@ const CategorySelectionModal: React.FC<CategorySelectionModalProps> = ({
         onClose();
     };
 
+    const handleExpandAll = () => {
+        const allIds = getAllCategoryIds(allCategories);
+        expandAll(allIds);
+    };
+
+    return (
+        <>
+            <DialogHeader>
+                <div className="mt-4 flex items-center justify-between">
+                    <DialogTitle>Select Categories</DialogTitle>
+                    <div className="flex gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleExpandAll}
+                        >
+                            Expand All
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={collapseAll}
+                        >
+                            Collapse All
+                        </Button>
+                    </div>
+                </div>
+            </DialogHeader>
+            <div className={classes.scrollable_content}>
+                {allCategories.map((category) => (
+                    <CategoryNodeWithCheckbox
+                        key={category.id}
+                        category={category}
+                        selectedCategories={currentSelectedIds}
+                        onCategoryToggle={handleCategoryToggle}
+                    />
+                ))}
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={onClose}>
+                    Cancel
+                </Button>
+                <Button onClick={handleSave}>Save</Button>
+            </DialogFooter>
+        </>
+    );
+};
+
+const CategorySelectionModal: React.FC<CategorySelectionModalProps> = ({
+    isOpen,
+    onClose,
+    ...props
+}) => {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className={`sm:max-w-150 ${classes.modal_content}`}>
-                <DialogHeader>
-                    <DialogTitle>Select Categories</DialogTitle>
-                </DialogHeader>
-                <div
-                    className={classes.scrollable_content}
-                    style={{ maxHeight: '60vh' }}
-                >
-                    {allCategories.map((category) => (
-                        <CategoryNodeWithCheckbox
-                            key={category.id}
-                            category={category}
-                            selectedCategories={currentSelectedIds}
-                            onCategoryToggle={handleCategoryToggle}
-                        />
-                    ))}
-                </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSave}>Save</Button>
-                </DialogFooter>
+                <CategoryExpandedProvider>
+                    <CategorySelectionModalContent
+                        {...props}
+                        onClose={onClose}
+                    />
+                </CategoryExpandedProvider>
             </DialogContent>
         </Dialog>
     );

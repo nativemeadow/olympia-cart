@@ -28,11 +28,11 @@ import { Attributes, Product, Category } from '@/types/model-types';
 import { CategoryHierarchy } from '@/types';
 import { useForm } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { ImSpinner } from 'react-icons/im';
 import { useState } from 'react';
 
 import ProductForm from './product-form';
-import styles from '../categories/categories.module.css';
-import classes from './products.module.css';
+import classes from './product-form.module.css';
 
 function DeleteProductForm({
     product,
@@ -114,7 +114,7 @@ export function AddProductAction({
                             onClick={handleOpenAdd}
                             className={classes.action_icon}
                         >
-                            <Plus className={styles.plus_icon} />
+                            <Plus className={classes.plus_icon} />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent>Add Product</TooltipContent>
@@ -160,6 +160,7 @@ export function EditProductAction({
     const [attributes, setAttributes] = useState<Attributes[]>([]);
     const [allCategories, setAllCategories] = useState<CategoryHierarchy[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSuccess = () => {
         onSuccess();
@@ -168,6 +169,7 @@ export function EditProductAction({
 
     const handleOpen = () => {
         setIsOpen(true);
+        setIsLoading(true);
         fetch(route('dashboard.product.show', { product_id: product.id }))
             .then((response) => response.json())
             .then((data) => {
@@ -175,7 +177,8 @@ export function EditProductAction({
                 setAttributes(data.allAttributes);
                 setAllCategories(data.allCategories);
                 console.log('Fetching product data for edit:', data.product);
-            });
+            })
+            .finally(() => setIsLoading(false));
     };
 
     return (
@@ -189,7 +192,7 @@ export function EditProductAction({
                             onClick={handleOpen}
                             className={classes.action_icon}
                         >
-                            <Pencil className={styles.action_icon} />
+                            <Pencil className={classes.action_icon} />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent>Edit Product</TooltipContent>
@@ -199,30 +202,42 @@ export function EditProductAction({
                 className={classes.form_dialog}
                 onInteractOutside={(e) => e.preventDefault()}
             >
-                <DialogHeader>
-                    <DialogTitle>Edit "{product.title}"</DialogTitle>
-                </DialogHeader>
-                <div className={classes.scrollable_content}>
-                    {productData ? (
-                        <ProductForm
-                            product={productData}
-                            attributes={attributes}
-                            isEdit={true}
-                            onSuccess={handleSuccess}
-                            allCategories={allCategories}
-                        />
-                    ) : (
-                        <p>Loading...</p>
-                    )}
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button type="submit" form="product-edit-form">
-                        Save
-                    </Button>
-                </DialogFooter>
+                {isLoading ? (
+                    <div className={classes.loadingContainer}>
+                        <div className={classes.savingSpinner}>
+                            <ImSpinner />
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <DialogHeader>
+                            <DialogTitle>Edit: {product.title}</DialogTitle>
+                        </DialogHeader>
+                        <div className={classes.scrollable_content}>
+                            {productData && (
+                                <ProductForm
+                                    product={productData}
+                                    attributes={attributes}
+                                    isEdit={true}
+                                    onSuccess={handleSuccess}
+                                    allCategories={allCategories}
+                                />
+                            )}
+                        </div>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button variant="outline">Cancel</Button>
+                            </DialogClose>
+                            <Button
+                                type="submit"
+                                form="product-edit-form"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? 'Loading...' : 'Save'}
+                            </Button>
+                        </DialogFooter>
+                    </>
+                )}
             </DialogContent>
         </Dialog>
     );
@@ -237,20 +252,20 @@ export function DeleteProductAction({
 }) {
     return (
         <AlertDialog>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <AlertDialogTrigger asChild>
+            <AlertDialogTrigger asChild>
+                <Tooltip>
+                    <TooltipTrigger asChild>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className={`text-destructive ${classes.action_icon}`}
+                            className={classes.action_icon}
                         >
-                            <Trash2 className={styles.action_icon} />
+                            <Trash2 className={classes.delete_icon} />
                         </Button>
-                    </AlertDialogTrigger>
-                </TooltipTrigger>
-                <TooltipContent>Delete Product</TooltipContent>
-            </Tooltip>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete Product</TooltipContent>
+                </Tooltip>
+            </AlertDialogTrigger>
             <AlertDialogContent>
                 <DeleteProductForm product={product} onSuccess={onSuccess} />
             </AlertDialogContent>

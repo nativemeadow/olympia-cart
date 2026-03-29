@@ -3,7 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import { CategoryHierarchy } from '@/types';
 import { useEffect, useState } from 'react';
 import CategoryNode from './category-node';
-import styles from './categories.module.css';
+import classes from './categories.module.css';
 import {
     CategoryExpandedProvider,
     useCategoryExpanded,
@@ -30,7 +30,7 @@ function CategoryActions({ categories }: Props) {
     const allIds = getAllCategoryIds(categories);
 
     return (
-        <div className={styles.toolbar}>
+        <div className={classes.toolbar}>
             <Button onClick={() => expandAll(allIds)} variant="outline">
                 Expand All
             </Button>
@@ -188,17 +188,17 @@ export default function Categories({ categories: initialCategories }: Props) {
         <DashboardLayout>
             <Head title="Categories" />
             <CategoryExpandedProvider>
-                <div className={styles.headerContainer}>
+                <div className={classes.headerContainer}>
                     <div>
-                        <h1 className={styles.title}>Manage Categories</h1>
-                        <p className={styles.description}>
+                        <h1 className={classes.title}>Manage Categories</h1>
+                        <p className={classes.description}>
                             This is where you will add, edit, and delete product
                             categories.
                         </p>
                     </div>
                     <CategoryActions categories={categoryTree} />
                 </div>
-                <div className={styles.container}>
+                <div className={classes.container}>
                     {categoryTree.map((category) => (
                         <CategoryNode
                             key={category.id}

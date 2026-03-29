@@ -138,9 +138,9 @@ type FieldWrapperProps = {
 
 const FieldWrapper: React.FC<FieldWrapperProps> = ({ children, error }) => {
     return (
-        <div className="error-container">
+        <div className={classes.error_container}>
             {children}
-            {error && <div className="input-error-bubble">{error}</div>}
+            {error && <div className={classes.input_error_bubble}>{error}</div>}
         </div>
     );
 };
@@ -172,14 +172,41 @@ const ProductForm = ({
         useForm<ProductFormData>();
 
     useEffect(() => {
-        const initialData = product
-            ? PrepareProductData(product, attributes)
-            : {
-                  ...initialProduct(),
-                  prices: [initialPrice(attributes)],
-              };
+        const findCategory = (
+            categories: CategoryHierarchy[],
+            id: number,
+        ): Category | undefined => {
+            for (const category of categories) {
+                if (category.id === id) {
+                    return category as Category;
+                }
+                if (category.children) {
+                    const found = findCategory(category.children, id);
+                    if (found) return found;
+                }
+            }
+        };
+
+        let initialData;
+        if (product) {
+            initialData = PrepareProductData(product, attributes);
+        } else {
+            initialData = {
+                ...initialProduct(),
+                prices: [initialPrice(attributes)],
+            };
+            if (categoryId && allCategories) {
+                const categoryToAdd = findCategory(allCategories, categoryId);
+                if (categoryToAdd) {
+                    initialData.categories = [
+                        ...(initialData.categories || []),
+                        categoryToAdd,
+                    ];
+                }
+            }
+        }
         setData('product', initialData);
-    }, [product, attributes]);
+    }, [product, attributes, categoryId, allCategories]);
 
     console.log('ProductForm data:', data);
     console.log('ProductForm attributes:', attributes);

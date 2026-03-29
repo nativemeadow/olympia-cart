@@ -1,15 +1,11 @@
 .modal_content {
-    max-height: 60vh;
-    overflow-y: auto;
-    margin-left: -1rem;
-    margin-right: -1rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    display: flex;
+    flex-direction: column;
+    height: 80vh; /* Adjust as needed */
 }
 
 .scrollable_content {
+    flex-grow: 1;
     overflow-y: auto;
 }
 
@@ -68,4 +64,7 @@
     padding-left: 1rem; /* pl-4 */
 }
 
-/* From category-actions.tsx */
+.toolbar {
+    display: flex;
+    gap: 0.5rem; /* 8px */
+}
