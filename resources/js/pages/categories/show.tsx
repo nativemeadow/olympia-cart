@@ -20,6 +20,9 @@ type Props = {
 
 export default function CategoryShow({ categoryData, category_path }: Props) {
     const category: CategoryDataType = categoryData.data;
+
+    console.log('Category Data:', category);
+
     useEffect(() => {
         const main = document.querySelector('main');
         if (main) {

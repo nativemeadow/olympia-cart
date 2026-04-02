@@ -115,6 +115,10 @@
     cursor: pointer;
 }
 
+.text_destructive {
+    color: var(--color-destructive);
+}
+
 .formContainer {
     max-height: 60vh;
     overflow-y: auto;

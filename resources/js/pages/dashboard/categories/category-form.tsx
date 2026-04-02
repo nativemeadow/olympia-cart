@@ -1,9 +1,4 @@
-import React, {
-    FormEventHandler,
-    PropsWithChildren,
-    useEffect,
-    useState,
-} from 'react';
+import React, { FormEventHandler, useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/react';
 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -28,10 +23,12 @@ import AlertDialogComponent from '@/components/AlertDialog';
 import cx from 'clsx';
 import '@/../css/errors.css';
 import classes from './category-form.module.css';
+import { set } from 'react-hook-form';
 
 type CategoryFormData = {
     title: string;
     slug: string;
+    ancestorSlug: string;
     description: string;
     image: string;
     is_active: boolean;
@@ -56,6 +53,7 @@ const FieldWrapper: React.FC<FieldWrapperProps> = ({ children, error }) => {
 const initialData: CategoryFormData = {
     title: '',
     slug: '',
+    ancestorSlug: '',
     description: '',
     image: '',
     is_active: true,
@@ -78,38 +76,51 @@ export default function CategoryForm({
     const [errorDialogMessage, setErrorDialogMessage] = useState('');
 
     const { data, setData, post, put, processing, errors, reset, clearErrors } =
-        useForm<CategoryFormData>({
-            title: category?.title || '',
-            slug: category?.slug || '',
-            description: category?.description || '',
-            image: category?.image || '',
-            media: category?.media || null,
-            is_active: category?.is_active || false,
-            parent_id: isEdit
-                ? category?.parent_id || null
-                : category?.id || null,
-        });
+        useForm<CategoryFormData>(
+            isEdit && category
+                ? {
+                      title: category?.title || '',
+                      slug: category?.slug || '',
+                      description: category?.description || '',
+                      image: category?.image || '',
+                      media: category?.media || null,
+                      is_active: category?.is_active || false,
+                      parent_id: isEdit
+                          ? category?.parent_id || null
+                          : category?.id || null,
+                      ancestorSlug: '',
+                  }
+                : initialData,
+        );
 
     useEffect(() => {
         if (isEdit && category) {
+            const ancestors =
+                category?.slug.split('/').slice(0, -1).join('/') || '';
+            const ancestorSlugValue = ancestors ? ancestors + '/' : '';
+            const initialSlug = category?.slug.split('/').slice(-1)[0] || '';
             setData({
                 title: category.title,
-                slug: category.slug,
+                slug: initialSlug,
                 description: category?.description || '',
                 image: category?.image || '',
                 media: category?.media || null,
                 is_active: category?.is_active || false,
                 parent_id: category.parent_id,
+                ancestorSlug: ancestorSlugValue,
             });
             setIsSlugManuallyEdited(true);
         } else {
+            const ancestorSlugValue = category?.slug ? category.slug + '/' : '';
             setData({
                 ...initialData,
                 parent_id: category?.id || null,
+                ancestorSlug: ancestorSlugValue,
             });
             setIsSlugManuallyEdited(false);
         }
-    }, [category, isEdit]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     console.log('Initial form data:', category);
 
@@ -121,9 +132,17 @@ export default function CategoryForm({
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
         const options = {
+            preserveState: true,
             onSuccess: () => {
                 reset();
-                onSuccess();
+                setTimeout(() => {
+                    onSuccess();
+                }, 0);
+            },
+            onError: () => {
+                // This callback can be used to handle errors, but for now,
+                // we just need it to exist to prevent default behavior
+                // and rely on the `errors` prop being populated.
             },
         };
         if (isEdit && category) {
@@ -188,37 +207,41 @@ export default function CategoryForm({
                             </div>
                         </div>
                     ) : (
-                        <MediaSelectionModal
-                            mediaType="category"
-                            entityId={category?.id}
-                            onSelect={(media) => {
-                                setData('media', media);
-                                setData('image', media.file_name);
-                            }}
-                        >
-                            <Button type="button">Select Image</Button>
-                        </MediaSelectionModal>
+                        <FieldWrapper error={errors['image']}>
+                            <MediaSelectionModal
+                                mediaType="category"
+                                entityId={category?.id}
+                                onSelect={(media) => {
+                                    setData('media', media);
+                                    setData('image', media.file_name);
+                                }}
+                            >
+                                <div className={classes.addImagePlaceholder}>
+                                    <p>Add image</p>
+                                </div>
+                                <span
+                                    className={cx(classes.input, {
+                                        'input-with-error': errors['image'],
+                                    })}
+                                ></span>
+                            </MediaSelectionModal>
+                        </FieldWrapper>
                     )}
                     {data.media ? (
                         <div>
                             <Label htmlFor="image" className={classes.label}>
                                 Image File
                             </Label>
-                            <FieldWrapper error={errors['image']}>
-                                <Input
-                                    id="image"
-                                    name="image"
-                                    type="text"
-                                    disabled
-                                    value={data.image || ''}
-                                    onChange={(e) =>
-                                        setData('image', e.target.value)
-                                    }
-                                    className={cx(classes.input, {
-                                        'input-with-error': errors['image'],
-                                    })}
-                                />
-                            </FieldWrapper>
+                            <Input
+                                id="image"
+                                name="image"
+                                type="text"
+                                disabled
+                                value={data.image || ''}
+                                onChange={(e) =>
+                                    setData('image', e.target.value)
+                                }
+                            />
                         </div>
                     ) : null}
                 </div>
@@ -229,25 +252,26 @@ export default function CategoryForm({
                             Title
                         </Label>
                         <div className={classes.inputWrapper}>
-                            <Input
-                                id="title"
-                                value={data.title}
-                                onChange={(e) => {
-                                    setData('title', e.target.value);
-                                    if (!isSlugManuallyEdited) {
+                            <FieldWrapper error={errors['title']}>
+                                <Input
+                                    id="title"
+                                    value={data.title}
+                                    onChange={(e) => {
                                         clearErrors('title');
-                                        setData(
-                                            'slug',
-                                            generateSlug(e.target.value),
-                                        );
-                                    }
-                                }}
-                            />
-                            {errors.title && (
-                                <p className={classes.errorText}>
-                                    {errors.title}
-                                </p>
-                            )}
+                                        setData('title', e.target.value);
+                                        if (!isSlugManuallyEdited) {
+                                            clearErrors('title');
+                                            setData(
+                                                'slug',
+                                                generateSlug(e.target.value),
+                                            );
+                                        }
+                                    }}
+                                    className={cx(classes.input, {
+                                        'input-with-error': errors['title'],
+                                    })}
+                                />
+                            </FieldWrapper>
                         </div>
                     </div>
                     <div className={classes.fieldRow}>
@@ -255,19 +279,23 @@ export default function CategoryForm({
                             Slug
                         </Label>
                         <div className={classes.inputWrapper}>
-                            <Input
-                                id="slug"
-                                value={data.slug}
-                                onChange={(e) => {
-                                    setData('slug', e.target.value);
-                                    setIsSlugManuallyEdited(true);
-                                }}
-                            />
-                            {errors.slug && (
-                                <p className={classes.errorText}>
-                                    {errors.slug}
-                                </p>
-                            )}
+                            <span className={classes.ancestorSlug}>
+                                {data.ancestorSlug}
+                            </span>
+                            <FieldWrapper error={errors['slug']}>
+                                <Input
+                                    id="slug"
+                                    value={data.slug}
+                                    onChange={(e) => {
+                                        clearErrors('slug');
+                                        setData('slug', e.target.value);
+                                        setIsSlugManuallyEdited(true);
+                                    }}
+                                    className={cx(classes.input, {
+                                        'input-with-error': errors['slug'],
+                                    })}
+                                />
+                            </FieldWrapper>
                         </div>
                     </div>
                     <div className={classes.descriptionContainer}>
@@ -328,7 +356,7 @@ export default function CategoryForm({
                                         htmlFor="status-inactive"
                                         className={classes.label}
                                     >
-                                        Inactive
+                                        Draft
                                     </Label>
                                 </div>
                             </RadioGroup>
@@ -336,7 +364,7 @@ export default function CategoryForm({
                     </div>
                 </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className={classes.stickyFooter}>
                 <DialogClose asChild>
                     <Button variant="outline">Cancel</Button>
                 </DialogClose>

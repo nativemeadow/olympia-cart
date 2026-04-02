@@ -28,17 +28,25 @@ class CategoryController extends Controller
     {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255|unique:categories,title',
-            'slug' => 'nullable|string|max:255|unique:categories,slug',
-            'description' => 'nullable|string',
-            'image' => 'nullable|string|max:255',
+            'slug' => 'required|string|max:255|regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+            'ancestorSlug' => 'nullable|string',
+            'description' => 'required|string',
+            'image' => 'required|string|max:255',
             'is_active' => 'nullable|boolean',
             'parent_id' => 'nullable|exists:categories,id',
         ], [
             'title.required' => 'The category title is required.',
             'title.max' => 'The category title must not exceed 255 characters.',
             'title.unique' => 'A category with this title already exists.',
+            // slug must not contain spaces. It must be alphanumeric with dashes allowed but no other special characters. 
+            // We can enforce this with a regex.
+            'slug.required' => 'The category slug is required.',
+            'slug.regex' => 'The category slug may only contain letters, numbers, and dashes, and must not contain spaces or special characters.',
             'slug.max' => 'The category slug must not exceed 255 characters.',
             'slug.unique' => 'A category with this slug already exists.',
+            'description.required' => 'The category description is required',
+            'image.required' => 'The category image is required.',
+
             'image.max' => 'The image name must not exceed 255 characters.',
             'is_active.boolean' => 'The is active field must be true or false.',
             'parent_id.exists' => 'The selected parent category does not exist.',
@@ -47,9 +55,17 @@ class CategoryController extends Controller
         DB::beginTransaction();
 
         try {
+            $slug = $validatedData['slug'] ?? Str::slug($validatedData['title']);
+            $fullSlug = ($validatedData['ancestorSlug'] ?? '') . $slug;
+
+            // Check for slug uniqueness manually
+            if (Category::where('slug', $fullSlug)->exists()) {
+                return back()->withErrors(['slug' => 'A category with this slug already exists.'])->withInput();
+            }
+
             $category = Category::create([
                 'title' => $validatedData['title'],
-                'slug' => $validatedData['slug'] ?? Str::slug($validatedData['title']),
+                'slug' => $fullSlug,
                 'uuid' => Str::uuid(),
                 'description' => $validatedData['description'] ?? null,
                 'image' => $validatedData['image'] ?? null,
@@ -65,13 +81,14 @@ class CategoryController extends Controller
 
             // If we have a parent, we attach it. This creates the pivot record.
             if ($parentId) {
-                $category->parents()->attach($parentId, ['order' => $maxOrder + 1]);
+                $category->parents()->attach($parentId, ['order' => $maxOrder + 1, 'slug' => $slug]);
             } else {
                 // For top-level categories, we still need a pivot record to manage order.
                 // We can create it directly, as there's no "parent" to attach to.
                 DB::table('category_category')->insert([
                     'category_id' => $category->id,
                     'parent_id' => null,
+                    'slug' => $slug,
                     'order' => $maxOrder + 1,
                 ]);
             }
@@ -104,27 +121,53 @@ class CategoryController extends Controller
                 Rule::unique('categories')->ignore($category->id),
             ],
             'slug' => [
-                'nullable',
+                'required',
                 'string',
                 'max:255',
-                Rule::unique('categories')->ignore($category->id),
+                'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
             ],
-            'description' => 'nullable|string',
-            'image' => 'nullable|string|max:255',
+            'ancestorSlug' => 'nullable|string',
+            'description' => 'required|string',
+            'image' => 'required|string|max:255',
             'is_active' => 'nullable|boolean',
             'parent_id' => [
                 'nullable',
                 'exists:categories,id',
                 Rule::notIn([$category->id]), // Cannot be its own parent
             ],
+        ], [
+            'title.required' => 'The category title is required.',
+            'title.max' => 'The category title must not exceed 255 characters.',
+            'title.unique' => 'A category with this title already exists.',
+            // slug must not contain spaces. It must be alphanumeric with dashes allowed but no other special characters. 
+            // We can enforce this with a regex.
+            'slug.required' => 'The category slug is required.',
+            'slug.regex' => 'The category slug may only contain letters, numbers, and dashes, and must not contain spaces or special characters.',
+            'slug.max' => 'The category slug must not exceed 255 characters.',
+            'slug.unique' => 'A category with this slug already exists.',
+            'description.required' => 'The category description is required.',
+            'image.required' => 'The category image is required.',
+
+            'image.max' => 'The image name must not exceed 255 characters.',
+            'is_active.boolean' => 'The is active field must be true or false.',
+            'parent_id.exists' => 'The selected parent category does not exist.',
+            'parent_id.not_in' => 'A category cannot be its own parent.',
         ]);
 
         DB::beginTransaction();
 
         try {
+            $slug = $validatedData['slug'] ?? Str::slug($validatedData['title']);
+            $fullSlug = ($validatedData['ancestorSlug'] ?? '') . $slug;
+
+            // Check for slug uniqueness manually
+            if (Category::where('slug', $fullSlug)->where('id', '!=', $category->id)->exists()) {
+                return back()->withErrors(['slug' => 'A category with this slug already exists.'])->withInput();
+            }
+
             $category->update([
                 'title' => $validatedData['title'],
-                'slug' => $validatedData['slug'] ?? Str::slug($validatedData['title']),
+                'slug' => $slug, //$fullSlug,
                 'description' => $validatedData['description'] ?? null,
                 'image' => $validatedData['image'] ?? null,
                 'is_active' => $validatedData['is_active'] ?? false,

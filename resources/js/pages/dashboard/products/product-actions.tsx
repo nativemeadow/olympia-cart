@@ -34,45 +34,6 @@ import { useState } from 'react';
 import ProductForm from './product-form';
 import classes from './product-form.module.css';
 
-function DeleteProductForm({
-    product,
-    onSuccess,
-}: {
-    product: Product;
-    onSuccess: () => void;
-}) {
-    const { delete: destroy, processing } = useForm({});
-
-    const handleDelete = () => {
-        destroy(route('dashboard.products.destroy', product.id), {
-            onSuccess,
-            preserveScroll: true,
-        });
-    };
-
-    return (
-        <>
-            <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                    Are you sure you want to delete the product "{product.title}
-                    "? This action cannot be undone.
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                    onClick={handleDelete}
-                    disabled={processing}
-                    className={classes.delete_button}
-                >
-                    {processing ? 'Deleting...' : 'Delete'}
-                </AlertDialogAction>
-            </AlertDialogFooter>
-        </>
-    );
-}
-
 export function AddProductAction({
     onSuccess,
     categoryId,
@@ -250,24 +211,52 @@ export function DeleteProductAction({
     product: Product;
     onSuccess: () => void;
 }) {
+    const { delete: destroy, processing } = useForm({});
+
+    const handleDelete = () => {
+        destroy(route('dashboard.products.destroy', product.id), {
+            onSuccess,
+            preserveScroll: true,
+        });
+    };
+
     return (
         <AlertDialog>
-            <AlertDialogTrigger asChild>
-                <Tooltip>
-                    <TooltipTrigger asChild>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <AlertDialogTrigger asChild>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className={classes.action_icon}
+                            className={`${classes.text_destructive} ${classes.delete_icon}`}
                         >
                             <Trash2 className={classes.delete_icon} />
                         </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Delete Product</TooltipContent>
-                </Tooltip>
-            </AlertDialogTrigger>
+                    </AlertDialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Delete Product</TooltipContent>
+            </Tooltip>
             <AlertDialogContent>
-                <DeleteProductForm product={product} onSuccess={onSuccess} />
+                <AlertDialogHeader>
+                    <AlertDialogTitle>
+                        Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete the product:
+                        <br />
+                        <strong>{product.title}</strong>
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={handleDelete}
+                        disabled={processing}
+                    >
+                        Continue
+                    </AlertDialogAction>
+                </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
     );

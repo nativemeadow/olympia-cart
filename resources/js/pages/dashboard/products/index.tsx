@@ -7,7 +7,6 @@ import classes from './products.module.css';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import Toastify from 'toastify-js';
-import axios from 'axios';
 
 type CategoriesIndexProps = {
     categories: CategoryHierarchy[];
@@ -66,33 +65,37 @@ export default function Products({ categories }: CategoriesIndexProps) {
             product_order: index,
         }));
 
-        axios
-            .put(route('dashboard.products.order'), {
-                category_id: categoryId,
-                products: product_order,
-            })
-            .then(() => {
-                Toastify({
-                    text: 'Product order updated successfully.',
-                    duration: 3000,
-                    close: true,
-                    gravity: 'top',
-                    position: 'right',
-                    backgroundColor:
-                        'linear-gradient(to right, #00b09b, #96c93d)',
-                }).showToast();
-            })
-            .catch((error) => {
-                console.error(error);
-                Toastify({
-                    text: 'Failed to reorder products. Please try again.',
-                    duration: 3000,
-                    close: true,
-                    gravity: 'top',
-                    position: 'right',
-                    backgroundColor: 'red',
-                }).showToast();
+        try {
+            const response = await fetch(route('dashboard.products.order'), {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': (
+                        document.querySelector(
+                            'meta[name="csrf-token"]',
+                        ) as HTMLMetaElement
+                    )?.content,
+                },
+                body: JSON.stringify({
+                    category_id: categoryId,
+                    products: product_order,
+                }),
             });
+
+            if (!response.ok) {
+                throw new Error('Failed to reorder products.');
+            }
+        } catch (error) {
+            console.error(error);
+            Toastify({
+                text: 'Failed to reorder products. Please try again.',
+                duration: 3000,
+                close: true,
+                gravity: 'top',
+                position: 'right',
+                backgroundColor: 'red',
+            }).showToast();
+        }
     };
 
     return (

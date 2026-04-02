@@ -34,7 +34,7 @@ class Category extends Model
             'category_category',
             'child_id',
             'parent_id'
-        );
+        )->withTimestamps();
     }
 
     /**
@@ -47,7 +47,7 @@ class Category extends Model
             'category_category',
             'parent_id',
             'child_id'
-        );
+        )->withTimestamps();
     }
 
     public function getBreadcrumb()
@@ -61,6 +61,19 @@ class Category extends Model
         }
 
         return implode(' > ', $breadcrumb);
+    }
+
+    public function getFullSlug()
+    {
+        $slugs = [$this->slug];
+        $parent = $this->parents()->first();
+
+        while ($parent) {
+            array_unshift($slugs, $parent->slug);
+            $parent = $parent->parents()->first();
+        }
+
+        return implode('/', $slugs);
     }
 
     public function products()

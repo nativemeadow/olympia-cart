@@ -1,9 +1,18 @@
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -12,7 +21,7 @@ import { CategoryHierarchy } from '@/types';
 import { useForm } from '@inertiajs/react';
 import CategoryForm from './category-form';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { PropsWithChildren, useState } from 'react';
+import { useState } from 'react';
 import classes from './categories.module.css';
 import { useCategoryExpanded } from '@/context/CategoryExpandedContext';
 
@@ -34,39 +43,26 @@ function DeleteCategoryForm({
 
     return (
         <>
-            <DialogDescription>
-                Are you sure you want to delete the category "{category.title}"?
-                This action cannot be undone.
-            </DialogDescription>
-            <DialogFooter className="mt-4">
-                <Button
-                    variant="destructive"
+            <AlertDialogHeader>
+                <AlertDialogTitle>Delete Category</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Are you sure you want to delete the category "
+                    {category.title}"? This action cannot be undone.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-4">
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
                     onClick={handleDelete}
                     disabled={processing}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                     {processing ? 'Deleting...' : 'Delete'}
-                </Button>
-            </DialogFooter>
+                </AlertDialogAction>
+            </AlertDialogFooter>
         </>
     );
 }
-
-// function CategoryActionDialog({
-//     children,
-//     title,
-//     open,
-//     onOpenChange,
-// }: PropsWithChildren<{
-//     title: string;
-//     open: boolean;
-//     onOpenChange: (open: boolean) => void;
-// }>) {
-//     return (
-//         <Dialog open={open} onOpenChange={onOpenChange}>
-//             {children}
-//         </Dialog>
-//     );
-// }
 
 export function AddCategoryAction({
     category,
@@ -104,6 +100,7 @@ export function AddCategoryAction({
                 <div className={classes.formContainer}>
                     <CategoryForm
                         category={category}
+                        isEdit={false}
                         onSuccess={handleSuccess}
                     />
                 </div>
@@ -152,7 +149,7 @@ export function EditCategoryAction({
                 <div className={classes.formContainer}>
                     <CategoryForm
                         category={category}
-                        isEdit
+                        isEdit={true}
                         onSuccess={handleSuccess}
                     />
                 </div>
@@ -168,31 +165,20 @@ export function DeleteCategoryAction({
     category: CategoryHierarchy;
     onSuccess: () => void;
 }) {
-    const [isOpen, setIsOpen] = useState(false);
-    const handleSuccess = () => {
-        onSuccess();
-        setIsOpen(false);
-    };
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
+        <AlertDialog>
+            <AlertDialogTrigger asChild>
                 <Button
                     variant="ghost"
                     size="icon"
-                    className={`text-destructive ${classes.delete_icon}`}
+                    className={`${classes.text_destructive} ${classes.delete_icon}`}
                 >
                     <Trash2 className={classes.delete_icon} />
                 </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Delete Category</DialogTitle>
-                </DialogHeader>
-                <DeleteCategoryForm
-                    category={category}
-                    onSuccess={handleSuccess}
-                />
-            </DialogContent>
-        </Dialog>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <DeleteCategoryForm category={category} onSuccess={onSuccess} />
+            </AlertDialogContent>
+        </AlertDialog>
     );
 }
