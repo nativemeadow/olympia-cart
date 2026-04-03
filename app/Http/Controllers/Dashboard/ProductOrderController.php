@@ -13,6 +13,12 @@ class ProductOrderController extends Controller
      */
     public function __invoke(Request $request)
     {
+
+        // display log message with the request data
+        // logger()->info('Received request to update product order', [
+        //     'request_data' => $request->all(),
+        // ]);
+
         $request->validate([
             'category_id' => 'required|integer|exists:categories,id',
             'products' => 'required|array',

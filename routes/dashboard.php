@@ -44,6 +44,10 @@ Route::prefix('dashboard')
             'products',
         ])->name('products');
 
+        Route::put('products/order', ProductOrderController::class)->name(
+            'products.order',
+        );
+
         Route::get('/product/media/{sort_column?}/{order?}/{search_term?}', [ProductController::class, 'productMedia'])->name('product.media');
 
         Route::get('/product/{product_id}', [
@@ -55,10 +59,6 @@ Route::prefix('dashboard')
         Route::put('/products/update/{product_id}', [ProductController::class, 'update'])->name('products.update');
         Route::delete('/products/destroy/{product_id}', [ProductController::class, 'destroy'])->name('products.destroy');
 
-        Route::put('/products/order', ProductOrderController::class)->name(
-            'products.order',
-        );
-
         Route::get('/price/attributes', [
             ProductController::class,
             'getPriceAttributes',
@@ -68,11 +68,13 @@ Route::prefix('dashboard')
             'customers',
         );
 
-        Route::get('/orders', [OrderController::class, 'getAll'])->name(
-            'orders',
-        );
+        // Route::get('/orders', [OrderController::class, 'getAll'])->name(
+        //     'orders',
+        // );
 
-        Route::get('/customer-orders', [CustomersOrdersController::class, 'index'])->name('customer.orders');
+        Route::get('/customer-orders', [CustomersOrdersController::class, 'index'])->name(
+            'customer.orders'
+        );
 
         Route::get('/media/{sort_column?}/{order?}/{search_term?}', [
             MediaController::class,

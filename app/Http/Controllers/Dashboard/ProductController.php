@@ -407,10 +407,23 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
-        $product = Product::findOrFail($id);
-        $product->delete();
+        DB::beginTransaction();
+        try {
+            $product = Product::findOrFail($id);
 
-        return redirect()->route('dashboard.products')->with('success', 'Product deleted successfully.');
+            // Example check: prevent deletion if there are orders associated with the product.
+            // This assumes an 'orderItems' relationship exists on the Product model.
+            // if ($product->orderItems()->exists()) {
+            //     return response()->json(['error' => 'This product cannot be deleted because it is part of an order.'], 422);
+            // }
+
+            $product->delete();
+            DB::commit();
+            return response()->json(['success' => 'Product deleted successfully.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Failed to delete product: ' . $e->getMessage()], 500);
+        }
     }
 
     public function productMedia(Request $request)
@@ -457,13 +470,4 @@ class ProductController extends Controller
             'filters' => $request->only(['sort_column', 'order', 'per_page', 'search_term']),
         ]);
     }
-
-    // public function reorderProducts($orderArray)
-    // {
-    //     foreach ($orderArray as $index => $productId) {
-    //         Product::where('id', $productId)->update(['sort_order' => $index]);
-    //     }
-
-    //     return response()->json(['message' => 'Products reordered successfully.']);
-    // }
 }

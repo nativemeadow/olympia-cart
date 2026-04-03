@@ -26,10 +26,10 @@ import {
 } from '@/components/ui/tooltip';
 import { Attributes, Product, Category } from '@/types/model-types';
 import { CategoryHierarchy } from '@/types';
-import { useForm } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { ImSpinner } from 'react-icons/im';
 import { useState } from 'react';
+import axios from 'axios';
 
 import ProductForm from './product-form';
 import classes from './product-form.module.css';
@@ -211,13 +211,25 @@ export function DeleteProductAction({
     product: Product;
     onSuccess: () => void;
 }) {
-    const { delete: destroy, processing } = useForm({});
+    const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleDelete = () => {
-        destroy(route('dashboard.products.destroy', product.id), {
-            onSuccess,
-            preserveScroll: true,
-        });
+    const handleDelete = async () => {
+        setProcessing(true);
+        setError(null);
+        try {
+            await axios.delete(route('dashboard.products.destroy', product.id));
+            if (onSuccess) {
+                onSuccess();
+            }
+        } catch (err: any) {
+            setError(
+                err.response?.data?.error ||
+                    'An unexpected error occurred. Please try again.',
+            );
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
@@ -246,6 +258,9 @@ export function DeleteProductAction({
                         delete the product:
                         <br />
                         <strong>{product.title}</strong>
+                        {error && (
+                            <div className="mt-4 text-red-500">{error}</div>
+                        )}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -254,7 +269,7 @@ export function DeleteProductAction({
                         onClick={handleDelete}
                         disabled={processing}
                     >
-                        Continue
+                        {processing ? 'Deleting...' : 'Continue'}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

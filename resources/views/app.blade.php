@@ -33,6 +33,9 @@
 
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
+    {{-- CSRF Token for security in AJAX requests --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.png" type="image/png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">

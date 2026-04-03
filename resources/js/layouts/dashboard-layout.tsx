@@ -24,7 +24,11 @@ const navLinks = [
     },
     { href: 'dashboard.products', label: 'Products', icon: Package },
     { href: 'dashboard.media', label: 'Media', icon: LayoutGrid },
-    { href: 'dashboard.orders', label: 'Orders', icon: ShoppingCart },
+    {
+        href: 'dashboard.customer.orders',
+        label: 'Customer Orders',
+        icon: ShoppingCart,
+    },
     { href: 'dashboard.customers', label: 'Customers', icon: Users },
     { href: 'dashboard.users', label: 'Users', icon: UserCog },
     { href: 'dashboard.settings', label: 'Settings', icon: Settings },
