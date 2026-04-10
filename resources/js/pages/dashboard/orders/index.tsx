@@ -24,21 +24,61 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
+import { Badge } from '@/components/ui/badge';
+import styles from './orders.module.css';
+import { Input } from '@/components/ui/input';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { router } from '@inertiajs/react';
+import { Search, X } from 'lucide-react';
 
 interface CustomerOrdersProps {
     customers: OrdersPaginated<Customer>;
+    filters: {
+        search: string;
+    };
 }
 
-export default function CustomerOrders({ customers }: CustomerOrdersProps) {
+export default function CustomerOrders({
+    customers,
+    filters,
+}: CustomerOrdersProps) {
     const { data, links, prev_page_url, next_page_url } = customers;
+    const [searchTerm, setSearchTerm] = useState(filters.search || '');
 
-    console.log('Customer Orders Data:', customers);
+    const handleSearch = () => {
+        router.get(
+            route('dashboard.customer.orders'),
+            { search: searchTerm },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
+    };
+
+    const handleClear = () => {
+        setSearchTerm('');
+        router.get(
+            route('dashboard.customer.orders'),
+            {},
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
+    };
+
+    useEffect(() => {
+        // If you want to search as you type, you can call handleSearch here.
+        // For now, we'll only search on button click.
+    }, [searchTerm]);
 
     if (!customers) {
         return (
             <DashboardLayout>
                 <Head title="Customer Orders" />
-                <div className="px-4 sm:px-6 lg:px-8">
+                <div className={styles.container}>
                     <p>Loading...</p>
                 </div>
             </DashboardLayout>
@@ -48,25 +88,46 @@ export default function CustomerOrders({ customers }: CustomerOrdersProps) {
     return (
         <DashboardLayout>
             <Head title="Customer Orders" />
-            <div className="px-4 sm:px-6 lg:px-8">
-                <div className="sm:flex sm:items-center">
-                    <div className="sm:flex-auto">
-                        <h1 className="text-base leading-6 font-semibold text-gray-900">
-                            Customer Orders
-                        </h1>
-                        <p className="mt-2 text-sm text-gray-700">
+            <div className={styles.container}>
+                <div className={styles.header}>
+                    <div className={styles.headerContent}>
+                        <h1 className={styles.title}>Customer Orders</h1>
+                        <p className={styles.description}>
                             A list of all the orders from your customers,
                             grouped by customer.
                         </p>
                     </div>
                 </div>
-                <div className="mt-8 flow-root">
-                    <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                        <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+
+                <div className="mt-4 flex items-center gap-2">
+                    <Input
+                        type="text"
+                        placeholder="Search by customer name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="max-w-sm"
+                    />
+                    <Button onClick={handleSearch}>
+                        <Search className={styles.buttonSize} />
+                    </Button>
+                    {searchTerm && (
+                        <Button
+                            variant="outline"
+                            onClick={handleClear}
+                            className={styles.clearButton}
+                        >
+                            <X className={styles.buttonSize} />
+                        </Button>
+                    )}
+                </div>
+
+                <div className={styles.contentWrapper}>
+                    <div className={styles.tableContainer}>
+                        <div className={styles.tableWrapper}>
                             <Accordion
                                 type="single"
                                 collapsible
-                                className="w-full"
+                                className={styles.customerAccordion}
                             >
                                 {data.map((customer) => (
                                     <AccordionItem
@@ -74,14 +135,39 @@ export default function CustomerOrders({ customers }: CustomerOrdersProps) {
                                         value={`customer-${customer.id}`}
                                     >
                                         <AccordionTrigger>
-                                            {customer.first_name}{' '}
-                                            {customer.last_name}
+                                            <div
+                                                className={
+                                                    styles.customerTrigger
+                                                }
+                                            >
+                                                <Badge
+                                                    className={
+                                                        customer.user_id
+                                                            ? styles.registered_badge
+                                                            : styles.guest_badge
+                                                    }
+                                                >
+                                                    {customer.user_id
+                                                        ? 'Registered'
+                                                        : 'Guest'}
+                                                </Badge>
+                                                <span
+                                                    className={
+                                                        styles.customerName
+                                                    }
+                                                >
+                                                    {customer.first_name}{' '}
+                                                    {customer.last_name}
+                                                </span>
+                                            </div>
                                         </AccordionTrigger>
                                         <AccordionContent>
                                             <Accordion
                                                 type="single"
                                                 collapsible
-                                                className="w-full"
+                                                className={
+                                                    styles.orderAccordion
+                                                }
                                             >
                                                 {customer.orders?.map(
                                                     (order: Order) => (
@@ -105,7 +191,11 @@ export default function CustomerOrders({ customers }: CustomerOrdersProps) {
                                                                 ).toFixed(2)}
                                                             </AccordionTrigger>
                                                             <AccordionContent>
-                                                                <Table>
+                                                                <Table
+                                                                    className={
+                                                                        styles.orderItemsTable
+                                                                    }
+                                                                >
                                                                     <TableHeader>
                                                                         <TableRow>
                                                                             <TableHead>
@@ -173,41 +263,45 @@ export default function CustomerOrders({ customers }: CustomerOrdersProps) {
                         </div>
                     </div>
                 </div>
-                <Pagination className="mt-4">
-                    <PaginationContent>
-                        {prev_page_url && (
-                            <PaginationItem>
-                                <Link href={prev_page_url} preserveScroll>
-                                    <PaginationPrevious />
-                                </Link>
-                            </PaginationItem>
-                        )}
-                        {links.map((link, index) => {
-                            // We only want to render numeric page links
-                            if (!isNaN(Number(link.label))) {
-                                return (
-                                    <PaginationItem key={index}>
-                                        <Link href={link.url!} preserveScroll>
-                                            <PaginationLink
-                                                isActive={link.active}
+                <div className={styles.pagination}>
+                    <Pagination>
+                        <PaginationContent>
+                            {prev_page_url && (
+                                <PaginationItem>
+                                    <Link href={prev_page_url} preserveScroll>
+                                        <PaginationPrevious />
+                                    </Link>
+                                </PaginationItem>
+                            )}
+                            {links.map((link, index) => {
+                                if (!isNaN(Number(link.label))) {
+                                    return (
+                                        <PaginationItem key={index}>
+                                            <Link
+                                                href={link.url!}
+                                                preserveScroll
                                             >
-                                                {link.label}
-                                            </PaginationLink>
-                                        </Link>
-                                    </PaginationItem>
-                                );
-                            }
-                            return null;
-                        })}
-                        {next_page_url && (
-                            <PaginationItem>
-                                <Link href={next_page_url} preserveScroll>
-                                    <PaginationNext />
-                                </Link>
-                            </PaginationItem>
-                        )}
-                    </PaginationContent>
-                </Pagination>
+                                                <PaginationLink
+                                                    isActive={link.active}
+                                                >
+                                                    {link.label}
+                                                </PaginationLink>
+                                            </Link>
+                                        </PaginationItem>
+                                    );
+                                }
+                                return null;
+                            })}
+                            {next_page_url && (
+                                <PaginationItem>
+                                    <Link href={next_page_url} preserveScroll>
+                                        <PaginationNext />
+                                    </Link>
+                                </PaginationItem>
+                            )}
+                        </PaginationContent>
+                    </Pagination>
+                </div>
             </div>
         </DashboardLayout>
     );

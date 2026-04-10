@@ -29,7 +29,7 @@ export default function Products({ categories }: CategoriesIndexProps) {
             });
         };
         traverse(categories);
-        setOpenNodes(allIds);
+        setOpenNodes({});
     }, [categories]);
 
     const toggleNode = (id: number) => {

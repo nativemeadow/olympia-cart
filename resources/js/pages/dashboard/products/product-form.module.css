@@ -127,7 +127,7 @@
 .priceInput,
 .skuInput,
 .extendedPropInput {
-    width: 7rem;
+    width: 5rem;
 }
 
 .mediaFigure.priceImage {
@@ -305,4 +305,8 @@
 
 .text_destructive {
     color: var(--color-destructive);
+}
+
+.titleInput {
+    width: 10rem;
 }

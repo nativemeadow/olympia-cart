@@ -58,8 +58,9 @@ class ProductController extends Controller
         return $formatForHierarchy($tree);
     }
 
+    private $excludeKeys = ['Title', 'Description', 'Image']; // Define derived keys
 
-    //
+    // This method retrieves a product along with its related categories, variants, and media.
     public function show($product_id)
     {
         $product = Product::with([
@@ -93,19 +94,19 @@ class ProductController extends Controller
             }
         }
 
-        $allAttributes = Attribute::distinct()->get(['name', 'data_type']);
+        $allAttributes = Attribute::distinct()->get(['id', 'name', 'data_type']);
         $allCategories = $this->getCategoryTree();
 
         return response()->json([
             'product' => $productArray,
-            'allAttributes' => $allAttributes,
+            'allAttributes' => $allAttributes->sortBy('id')->values(),
             'allCategories' => $allCategories,
         ]);
     }
 
     public function getPriceAttributes()
     {
-        $attributes = Attribute::with('values')->get(['name', 'data_type', 'list_of_values']);
+        $attributes = Attribute::with('values')->get(['name', 'data_type', 'list_of_values'])->sortBy('id');
         $allCategories = $this->getCategoryTree();
 
         return response()->json([
@@ -114,36 +115,78 @@ class ProductController extends Controller
         ]);
     }
 
-    private function handleDerivedAttributes($priceData, $attributeName = null, $isCreate = true)
+    private function handleDerivedAttribute($variant, $attributeName, $value)
     {
-        $attributesToSync = [];
+        // This function manages derived attributes like 'title' and 'description' for a product variant.
+        // It ensures that each variant has at most one attribute value for a given derived attribute,
+        // preventing duplicates and ensuring data integrity.
 
-        // Handle attribute
-        if (!empty($priceData[$attributeName])) {
-            $attribute = Attribute::firstOrCreate(['name' => ucfirst($attributeName), 'data_type' => 'string']);
-            $attributeValue = $isCreate
-                ? AttributeValue::firstOrCreate(['attribute_id' => $attribute->id, 'value' => $priceData[$attributeName]])
-                : AttributeValue::updateOrCreate(
-                    ['attribute_id' => $attribute->id, 'value' => $priceData[$attributeName]]
-                );
+        $attributesToSync = [];
+        // Ensure the base attribute (e.g., 'Title', 'Description') exists.
+        $attribute = Attribute::firstOrCreate(['name' => ucfirst($attributeName), 'data_type' => 'string']);
+
+        // Check if an AttributeValue for this specific attribute already exists for this specific variant.
+        // This is the key to avoiding duplicate entries.
+        $attributeValue = $variant->attributeValues()->where('attribute_id', $attribute->id)->first();
+
+        if (!empty($value)) {
+            // If a value is provided in the request...
+            if ($attributeValue) {
+                // ...and an attribute value already exists for this variant, update its value.
+                // This handles the case where a user is changing an existing title or description.
+                $attributeValue->update(['value' => $value]);
+            } else {
+                // ...and no attribute value exists, create a new one.
+                // This handles new variants or when a title/description is added for the first time.
+                $attributeValue = AttributeValue::create([
+                    'attribute_id' => $attribute->id,
+                    'value' => $value,
+                ]);
+            }
+            // Add the ID of the managed attribute value to the list to be synced.
             $attributesToSync[] = $attributeValue->id;
+        } elseif ($attributeValue) {
+            // If the request provides no value (it's empty or null), but an old value exists in the database...
+            // ...detach it from the variant. The final sync operation will then remove the association.
+            $variant->attributeValues()->detach($attributeValue->id);
         }
+
+        // Return the array of IDs to be synced. It will contain one ID or be empty.
         return $attributesToSync;
     }
 
-    private function handleImageAttribute($priceData, $isCreate = true)
+    private function handleImageAttribute($variant, $image)
     {
+        // This function specifically manages the 'Image' derived attribute for a product variant.
+        // It works similarly to handleDerivedAttribute, ensuring a single, correct image association.
+
         $attributesToSync = [];
-        if (!empty($priceData['image'])) {
-            $attribute = Attribute::firstOrCreate(['name' => 'Image', 'data_type' => 'string']);
-            $image_name = $priceData['image']['file_name'];
-            $attributeValue = $isCreate
-                ? AttributeValue::firstOrCreate(['attribute_id' => $attribute->id, 'value' => $image_name])
-                : AttributeValue::updateOrCreate(
-                    ['attribute_id' => $attribute->id, 'value' => $image_name]
-                );
-            $attributesToSync[] = $attributeValue->id;
+        // Ensure the 'Image' attribute exists.
+        $attribute = Attribute::firstOrCreate(['name' => 'Image', 'data_type' => 'string']);
+        // Find if an 'Image' attribute value is already associated with this variant.
+        $imageValueInstance = $variant->attributeValues()->where('attribute_id', $attribute->id)->first();
+
+        if (!empty($image)) {
+            // If an image object is provided in the request...
+            $image_name = $image['file_name'];
+            if ($imageValueInstance) {
+                // ...and an image attribute already exists, update its value with the new file name.
+                $imageValueInstance->update(['value' => $image_name]);
+            } else {
+                // ...and no image attribute exists, create a new one with the file name.
+                $imageValueInstance = AttributeValue::create([
+                    'attribute_id' => $attribute->id,
+                    'value' => $image_name,
+                ]);
+            }
+            // Add the image attribute's ID to the sync list.
+            $attributesToSync[] = $imageValueInstance->id;
+        } elseif ($imageValueInstance) {
+            // If no image is provided, but one was previously associated...
+            // ...detach it to remove the association.
+            $variant->attributeValues()->detach($imageValueInstance->id);
         }
+        // Return the array with the image attribute ID or an empty array.
         return $attributesToSync;
     }
 
@@ -218,25 +261,29 @@ class ProductController extends Controller
 
                 $attributesToSync = [];
 
-                // Handle title
-                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttributes($priceData, 'title'));
+                // Delegate handling of the 'title' derived attribute.
+                // This ensures the title is correctly created and associated with the variant.
+                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttribute($variant, 'title', $priceData['title'] ?? null));
 
-                // Handle description
-                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttributes($priceData, 'description'));
+                // Delegate handling of the 'description' derived attribute.
+                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttribute($variant, 'description', $priceData['description'] ?? null));
 
-                // Handle image
-                $attributesToSync = array_merge($attributesToSync, $this->handleImageAttribute($priceData));
+                // Delegate handling of the 'image' derived attribute.
+                $attributesToSync = array_merge($attributesToSync, $this->handleImageAttribute($variant, $priceData['image'] ?? null));
 
-                // Handle extended_properties
+                // Handle standard extended_properties that are not derived.
                 if (isset($priceData['extended_properties'])) {
                     foreach ($priceData['extended_properties'] as $name => $value) {
+                        // Skip derived attributes since they are handled separately
+                        if (in_array($name, $this->excludeKeys)) {
+                            continue;
+                        }
                         if (!empty($value)) {
                             $attribute = Attribute::where('name', $name)->first();
                             if ($attribute) {
-                                $attributeValue = AttributeValue::firstOrCreate([
-                                    'attribute_id' => $attribute->id,
-                                    'value' => $value,
-                                ]);
+                                $attributeValue = AttributeValue::updateOrCreate(
+                                    ['attribute_id' => $attribute->id, 'value' => $value]
+                                );
                                 $attributesToSync[] = $attributeValue->id;
                             }
                         }
@@ -367,18 +414,23 @@ class ProductController extends Controller
 
                 $attributesToSync = [];
 
-                // Handle title
-                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttributes($priceData, 'title'));
+                // Delegate handling of the 'title' derived attribute.
+                // This function will correctly update the existing title or create a new one if needed.
+                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttribute($variant, 'title', $priceData['title'] ?? null));
 
-                // Handle description
-                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttributes($priceData, 'description'));
+                // Delegate handling of the 'description' derived attribute.
+                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttribute($variant, 'description', $priceData['description'] ?? null));
 
-                // Handle image
-                $attributesToSync = array_merge($attributesToSync, $this->handleImageAttribute($priceData, false));
+                // Delegate handling of the 'image' derived attribute.
+                $attributesToSync = array_merge($attributesToSync, $this->handleImageAttribute($variant, $priceData['image'] ?? null));
 
-                // Handle extended_properties
+                // Handle standard extended_properties that are not derived.
                 if (isset($priceData['extended_properties'])) {
                     foreach ($priceData['extended_properties'] as $name => $value) {
+                        // Skip derived attributes since they are handled separately
+                        if (in_array($name, $this->excludeKeys)) {
+                            continue;
+                        }
                         if (!empty($value)) {
                             $attribute = Attribute::where('name', $name)->first();
                             if ($attribute) {

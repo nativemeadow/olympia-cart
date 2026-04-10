@@ -1,6 +1,6 @@
 .detail {
-    max-width: var(--max-container-size);
-    min-width: var(--min-container-size);
+    /* max-width: var(--max-container-size);
+    min-width: var(--min-container-size); */
 }
 
 .detail_container {
@@ -525,8 +525,8 @@
 
 @media screen and (min-width: 768px) {
     .detail {
-        max-width: var(--max-container-size);
-        min-width: var(--min-container-size);
+        /* max-width: var(--max-container-size);
+        min-width: var(--min-container-size); */
         margin: 0 auto;
     }
 
@@ -536,7 +536,7 @@
 
     .detail_container {
         display: grid;
-        gap: 2rem;
+        gap: 3rem;
         grid-template-columns: repeat(2, 3fr);
         max-width: 95%;
     }

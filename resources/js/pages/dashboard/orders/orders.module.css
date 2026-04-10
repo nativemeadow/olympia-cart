@@ -1,0 +1,144 @@
+.container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+@media (min-width: 640px) {
+    .container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+@media (min-width: 1024px) {
+    .container {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+.header {
+    /* No base styles */
+}
+@media (min-width: 640px) {
+    .header {
+        display: flex;
+        align-items: center;
+    }
+}
+
+.headerContent {
+    /* No base styles */
+}
+@media (min-width: 640px) {
+    .headerContent {
+        flex: 1 1 auto;
+    }
+}
+
+.title {
+    font-size: 1rem; /* text-base */
+    font-weight: 600; /* font-semibold */
+    line-height: 1.5rem; /* leading-6 */
+    color: #111827; /* text-gray-900 */
+}
+
+.description {
+    margin-top: 0.5rem; /* mt-2 */
+    font-size: 0.875rem; /* text-sm */
+    color: #374151; /* text-gray-700 */
+}
+
+.contentWrapper {
+    margin-top: 2rem; /* mt-8 */
+    display: flow-root;
+}
+
+.tableContainer {
+    margin-top: -0.5rem; /* -my-2 */
+    margin-bottom: -0.5rem; /* -my-2 */
+    margin-left: -1rem; /* -mx-4 */
+    margin-right: -1rem; /* -mx-4 */
+    overflow-x: auto;
+}
+@media (min-width: 640px) {
+    .tableContainer {
+        margin-left: -1.5rem; /* sm:-mx-6 */
+        margin-right: -1.5rem; /* sm:-mx-6 */
+    }
+}
+@media (min-width: 1024px) {
+    .tableContainer {
+        margin-left: -2rem; /* lg:-mx-8 */
+        margin-right: -2rem; /* lg:-mx-8 */
+    }
+}
+
+.tableWrapper {
+    display: inline-block;
+    min-width: 100%;
+    padding-top: 0.5rem; /* py-2 */
+    padding-bottom: 0.5rem; /* py-2 */
+    vertical-align: middle;
+}
+@media (min-width: 640px) {
+    .tableWrapper {
+        padding-left: 1.5rem; /* sm:px-6 */
+        padding-right: 1.5rem; /* sm:px-6 */
+    }
+}
+@media (min-width: 1024px) {
+    .tableWrapper {
+        padding-left: 2rem; /* lg:px-8 */
+        padding-right: 2rem; /* lg:px-8 */
+    }
+}
+
+.customerAccordion {
+    width: 100%;
+}
+
+.customerTrigger {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* gap-2 */
+}
+
+.orderAccordion {
+    width: 100%;
+}
+
+.pagination {
+    margin-top: 1rem; /* mt-4 */
+}
+
+.orderIdCell {
+    font-weight: 500; /* font-medium */
+}
+
+.registered_badge {
+    background-color: var(--color-green-600);
+    color: var(--color-gray-10);
+}
+
+.guest_badge {
+    background-color: var(--color-orange-500);
+    color: var(--color-gray-10);
+}
+
+.customerName {
+    margin-left: 1rem; /* ml-4 */
+}
+
+.clearButton {
+    color: var(--destructive);
+    border-color: var(--destructive);
+}
+
+.clearButton:hover {
+    background-color: var(--destructive);
+    color: var(--destructive-foreground);
+}
+
+.button-size {
+    height: calc(var(--spacing) * 4);
+    width: calc(var(--spacing) * 4);
+}

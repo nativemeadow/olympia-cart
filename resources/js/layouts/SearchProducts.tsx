@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import { Button, Input } from '@heroui/react';
 import { SearchIcon } from './SearchIcon';
+import { CiSearch } from 'react-icons/ci';
 
 import classes from './SearchProducts.module.css';
 
@@ -48,7 +49,7 @@ const SearchProducts = () => {
                 size="sm"
                 variant="flat"
             >
-                <SearchIcon />
+                <CiSearch className={classes.search_icon} />
             </Button>
         </form>
     );

@@ -5,7 +5,7 @@ use App\Http\Controllers\Dashboard\ProductController;
 use App\Http\Controllers\Dashboard\MediaController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\CustomersController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Dashboard\CustomerController;
 use App\Http\Controllers\Dashboard\ProductOrderController;
 use App\Http\Controllers\Dashboard\CategoryOrderController;
 use App\Http\Controllers\Dashboard\CustomersOrdersController;
@@ -64,13 +64,9 @@ Route::prefix('dashboard')
             'getPriceAttributes',
         ])->name('price.attributes');
 
-        Route::get('/customers', [CustomersController::class, 'getAll'])->name(
+        Route::get('/customers', [CustomerController::class, 'index'])->name(
             'customers',
         );
-
-        // Route::get('/orders', [OrderController::class, 'getAll'])->name(
-        //     'orders',
-        // );
 
         Route::get('/customer-orders', [CustomersOrdersController::class, 'index'])->name(
             'customer.orders'

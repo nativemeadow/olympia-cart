@@ -3,6 +3,14 @@ import { parser } from '@/utils/html-parse';
 import { Link } from '@inertiajs/react';
 import filterPricing from './product-pricing';
 import { ProductType } from '@/types';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 
 import classes from './product-card.module.css';
 
@@ -19,13 +27,14 @@ const ProductCard = (props: Props) => {
     const { product, categorySlug } = props;
 
     return (
-        <div className={classes.card}>
-            <div className={classes.card_container}>
-                <div className={classes.card_image}>
+        <Card className={classes.card}>
+            <CardContent>
+                <div className={classes.card_image_container}>
                     <Link
                         href={`/${categoryPath}/products/${categorySlug}/${product.slug}`}
                     >
                         <img
+                            className={classes.card_image}
                             src={`/${productImageFolder}/${product.image}`}
                             alt={
                                 product.title !== undefined ? product.title : ''
@@ -47,8 +56,8 @@ const ProductCard = (props: Props) => {
                         </ul>
                     </div>
                 </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     );
 };
 

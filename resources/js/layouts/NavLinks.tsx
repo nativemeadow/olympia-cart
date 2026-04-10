@@ -20,9 +20,7 @@ const NavLinks = () => {
     };
 
     return (
-        <div
-            className={`flex items-center space-x-6 ${classes['main-nav-item']}`}
-        >
+        <div className={`${classes['main-nav']} ${classes['main-nav-item']}`}>
             {MainNavData().map((item: NavData, index: number) => (
                 <Link
                     key={item.title}

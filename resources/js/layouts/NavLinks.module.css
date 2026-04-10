@@ -1,3 +1,9 @@
+.main-nav {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
 .main-nav-item a {
     font-family: Aleo, serif;
     font-size: 1rem;
@@ -7,4 +13,7 @@
 
 .main-nav-item a.active {
     color: var(--main-nav-item-active);
+}
+
+@media screen and (min-width: 991px) {
 }

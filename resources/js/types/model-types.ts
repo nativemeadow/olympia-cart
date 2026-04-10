@@ -25,6 +25,7 @@ export type Customer = {
     user_id?: number | null;
     addresses?: Address[];
     orders?: Order[];
+    carts?: Cart[];
 };
 
 export type Category = {
@@ -168,6 +169,8 @@ export type Cart = {
     user_id: number;
     cart_uuid: string;
     session_id: string;
+    status: string;
+    active: boolean;
     total: number;
     created_at: string;
     updated_at: string;

@@ -1,17 +1,16 @@
 import React from 'react';
 
 type Props = {
-    className: string;
-    scale?: string;
+    className?: string;
+    width?: number;
 };
 
-const LogoPage = ({ className, scale = '0.5' }: Props) => {
+const LogoPage = ({ className, width = 215 }: Props) => {
     return (
-        <div style={{ transform: `scale(${scale})` }} className={className}>
+        <div className={className} style={{ width: `${width}px` }}>
             <svg
-                width="429"
-                height="77.84480371064029"
                 viewBox="0 0 370.3448275862069 67.201446174124"
+                style={{ width: '100%', height: 'auto' }}
             >
                 <defs id="SvgjsDefs2694"></defs>
                 <g

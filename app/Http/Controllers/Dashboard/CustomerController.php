@@ -4,16 +4,14 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
-use \App\Models\Order;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 
-class CustomersOrdersController extends Controller
+use Illuminate\Http\Request;
+
+class CustomerController extends Controller
 {
     public function index(Request $request)
     {
-        $customers = Customer::query()
-            ->when($request->input('search'), function ($query, $search) {
+        $customers = Customer::when($request->input('search'), function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query
                         ->where('first_name', 'like', "%{$search}%")
@@ -21,16 +19,22 @@ class CustomersOrdersController extends Controller
                 });
             })
             ->with([
+            'carts',
+            'carts.items',
+            'carts.items.product',
+            'orders',
+            'orders.items',
+            'orders.items.product'
+            ])->with([
                 'orders' => function ($query) {
                     $query->with('items')->orderBy('created_at', 'desc');
                 },
-            ])
-            ->orderBy('last_name')
+            ])->orderBy('last_name')
             ->orderBy('first_name')
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('dashboard/orders/index', [
+        return inertia('dashboard/customers/index', [
             'customers' => $customers,
             'filters' => $request->only(['search']),
         ]);

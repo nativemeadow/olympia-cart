@@ -850,6 +850,110 @@ const ProductForm = ({
                                                                     />
                                                                 </FieldWrapper>
                                                             </div>
+                                                            <div>
+                                                                <Label
+                                                                    htmlFor={`price-${price.id}-description`}
+                                                                    className={
+                                                                        classes.label
+                                                                    }
+                                                                >
+                                                                    Select Value
+                                                                </Label>
+                                                                <FieldWrapper
+                                                                    error={
+                                                                        (
+                                                                            errors as any
+                                                                        )[
+                                                                            `product.prices.${index}.description`
+                                                                        ]
+                                                                    }
+                                                                >
+                                                                    <Input
+                                                                        id={`price-${price.id}-description`}
+                                                                        type="text"
+                                                                        value={
+                                                                            price.description ||
+                                                                            ''
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) => {
+                                                                            clearErrors(
+                                                                                `product.prices.${index}.description` as any,
+                                                                            );
+                                                                            setData(
+                                                                                `product.prices.${index}.description` as any,
+                                                                                e
+                                                                                    .target
+                                                                                    .value,
+                                                                            );
+                                                                        }}
+                                                                        className={cx(
+                                                                            classes.descriptionInput,
+                                                                            {
+                                                                                'input-with-error':
+                                                                                    (
+                                                                                        errors as any
+                                                                                    )[
+                                                                                        `product.prices.${index}.description`
+                                                                                    ],
+                                                                            },
+                                                                        )}
+                                                                    />
+                                                                </FieldWrapper>
+                                                            </div>
+                                                            <div>
+                                                                <Label
+                                                                    htmlFor={`price-${price.id}-title`}
+                                                                    className={
+                                                                        classes.label
+                                                                    }
+                                                                >
+                                                                    Price Label
+                                                                </Label>
+                                                                <FieldWrapper
+                                                                    error={
+                                                                        (
+                                                                            errors as any
+                                                                        )[
+                                                                            `product.prices.${index}.title`
+                                                                        ]
+                                                                    }
+                                                                >
+                                                                    <Input
+                                                                        id={`price-${price.id}-title`}
+                                                                        type="text"
+                                                                        value={
+                                                                            price.title ||
+                                                                            ''
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) => {
+                                                                            clearErrors(
+                                                                                `product.prices.${index}.title` as any,
+                                                                            );
+                                                                            setData(
+                                                                                `product.prices.${index}.title` as any,
+                                                                                e
+                                                                                    .target
+                                                                                    .value,
+                                                                            );
+                                                                        }}
+                                                                        className={cx(
+                                                                            classes.titleInput,
+                                                                            {
+                                                                                'input-with-error':
+                                                                                    (
+                                                                                        errors as any
+                                                                                    )[
+                                                                                        `product.prices.${index}.title`
+                                                                                    ],
+                                                                            },
+                                                                        )}
+                                                                    />
+                                                                </FieldWrapper>
+                                                            </div>
 
                                                             <DeletePriceForm
                                                                 priceId={
@@ -859,112 +963,6 @@ const ProductForm = ({
                                                                     removePrice
                                                                 }
                                                             />
-                                                        </div>
-
-                                                        <div>
-                                                            <Label
-                                                                htmlFor={`price-${price.id}-title`}
-                                                                className={
-                                                                    classes.label
-                                                                }
-                                                            >
-                                                                Title
-                                                            </Label>
-                                                            <FieldWrapper
-                                                                error={
-                                                                    (
-                                                                        errors as any
-                                                                    )[
-                                                                        `product.prices.${index}.title`
-                                                                    ]
-                                                                }
-                                                            >
-                                                                <Input
-                                                                    id={`price-${price.id}-title`}
-                                                                    type="text"
-                                                                    value={
-                                                                        price.title ||
-                                                                        ''
-                                                                    }
-                                                                    onChange={(
-                                                                        e,
-                                                                    ) => {
-                                                                        clearErrors(
-                                                                            `product.prices.${index}.title` as any,
-                                                                        );
-                                                                        setData(
-                                                                            `product.prices.${index}.title` as any,
-                                                                            e
-                                                                                .target
-                                                                                .value,
-                                                                        );
-                                                                    }}
-                                                                    className={cx(
-                                                                        classes.titleInput,
-                                                                        {
-                                                                            'input-with-error':
-                                                                                (
-                                                                                    errors as any
-                                                                                )[
-                                                                                    `product.prices.${index}.title`
-                                                                                ],
-                                                                        },
-                                                                    )}
-                                                                />
-                                                            </FieldWrapper>
-                                                        </div>
-
-                                                        <div>
-                                                            <Label
-                                                                htmlFor={`price-${price.id}-description`}
-                                                                className={
-                                                                    classes.label
-                                                                }
-                                                            >
-                                                                Description
-                                                            </Label>
-                                                            <FieldWrapper
-                                                                error={
-                                                                    (
-                                                                        errors as any
-                                                                    )[
-                                                                        `product.prices.${index}.description`
-                                                                    ]
-                                                                }
-                                                            >
-                                                                <Input
-                                                                    id={`price-${price.id}-description`}
-                                                                    type="text"
-                                                                    value={
-                                                                        price.description ||
-                                                                        ''
-                                                                    }
-                                                                    onChange={(
-                                                                        e,
-                                                                    ) => {
-                                                                        clearErrors(
-                                                                            `product.prices.${index}.description` as any,
-                                                                        );
-                                                                        setData(
-                                                                            `product.prices.${index}.description` as any,
-                                                                            e
-                                                                                .target
-                                                                                .value,
-                                                                        );
-                                                                    }}
-                                                                    className={cx(
-                                                                        classes.descriptionInput,
-                                                                        {
-                                                                            'input-with-error':
-                                                                                (
-                                                                                    errors as any
-                                                                                )[
-                                                                                    `product.prices.${index}.description`
-                                                                                ],
-                                                                        },
-                                                                    )}
-                                                                />
-                                                            </FieldWrapper>
                                                         </div>
 
                                                         {price.image ? (

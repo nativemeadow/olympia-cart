@@ -62,13 +62,22 @@ const MediaSelectionModal = ({
         setIsModalOpen(false);
     };
 
+    const handleClose = (e: React.MouseEvent<HTMLElement> | Event) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsModalOpen(false);
+    };
+
     return (
         <>
             <div onClick={openMediaModal} style={{ display: 'inline-block' }}>
                 {children}
             </div>
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="wide-dialog h-[80vh] overflow-y-auto">
+                <DialogContent
+                    className="wide-dialog h-[80vh] overflow-y-auto"
+                    onInteractOutside={handleClose}
+                >
                     <DialogHeader>
                         <DialogTitle>Select an Image</DialogTitle>
                     </DialogHeader>
@@ -85,7 +94,9 @@ const MediaSelectionModal = ({
                     )}
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button variant="outline">Close</Button>
+                            <Button variant="outline" onClick={handleClose}>
+                                Close
+                            </Button>
                         </DialogClose>
                     </DialogFooter>
                 </DialogContent>

@@ -85,9 +85,10 @@
 
 :root {
     /* Layout */
-    --max-container-size: 80rem; /*71.25rem;*/
+    --max-container-size: 90rem; /*71.25rem;*/
     --min-container-size: 13.5rem;
 
+    --site-nav-bar: oklch(22.1% 0.0057 106.9);
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
@@ -167,6 +168,8 @@
     --color-green-600: oklch(0.6306 0.174 162); /* Anchor */
 
     /* Blue Scale */
+    --color-blue-100: oklch(85.5% 0.05 250); /* Very pale blue */
+    --color-blue-200: oklch(80% 0.07 250); /* Pale blue */
     --color-blue-300: oklch(75.17% 0.0935 250.6); /* Pale blue */
     --color-blue-400: oklch(65.31% 0.1347 242.7);
     --color-blue-500: oklch(65.82% 0.169 248.8); /* Info */
@@ -276,6 +279,8 @@
     --color-shadow: oklch(0 0 0 / 15%);
     --color-focus-shadow: oklch(0.269 0 0 / 25%);
 
+    --site-nav-bar: oklch(36.25% 0.0067 106.7);
+
     /** reversed versions of colors **/
     --color-brown-200: oklch(0.5 0.1 79.92); /* Dark brown */
     --color-brown-400: oklch(0.549 0.1 79.92); /* brown */
@@ -287,7 +292,13 @@
     --color-focus-shadow: oklch(0.269 0 0 / 25%);
 }
 
-@layer base {
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* @layer base {
     * {
         @apply border-border;
     }
@@ -295,7 +306,7 @@
     body {
         @apply bg-background text-foreground;
     }
-}
+} */
 
 .wide-dialog {
     max-width: 90vw !important;
@@ -327,6 +338,7 @@ body.contact-us-page-body .page-container {
 }
 
 .main {
+    max-width: var(--max-container-size);
     min-width: var(--min-container-size);
     width: 100%;
     max-width: 80%;
@@ -336,7 +348,7 @@ body.contact-us-page-body .page-container {
 }
 
 .main.category-list {
-    width: 50%;
+    /* width: 50%; */
 }
 
 .footer {
@@ -366,7 +378,7 @@ body.contact-us-page-body .page-container {
 .category-list-container {
     max-width: var(--max-container-size);
     min-width: var(--min-container-size);
-    padding: 5rem 0 6.25rem 0;
+    padding: 0.5rem 0 6.25rem 0;
     min-height: calc(100vh - 7rem);
     margin: 0 auto;
 }

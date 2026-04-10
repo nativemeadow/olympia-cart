@@ -6,15 +6,30 @@
 
 .customer_table th,
 .customer_table td {
-    border-bottom: 1px solid var(--border);
     padding: 0.5rem 1rem; /* Equivalent to px-4 py-2 */
     text-align: left;
+}
+
+.customer_table tr {
+    border-bottom: 1px solid var(--border);
+
+    *:last-child {
+        border-bottom: none;
+    }
 }
 
 .customer_table th {
     font-weight: 600; /* Equivalent to font-semibold */
     font-size: 0.875rem; /* Equivalent to text-sm */
     color: var(--muted-foreground);
+}
+
+.customer_details {
+    font-size: 1.25rem; /* text-sm */
+    color: var(--foreground);
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Add ellipsis for overflowed text */
 }
 
 /* --- Column Widths --- */
@@ -56,4 +71,95 @@
 .table_container {
     max-width: 800px; /* Constrain the maximum width of the table */
     margin-top: 1.5rem; /* Equivalent to mt-6 */
+}
+
+.pagination {
+    margin-top: 1rem; /* mt-4 */
+}
+
+.searchContainer {
+    margin-bottom: 1rem; /* mb-4 */
+    display: flex;
+    justify-content: flex-start;
+}
+
+.searchInput {
+    width: 100%;
+    max-width: 400px; /* Constrain the maximum width of the search input */
+    padding: 0.5rem 1rem; /* py-2 px-4 */
+    border: 1px solid var(--border);
+    border-radius: 0.375rem; /* rounded-md */
+    font-size: 0.875rem; /* text-sm */
+}
+
+.searchButtons {
+    display: flex;
+    gap: 0.5rem; /* gap-2 */
+    margin-left: 0.5rem; /* ml-2 */
+}
+
+.clearButton {
+    color: var(--destructive);
+    border-color: var(--destructive);
+}
+
+.clearButton:hover {
+    background-color: var(--destructive);
+    color: var(--destructive-foreground);
+}
+
+.buttonSize {
+    height: calc(var(--spacing) * 4);
+    width: calc(var(--spacing) * 4);
+}
+
+.chevron_icon {
+    width: 1.25rem; /* w-5 */
+    height: 1.25rem; /* h-5 */
+}
+.order_history_header {
+    font-size: 1.125rem; /* text-lg */
+    font-weight: 600; /* font-semibold */
+    margin-bottom: 1rem; /* mb-4 */
+}
+
+.CollapsibleContent[data-state='open'] {
+    animation: slideDown 300ms ease-out;
+}
+.CollapsibleContent[data-state='closed'] {
+    animation: slideUp 300ms ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        height: 0;
+    }
+    to {
+        height: var(--radix-collapsible-content-height);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        height: var(--radix-collapsible-content-height);
+    }
+    to {
+        height: 0;
+    }
+}
+
+.hide_chevron {
+    display: none;
+}
+
+.show_chevron {
+    display: inline-block;
+}
+
+.separator {
+    margin: 1rem 0;
+    height: 1.5rem;
+    border-top: 1px solid var(--border);
+    background-color: var(--color-blue-100);
+    border-radius: 0.375rem; /* rounded-md */
 }

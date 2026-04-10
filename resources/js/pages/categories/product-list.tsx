@@ -15,12 +15,12 @@ const Products = ({ products, categorySlug }: Props) => {
     return (
         <div className={classes.products_grid}>
             {products.map((product) => (
-                <div key={product.id} className={classes.card_width}>
+                <React.Fragment key={product.id}>
                     <ProductCard
                         product={product}
                         categorySlug={categorySlug}
                     />
-                </div>
+                </React.Fragment>
             ))}
         </div>
     );

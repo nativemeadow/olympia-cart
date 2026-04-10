@@ -2,8 +2,13 @@
     border: 0.125rem;
     border-style: solid;
     border-radius: 0.7rem;
-    border-color: #cac9c9;
+    border-color: var(--color-brown-300);
+    max-height: 18.125rem;
+    max-width: 18.125rem;
     height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .card {
@@ -12,31 +17,32 @@
 
 .card:hover,
 .card:active {
-    -webkit-box-shadow: 1px 1px 15px 1px rgba(0, 0, 0, 0.5);
-    -moz-box-shadow: 1px 1px 15px 1px rgba(0, 0, 0, 0.425);
-    box-shadow: 1px 1px 15px 1px rgb(0 0 0 / 35%);
+    border-color: var(--color-red-700);
+    -webkit-box-shadow: 1px 1px 15px 1px var(--color-focus-shadow);
+    -moz-box-shadow: 1px 1px 15px 1px var(--color-focus-shadow);
+    box-shadow: 1px 1px 15px 1px var (--color-red-700);
+    transition: box-shadow 0.3s ease-in-out;
 }
 
 .card_container {
     padding: 0.5rem;
 }
 
-.card_image img {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    object-fit: contain; /* Changed from 'cover' to 'contain' */
-    max-height: 100px;
-    width: 100%; /* Ensure image takes full width of container */
-    height: auto; /* Maintain aspect ratio */
-}
-
-/* Add a fixed height to the card_image container for consistent sizing */
-.card_image {
-    height: 150px; /* Match your Image component height */
+.card_image_container {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 4rem;
+}
+
+card_image_container a img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.card_image {
+    height: 175px; /* Set a fixed height for the image container */
 }
 
 .card_title a {
@@ -49,7 +55,7 @@
     text-align: center;
 }
 
-.car_price-info {
+.card_price_info {
     text-align: center;
 }
 
