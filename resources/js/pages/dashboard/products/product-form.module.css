@@ -124,10 +124,16 @@
     align-items: flex-start;
 }
 
-.priceInput,
-.skuInput,
 .extendedPropInput {
     width: 5rem;
+}
+
+skuInput {
+    width: 8rem;
+}
+
+.priceInput {
+    width: 8rem;
 }
 
 .mediaFigure.priceImage {

@@ -48,22 +48,33 @@ class ProductVariant extends Model
     }
 
     /**
+     * The attribute values that belong to the product variant using the NEW pivot table.
+     * This is used by the admin panel for saving/updating variants.
+     */
+    public function newAttributeValues(): BelongsToMany
+    {
+        return $this->belongsToMany(AttributeValue::class, 'product_variant_attribute_values');
+    }
+
+    /**
      * Accessor for extended properties.
      *
      * @return array
      */
     public function getExtendedPropertiesAttribute()
     {
-        return $this->attributeValues->mapWithKeys(function ($attributeValue) {
+        $attributes = $this->relationLoaded('newAttributeValues') ? $this->newAttributeValues : $this->attributeValues;
+        return $attributes->mapWithKeys(function ($attributeValue) {
             return [$attributeValue->attribute->name => $attributeValue->value];
         });
     }
 
     public function getImageAttribute(): ?Media
     {
-        $this->loadMissing('attributeValues.attribute');
+        $this->loadMissing('attributeValues.attribute', 'newAttributeValues.attribute');
+        $attributes = $this->relationLoaded('newAttributeValues') ? $this->newAttributeValues : $this->attributeValues;
 
-        $imageValue = $this->attributeValues
+        $imageValue = $attributes
             ->first(function ($attributeValue) {
                 return strcasecmp($attributeValue->attribute?->name ?? '', 'image') === 0;
             })
@@ -83,9 +94,10 @@ class ProductVariant extends Model
 
     public function getTitleAttribute(): string
     {
-        $this->loadMissing('attributeValues.attribute');
+        $this->loadMissing('attributeValues.attribute', 'newAttributeValues.attribute');
+        $attributes = $this->relationLoaded('newAttributeValues') ? $this->newAttributeValues : $this->attributeValues;
 
-        $titleParts = $this->attributeValues
+        $titleParts = $attributes
             ->filter(function ($attributeValue) {
                 return strcasecmp($attributeValue->attribute?->name ?? '', 'title') === 0;
             })
@@ -97,9 +109,10 @@ class ProductVariant extends Model
 
     public function getDescriptionAttribute(): string
     {
-        $this->loadMissing('attributeValues.attribute');
+        $this->loadMissing('attributeValues.attribute', 'newAttributeValues.attribute');
+        $attributes = $this->relationLoaded('newAttributeValues') ? $this->newAttributeValues : $this->attributeValues;
 
-        $descriptionParts = $this->attributeValues
+        $descriptionParts = $attributes
             ->filter(function ($attributeValue) {
                 return strcasecmp($attributeValue->attribute?->name ?? '', 'description') === 0;
             })

@@ -5,6 +5,7 @@ import {
     OrderItem,
     Cart,
     CartItem,
+    User,
 } from '@/types/model-types';
 import { OrdersPaginated } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -37,8 +38,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import styles from './customers.module.css';
-import { Tab } from '@heroui/react';
-//import { Link } from 'lucide-react';
+import { ImSpinner } from 'react-icons/im';
 
 function CustomerOrders({ customer }: { customer: Customer }) {
     if (!customer.orders || customer.orders.length === 0) {
@@ -57,6 +57,9 @@ function CustomerOrders({ customer }: { customer: Customer }) {
                     <TableCell className={styles.tableHeaderCell}>
                         Status
                     </TableCell>
+                    <TableCell className={styles.tableHeaderCell}>
+                        Date
+                    </TableCell>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -70,6 +73,15 @@ function CustomerOrders({ customer }: { customer: Customer }) {
                         </TableCell>
                         <TableCell className={styles.tableBodyCell}>
                             {order.status}
+                        </TableCell>
+                        <TableCell className={styles.tableBodyCell}>
+                            {order.status === 'pending'
+                                ? new Date(
+                                      order.created_at,
+                                  ).toLocaleDateString()
+                                : new Date(
+                                      order.updated_at,
+                                  ).toLocaleDateString()}
                         </TableCell>
                     </TableRow>
                 ))}
@@ -106,6 +118,9 @@ function CustomerCarts({ customer }: { customer: Customer }) {
                     <TableCell className={styles.tableHeaderCell}>
                         Status
                     </TableCell>
+                    <TableCell className={styles.tableHeaderCell}>
+                        Date
+                    </TableCell>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -120,6 +135,15 @@ function CustomerCarts({ customer }: { customer: Customer }) {
                             </TableCell>
                             <TableCell className={styles.tableBodyCell}>
                                 {cart.status}
+                            </TableCell>
+                            <TableCell className={styles.tableBodyCell}>
+                                {cart.status === 'pending'
+                                    ? new Date(
+                                          cart.created_at,
+                                      ).toLocaleDateString()
+                                    : new Date(
+                                          cart.updated_at,
+                                      ).toLocaleDateString()}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -258,9 +282,16 @@ type CustomersProps = {
     filters: {
         search: string;
     };
+    auth: {
+        user: User;
+    };
 };
 
-export default function Customers({ customers, filters }: CustomersProps) {
+export default function Customers({
+    customers,
+    filters,
+    auth,
+}: CustomersProps) {
     const { data, links, prev_page_url, next_page_url } = customers;
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [openCustomerIds, setOpenCustomerIds] = useState<number[]>([]);
@@ -313,7 +344,7 @@ export default function Customers({ customers, filters }: CustomersProps) {
     };
 
     return (
-        <DashboardLayout>
+        <DashboardLayout user={auth.user}>
             <Head title="Customers" />
             <h1 className={styles.title}>Manage Customers</h1>
             <p className={styles.subtitle}>

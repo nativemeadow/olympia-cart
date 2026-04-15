@@ -66,7 +66,7 @@ class ProductController extends Controller
         $product = Product::with([
             'categories',
             'variants' => function ($query) {
-                $query->with('attributeValues.attribute');
+                $query->with('newAttributeValues.attribute');
             },
             'media',
         ])->find($product_id);
@@ -127,7 +127,7 @@ class ProductController extends Controller
 
         // Check if an AttributeValue for this specific attribute already exists for this specific variant.
         // This is the key to avoiding duplicate entries.
-        $attributeValue = $variant->attributeValues()->where('attribute_id', $attribute->id)->first();
+        $attributeValue = $variant->newAttributeValues()->where('attribute_id', $attribute->id)->first();
 
         if (!empty($value)) {
             // If a value is provided in the request...
@@ -148,7 +148,7 @@ class ProductController extends Controller
         } elseif ($attributeValue) {
             // If the request provides no value (it's empty or null), but an old value exists in the database...
             // ...detach it from the variant. The final sync operation will then remove the association.
-            $variant->attributeValues()->detach($attributeValue->id);
+            $variant->newAttributeValues()->detach($attributeValue->id);
         }
 
         // Return the array of IDs to be synced. It will contain one ID or be empty.
@@ -164,7 +164,7 @@ class ProductController extends Controller
         // Ensure the 'Image' attribute exists.
         $attribute = Attribute::firstOrCreate(['name' => 'Image', 'data_type' => 'string']);
         // Find if an 'Image' attribute value is already associated with this variant.
-        $imageValueInstance = $variant->attributeValues()->where('attribute_id', $attribute->id)->first();
+        $imageValueInstance = $variant->newAttributeValues()->where('attribute_id', $attribute->id)->first();
 
         if (!empty($image)) {
             // If an image object is provided in the request...
@@ -184,7 +184,7 @@ class ProductController extends Controller
         } elseif ($imageValueInstance) {
             // If no image is provided, but one was previously associated...
             // ...detach it to remove the association.
-            $variant->attributeValues()->detach($imageValueInstance->id);
+            $variant->newAttributeValues()->detach($imageValueInstance->id);
         }
         // Return the array with the image attribute ID or an empty array.
         return $attributesToSync;
@@ -290,7 +290,7 @@ class ProductController extends Controller
                     }
                 }
 
-                $variant->attributeValues()->sync($attributesToSync);
+                $variant->newAttributeValues()->sync($attributesToSync);
             }
 
             DB::commit();
@@ -443,7 +443,7 @@ class ProductController extends Controller
                     }
                 }
 
-                $variant->attributeValues()->sync($attributesToSync);
+                $variant->newAttributeValues()->sync($attributesToSync);
             }
 
             // Delete variants that are no longer in the request

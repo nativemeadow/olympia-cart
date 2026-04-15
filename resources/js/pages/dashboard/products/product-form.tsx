@@ -40,10 +40,16 @@ import AlertDialogComponent from '@/components/AlertDialog';
 import { Category } from '@/types/model-types';
 import { CategoryHierarchy } from '@/types';
 import CategoryManagement from './CategoryManagement';
+import { useProductTreeStore } from '@/zustand/product-tree-store';
 import {
     CategoryExpandedProvider,
     useCategoryExpanded,
 } from '@/context/CategoryExpandedContext';
+import {
+    useProductsAdminStore,
+    CurrentProduct,
+} from '@/zustand/product-admin-store';
+import { C } from 'node_modules/tailwindcss/dist/resolve-config-QUZ9b-Gn.mjs';
 
 const initialProduct = (): Product => ({
     id: 0,
@@ -157,7 +163,7 @@ const ProductForm = ({
     categoryId?: number;
     attributes?: Attributes[];
     isEdit?: boolean;
-    onSuccess: () => void;
+    onSuccess: (categoryId: number) => void;
     allCategories: CategoryHierarchy[];
 }) => {
     const [priceStrings, setPriceStrings] = useState<{ [key: string]: string }>(
@@ -168,8 +174,23 @@ const ProductForm = ({
     const [errorDialogOpen, setErrorDialogOpen] = useState(false);
     const [errorDialogMessage, setErrorDialogMessage] = useState('');
 
+    const { setCurrentProduct } = useProductsAdminStore();
+
+    useEffect(() => {
+        if (isEdit && product) {
+            const currentProduct: CurrentProduct = {
+                status: 'updated',
+                product: PrepareProductData(product!, attributes),
+                categoryId: categoryId || null,
+            };
+            setCurrentProduct(currentProduct);
+        }
+    }, [product, isEdit, attributes, categoryId, setCurrentProduct]);
+
     const { data, setData, post, put, processing, errors, reset, clearErrors } =
         useForm<ProductFormData>();
+
+    const { setActiveCategoryId } = useProductTreeStore(); // Get the action from the store
 
     useEffect(() => {
         const findCategory = (
@@ -241,7 +262,16 @@ const ProductForm = ({
         const options = {
             onSuccess: () => {
                 reset();
-                onSuccess();
+                const primaryCategoryId =
+                    data.product.categories && data.product.categories[0]
+                        ? data.product.categories[0].id
+                        : categoryId;
+                if (primaryCategoryId) {
+                    // Set the active category in the store
+                    setActiveCategoryId(primaryCategoryId);
+                    // Then call the onSuccess prop to trigger the page reload
+                    onSuccess(primaryCategoryId);
+                }
                 setIsSaving(false);
             },
             onError: (errorResponse: any) => {
@@ -792,6 +822,22 @@ const ProductForm = ({
                                                                     />
                                                                 </FieldWrapper>
                                                             </div>
+
+                                                            <DeletePriceForm
+                                                                priceId={
+                                                                    price.id
+                                                                }
+                                                                removePrice={
+                                                                    removePrice
+                                                                }
+                                                            />
+                                                        </div>
+
+                                                        <div
+                                                            className={
+                                                                classes.inputGroup
+                                                            }
+                                                        >
                                                             <div
                                                                 className={
                                                                     classes.inputItem
@@ -857,7 +903,7 @@ const ProductForm = ({
                                                                         classes.label
                                                                     }
                                                                 >
-                                                                    Select Value
+                                                                    Select Label
                                                                 </Label>
                                                                 <FieldWrapper
                                                                     error={
@@ -954,17 +1000,7 @@ const ProductForm = ({
                                                                     />
                                                                 </FieldWrapper>
                                                             </div>
-
-                                                            <DeletePriceForm
-                                                                priceId={
-                                                                    price.id
-                                                                }
-                                                                removePrice={
-                                                                    removePrice
-                                                                }
-                                                            />
                                                         </div>
-
                                                         {price.image ? (
                                                             <div
                                                                 className={`${classes.mediaItem}`}

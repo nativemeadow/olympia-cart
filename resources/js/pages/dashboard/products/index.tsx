@@ -1,60 +1,38 @@
 import DashboardLayout from '@/layouts/dashboard-layout';
 import { Head, router } from '@inertiajs/react';
 import { CategoryHierarchy } from '@/types';
-import { Product as ProductType } from '@/types/model-types';
+import { Product as ProductType, User } from '@/types/model-types';
 import ProductNode from './product-node';
 import classes from './products.module.css';
 import { useState, useEffect } from 'react';
+import { useProductTreeStore } from '@/zustand/product-tree-store';
 import { Button } from '@/components/ui/button';
 import Toastify from 'toastify-js';
 
 type CategoriesIndexProps = {
     categories: CategoryHierarchy[];
+    auth: {
+        user: User;
+    };
 };
 
-export default function Products({ categories }: CategoriesIndexProps) {
-    const [openNodes, setOpenNodes] = useState<{ [key: number]: boolean }>({});
+export default function Products({ categories, auth }: CategoriesIndexProps) {
+    const { expandAll, collapseAll, activeCategoryId, setActiveCategoryId } =
+        useProductTreeStore();
 
-    // Default all nodes to open on initial render
+    // This effect runs when the page reloads after a product is saved
     useEffect(() => {
-        const allIds: { [key: number]: boolean } = {};
-        const traverse = (nodes: CategoryHierarchy[]) => {
-            nodes.forEach((node) => {
-                if (node.children?.length || node.products?.length) {
-                    allIds[node.id] = true;
-                }
-                if (node.children) {
-                    traverse(node.children);
-                }
-            });
-        };
-        traverse(categories);
-        setOpenNodes({});
-    }, [categories]);
-
-    const toggleNode = (id: number) => {
-        setOpenNodes((prev) => ({ ...prev, [id]: !prev[id] }));
-    };
-
-    const collapseAll = () => {
-        setOpenNodes({});
-    };
-
-    const expandAll = () => {
-        const allIds: { [key: number]: boolean } = {};
-        const traverse = (nodes: CategoryHierarchy[]) => {
-            nodes.forEach((node) => {
-                if (node.children?.length || node.products?.length) {
-                    allIds[node.id] = true;
-                }
-                if (node.children) {
-                    traverse(node.children);
-                }
-            });
-        };
-        traverse(categories);
-        setOpenNodes(allIds);
-    };
+        if (activeCategoryId) {
+            const element = document.getElementById(
+                `category-${activeCategoryId}`,
+            );
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Reset the active ID so this doesn't run on every render
+                setActiveCategoryId(null);
+            }
+        }
+    }, [activeCategoryId, categories]); // Rerun when categories data changes
 
     const handleProductOrderChange = async (
         categoryId: number,
@@ -99,7 +77,7 @@ export default function Products({ categories }: CategoriesIndexProps) {
     };
 
     return (
-        <DashboardLayout>
+        <DashboardLayout user={auth.user}>
             <Head title="Products" />
             <div className={classes.headerContainer}>
                 <div>
@@ -113,14 +91,14 @@ export default function Products({ categories }: CategoriesIndexProps) {
                 <div className={classes.toolbar}>
                     <Button
                         variant="outline"
-                        onClick={expandAll}
+                        onClick={() => expandAll(categories)}
                         className={classes.expand_icon}
                     >
                         Expand All
                     </Button>
                     <Button
                         variant="outline"
-                        onClick={collapseAll}
+                        onClick={() => collapseAll()}
                         className={classes.collapse_icon}
                     >
                         Collapse All
@@ -132,8 +110,6 @@ export default function Products({ categories }: CategoriesIndexProps) {
                     <ProductNode
                         key={category.id}
                         category={category}
-                        openNodes={openNodes}
-                        toggleNode={toggleNode}
                         onProductOrderChange={handleProductOrderChange}
                     />
                 ))}

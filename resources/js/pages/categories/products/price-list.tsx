@@ -118,10 +118,14 @@ const PriceList = ({ categorySlug }: Props) => {
                                             }
                                         >
                                             $
-                                            {Number(
-                                                selectedPrice.price / 100,
-                                            ).toFixed(2)}{' '}
-                                            {/* {Number(price.price / 100).toFixed(2)} */}
+                                            {new Intl.NumberFormat().format(
+                                                Number(
+                                                    (
+                                                        selectedPrice.price /
+                                                        100
+                                                    ).toFixed(2),
+                                                ),
+                                            )}
                                             {selectedPrice.currency}
                                         </span>
                                     </p>

@@ -14,6 +14,9 @@ import { UserNav } from '@/components/user-nav';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { router } from '@inertiajs/react';
+import { ImSpinner } from 'react-icons/im';
 
 const navLinks = [
     { href: 'dashboard.index', label: 'Dashboard', icon: Home },
@@ -44,7 +47,26 @@ const NavLink = ({ href, children }: { href: string; children: ReactNode }) => (
     </Link>
 );
 
-export default function DashboardLayout({ children }: PropsWithChildren) {
+export default function DashboardLayout({
+    user,
+    header,
+    children,
+}: PropsWithChildren<{ user: User; header?: React.ReactNode }>) {
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const handleStart = () => setLoading(true);
+        const handleFinish = () => setLoading(false);
+
+        const removeStartListener = router.on('start', handleStart);
+        const removeFinishListener = router.on('finish', handleFinish);
+
+        return () => {
+            removeStartListener();
+            removeFinishListener();
+        };
+    }, []);
+
     const { auth } = usePage<{ auth: { user: User } }>().props;
 
     const navigationLinks = navLinks.map((item) => (
@@ -104,6 +126,11 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                     {children}
                 </main>
             </div>
+            {loading && (
+                <div className="spinner_overlay">
+                    <ImSpinner className="spinner animate_spin" />
+                </div>
+            )}
         </div>
     );
 }

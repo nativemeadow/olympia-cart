@@ -70,7 +70,7 @@ const ShoppingCart = ({ cart, checkout }: Props) => {
                                     ? 'In Store Pickup'
                                     : checkout?.is_delivery
                                       ? 'Delivery'
-                                      : 'N/A'}
+                                      : 'No Option Selected'}
                             </span>
                         </div>
                         <div className={classes.set_instructions}>

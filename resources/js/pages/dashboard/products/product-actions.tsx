@@ -29,6 +29,9 @@ import { CategoryHierarchy } from '@/types';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { ImSpinner } from 'react-icons/im';
 import { useState } from 'react';
+import { router } from '@inertiajs/react';
+import { useProductTreeStore } from '@/zustand/product-tree-store';
+
 import axios from 'axios';
 
 import ProductForm from './product-form';
@@ -38,16 +41,16 @@ export function AddProductAction({
     onSuccess,
     categoryId,
 }: {
-    onSuccess: () => void;
+    onSuccess: (categoryId: number) => void;
     categoryId: number;
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [attributes, setAttributes] = useState<Attributes[]>([]);
     const [allCategories, setAllCategories] = useState<CategoryHierarchy[]>([]);
 
-    const handleSuccess = () => {
+    const handleSuccess = (categoryId: number) => {
         setIsOpen(false);
-        onSuccess();
+        onSuccess(categoryId);
     };
 
     const handleOpenAdd = () => {
@@ -115,7 +118,7 @@ export function EditProductAction({
     onSuccess,
 }: {
     product: Product;
-    onSuccess: () => void;
+    onSuccess: (categoryId: number) => void;
 }) {
     const [productData, setProductData] = useState<Product | null>(null);
     const [attributes, setAttributes] = useState<Attributes[]>([]);
@@ -123,8 +126,8 @@ export function EditProductAction({
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSuccess = () => {
-        onSuccess();
+    const handleSuccess = (categoryId: number) => {
+        onSuccess(categoryId);
         setIsOpen(false);
     };
 
@@ -178,6 +181,12 @@ export function EditProductAction({
                             {productData && (
                                 <ProductForm
                                     product={productData}
+                                    categoryId={
+                                        productData.categories &&
+                                        productData.categories[0]
+                                            ? productData.categories[0].id
+                                            : undefined
+                                    }
                                     attributes={attributes}
                                     isEdit={true}
                                     onSuccess={handleSuccess}
@@ -209,18 +218,33 @@ export function DeleteProductAction({
     onSuccess,
 }: {
     product: Product;
-    onSuccess: () => void;
+    onSuccess: (categoryId: number) => void;
 }) {
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { setActiveCategoryId } = useProductTreeStore();
 
     const handleDelete = async () => {
         setProcessing(true);
         setError(null);
         try {
             await axios.delete(route('dashboard.products.destroy', product.id));
-            if (onSuccess) {
-                onSuccess();
+
+            const primaryCategoryId =
+                product.categories && product.categories[0]
+                    ? product.categories[0].id
+                    : undefined;
+
+            if (primaryCategoryId) {
+                // 1. Set the active category in the store
+                setActiveCategoryId(primaryCategoryId);
+
+                // 2. Directly trigger the page reload
+                router.visit(route('dashboard.products'), {
+                    only: ['categories'],
+                    preserveState: false,
+                    preserveScroll: true,
+                });
             }
         } catch (err: any) {
             setError(

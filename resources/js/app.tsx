@@ -7,6 +7,7 @@ import { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
 import '../css/app.css';
+import '../css/spinner.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -18,7 +19,7 @@ const resolve = (name: string) =>
     );
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title) => `${title} - ${appName}`,
     resolve: async (name) => {
         const page = await resolvePageComponent<any>(
             `./pages/${name}.tsx`,

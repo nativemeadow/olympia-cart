@@ -89,6 +89,7 @@ const NewImageForm = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        // Prevent the modal from closing the parent when clicking the submit button
         e.stopPropagation();
         setIsProcessing(true);
         clearErrors();

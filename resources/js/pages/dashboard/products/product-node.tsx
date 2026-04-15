@@ -9,23 +9,24 @@ import {
     DeleteProductAction,
 } from './product-actions';
 import { router, usePage } from '@inertiajs/react';
+import { useProductTreeStore } from '@/zustand/product-tree-store';
+import { useProductsAdminStore } from '@/zustand/product-admin-store';
 import Toastify from 'toastify-js';
 import 'toastify-js/src/toastify.css';
 import classes from './products.module.css';
 
 interface ProductNodeProps {
     category: CategoryHierarchy;
-    openNodes: { [key: number]: boolean };
-    toggleNode: (id: number) => void;
     onProductOrderChange: (categoryId: number, products: ProductType[]) => void;
 }
 
 const ProductNode: React.FC<ProductNodeProps> = ({
     category,
-    openNodes,
-    toggleNode,
     onProductOrderChange,
 }) => {
+    const { openNodes, toggleNode, setActiveCategoryId } =
+        useProductTreeStore();
+    const { setCurrentProduct } = useProductsAdminStore();
     const { props } = usePage();
     const isOpen = openNodes[category.id] || false;
     const hasChildren = category.children && category.children.length > 0;
@@ -59,14 +60,29 @@ const ProductNode: React.FC<ProductNodeProps> = ({
 
     const handleToggle = () => {
         if (isExpandable) {
-            toggleNode(category.id);
+            toggleNode(category);
         }
     };
 
-    const handleSuccess = () => {
+    const handleSuccess = (categoryId: number) => {
+        // Set the active category ID in the store
+        setActiveCategoryId(categoryId);
+        // Reload the page data
         router.visit(route('dashboard.products'), {
             only: ['categories'],
-            preserveScroll: true,
+            preserveState: true,
+            preserveScroll: false, // Allow scrolling to the element
+            onSuccess: () => {
+                const element = document.getElementById(
+                    `category-${categoryId}`,
+                );
+                if (element) {
+                    element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                    });
+                }
+            },
         });
     };
 
@@ -144,7 +160,11 @@ const ProductNode: React.FC<ProductNodeProps> = ({
     };
 
     return (
-        <div className={classes.node}>
+        <div
+            key={category.id}
+            id={`category-${category.id}`}
+            className={classes.node}
+        >
             <div className={classes.node_header}>
                 {isExpandable ? (
                     <Button
@@ -230,8 +250,6 @@ const ProductNode: React.FC<ProductNodeProps> = ({
                             <ProductNode
                                 key={child.id}
                                 category={child}
-                                openNodes={openNodes}
-                                toggleNode={toggleNode}
                                 onProductOrderChange={onProductOrderChange}
                             />
                         ))}

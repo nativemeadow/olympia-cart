@@ -91,7 +91,7 @@ const CartItem = ({ item }: Props) => {
                             <div>{item.unit}</div>
                         </div>
                         <div className={classes.item_subtotal}>
-                            Subtotal: $
+                            Subtotal:
                             <span className={classes.currency}>
                                 {formatCurrency(price * item.quantity)}
                             </span>

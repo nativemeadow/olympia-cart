@@ -53,7 +53,7 @@ const ProductDetail = ({ categorySlug, productData }: Props) => {
                     id={`price-${price.id}`}
                     className={classes.options_item}
                 >
-                    <span>${Number(price.price / 100).toFixed(2)}</span>
+                    <span>${new Intl.NumberFormat().format(Number((price.price / 100).toFixed(2)))}</span>
                     &nbsp;/&nbsp;
                     {parser(String(price['unit'] || 'Each'))}
                 </li>
