@@ -23,10 +23,10 @@ export default function AuthSimpleLayout({
                             href={route('home')}
                             className="flex flex-col items-center gap-2 font-medium"
                         >
-                            <div className="site_menu mb-1 flex items-center justify-center rounded-md">
+                            <div className="site_menu mb-1 flex items-center justify-center rounded-md p-4">
                                 {/* <AppLogoIcon className="size-9 fill-current text-[var(--foreground)] dark:text-white" /> */}
 
-                                <OMG_Logo className="size-full" scale="0.3" />
+                                <OMG_Logo className="size-full" />
                             </div>
                             <span className="sr-only">{title}</span>
                         </Link>

@@ -35,7 +35,7 @@ export function AppSidebar() {
                             className={`site_menu h-auto p-0 text-[#1b1b18] dark:text-[#fff]`}
                         >
                             <Link href="/" prefetch>
-                                <OMG_Logo className="size-full" scale="0.3" />
+                                <OMG_Logo className="size-full" />
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

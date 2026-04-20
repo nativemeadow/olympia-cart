@@ -13,7 +13,7 @@ use App\Http\Controllers\CheckoutStepsController;
 use \App\Http\Controllers\Auth\RegisteredUserController;
 use Inertia\Inertia;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:Admin'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');

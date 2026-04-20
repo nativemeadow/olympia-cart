@@ -15,11 +15,12 @@ class DatabaseSeeder extends Seeder
         User::factory(10)->create();
         //Category::factory(10)->create();
         // $this->call(CategorySeeder::class);
-        $this->call(CategoryPGSeeder::class);
-        $this->call(ProductSeeder::class);
-        $this->call(PriceSeeder::class);
-        $this->call(ProductCategorySeeder::class);
-        $this->call(ImagesSeeder::class);
+        // $this->call(CategoryPGSeeder::class);
+        // $this->call(ProductSeeder::class);
+        // $this->call(PriceSeeder::class);
+        $this->call(PermissionsSeeder::class);
+        // $this->call(ProductCategorySeeder::class);
+        // $this->call(ImagesSeeder::class);
 
         // User::factory()->create([
         //     'first_name' => 'Test',

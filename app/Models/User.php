@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Address;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 /**
  * @property-read \App\Models\Customer|null $customer
@@ -17,8 +18,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
-    use HasRoles;
+    use HasFactory, Notifiable, HasRoles, HasUuids;
 
     protected $appends = ['is_guest'];
 
