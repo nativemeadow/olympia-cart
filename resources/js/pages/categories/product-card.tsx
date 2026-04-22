@@ -2,6 +2,7 @@ import { Product } from '@/types/model-types';
 import { parser } from '@/utils/html-parse';
 import { Link } from '@inertiajs/react';
 import filterPricing from './product-pricing';
+import RenderImage from '@/components/render-image';
 import { ProductType } from '@/types';
 import {
     Card,
@@ -33,7 +34,7 @@ const ProductCard = (props: Props) => {
                     <Link
                         href={`/${categoryPath}/products/${categorySlug}/${product.slug}`}
                     >
-                        <img
+                        <RenderImage
                             className={classes.card_image}
                             src={`/${productImageFolder}/${product.image}`}
                             alt={

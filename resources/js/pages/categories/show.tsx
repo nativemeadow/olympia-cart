@@ -1,9 +1,7 @@
-import { Category } from '@/types/model-types';
 import { Head, usePage } from '@inertiajs/react';
 import List from '@/pages/categories/list';
 import parse from 'html-react-parser';
 import type { Categories } from '@/types/model-types';
-import type { Product } from '@/types/model-types';
 import ProductsList from '@/pages/categories/product-list';
 import { useEffect } from 'react';
 import { CategoryDataType, ProductType } from '@/types';

@@ -3,6 +3,8 @@ import { Head, router } from '@inertiajs/react';
 import { CategoryHierarchy } from '@/types';
 import { useEffect, useState } from 'react';
 import CategoryNode from './category-node';
+import { User } from '@/types';
+import { usePage } from '@inertiajs/react';
 import classes from './categories.module.css';
 import {
     CategoryExpandedProvider,
@@ -12,6 +14,12 @@ import { Button } from '@/components/ui/button';
 
 type Props = {
     categories: CategoryHierarchy[];
+};
+
+type PageProps = {
+    auth: {
+        user: User;
+    };
 };
 
 function getAllCategoryIds(categories: CategoryHierarchy[]): number[] {
@@ -42,6 +50,7 @@ function CategoryActions({ categories }: Props) {
 }
 
 export default function Categories({ categories: initialCategories }: Props) {
+    const { auth } = usePage<PageProps>().props;
     const [categoryTree, setCategoryTree] =
         useState<CategoryHierarchy[]>(initialCategories);
     const [draggedCategoryId, setDraggedCategoryId] = useState<number | null>(
@@ -185,7 +194,7 @@ export default function Categories({ categories: initialCategories }: Props) {
     };
 
     return (
-        <DashboardLayout>
+        <DashboardLayout user={auth.user}>
             <Head title="Categories" />
             <CategoryExpandedProvider>
                 <div className={classes.headerContainer}>

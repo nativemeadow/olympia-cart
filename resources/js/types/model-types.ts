@@ -1,4 +1,5 @@
 import { User as UserType } from '@/types/model-types';
+import { Checkout } from '.';
 
 export type User = {
     id: number;
@@ -178,6 +179,7 @@ export type Cart = {
     product_slug?: string | undefined;
     // Relationships
     items?: CartItem[];
+    checkout?: Checkout | null;
 };
 
 export type Order = {
@@ -195,6 +197,7 @@ export type Order = {
     items?: OrderItem[];
     billing_address?: Address;
     shipping_address?: Address;
+    checkout?: Checkout | null;
 };
 
 export type OrderItem = {

@@ -7,7 +7,7 @@ import {
     CartItem,
     User,
 } from '@/types/model-types';
-import { OrdersPaginated } from '@/types';
+import { OrdersPaginated, Payment } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
@@ -39,11 +39,15 @@ import {
 } from '@/components/ui/table';
 import styles from './customers.module.css';
 import { ImSpinner } from 'react-icons/im';
+import { P } from 'node_modules/framer-motion/dist/types.d-DagZKalS';
 
 function CustomerOrders({ customer }: { customer: Customer }) {
     if (!customer.orders || customer.orders.length === 0) {
         return '0';
     }
+
+    console.log('Customer Orders:', customer.orders); // --- IGNORE ---
+
     return (
         <Table className={styles.ordersTable}>
             <TableHeader>
@@ -64,26 +68,35 @@ function CustomerOrders({ customer }: { customer: Customer }) {
             </TableHeader>
             <TableBody>
                 {customer.orders.map((order) => (
-                    <TableRow key={order.id}>
-                        <TableCell className={styles.tableBodyCell}>
-                            {order.id}
-                        </TableCell>
-                        <TableCell className={styles.tableBodyCell}>
-                            ${(order.total / 100).toFixed(2)}
-                        </TableCell>
-                        <TableCell className={styles.tableBodyCell}>
-                            {order.status}
-                        </TableCell>
-                        <TableCell className={styles.tableBodyCell}>
-                            {order.status === 'pending'
-                                ? new Date(
-                                      order.created_at,
-                                  ).toLocaleDateString()
-                                : new Date(
-                                      order.updated_at,
-                                  ).toLocaleDateString()}
-                        </TableCell>
-                    </TableRow>
+                    <>
+                        <TableRow key={order.id}>
+                            <TableCell className={styles.tableBodyCell}>
+                                {order.id}
+                            </TableCell>
+                            <TableCell className={styles.tableBodyCell}>
+                                ${(order.total / 100).toFixed(2)}
+                            </TableCell>
+                            <TableCell className={styles.tableBodyCell}>
+                                {order.status}
+                            </TableCell>
+                            <TableCell className={styles.tableBodyCell}>
+                                {order.status === 'pending'
+                                    ? new Date(
+                                          order.created_at,
+                                      ).toLocaleDateString()
+                                    : new Date(
+                                          order.updated_at,
+                                      ).toLocaleDateString()}
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell colSpan={3} className="p-0">
+                                <PaymentDetails
+                                    payment={order.checkout?.payment as Payment}
+                                />
+                            </TableCell>
+                        </TableRow>
+                    </>
                 ))}
             </TableBody>
         </Table>
@@ -96,6 +109,8 @@ function CustomerCarts({ customer }: { customer: Customer }) {
     if (!customer.carts || customer.carts.length === 0) {
         return '0';
     }
+
+    console.log('Checkout:', customer.carts[0].checkout); // --- IGNORE ---
 
     const handleOpenCloseCart = (cartId: number) => {
         setOpenCartIds((prev) =>
@@ -215,41 +230,49 @@ function CustomerCarts({ customer }: { customer: Customer }) {
                                                 {cart.items &&
                                                 cart.items.length > 0 ? (
                                                     cart.items.map((item) => (
-                                                        <TableRow key={item.id}>
-                                                            <TableCell
-                                                                className={
-                                                                    styles.tableBodyCell
-                                                                }
+                                                        <>
+                                                            <TableRow
+                                                                key={item.id}
                                                             >
-                                                                {item.sku}
-                                                            </TableCell>
-                                                            <TableCell
-                                                                className={
-                                                                    styles.tableBodyCell
-                                                                }
-                                                            >
-                                                                {item.title}
-                                                            </TableCell>
-                                                            <TableCell
-                                                                className={
-                                                                    styles.tableBodyCell
-                                                                }
-                                                            >
-                                                                {item.quantity}{' '}
-                                                                {item.unit}
-                                                            </TableCell>
-                                                            <TableCell
-                                                                className={
-                                                                    styles.tableBodyCell
-                                                                }
-                                                            >
-                                                                $
-                                                                {(
-                                                                    item.price /
-                                                                    100
-                                                                ).toFixed(2)}
-                                                            </TableCell>
-                                                        </TableRow>
+                                                                <TableCell
+                                                                    className={
+                                                                        styles.tableBodyCell
+                                                                    }
+                                                                >
+                                                                    {item.sku}
+                                                                </TableCell>
+                                                                <TableCell
+                                                                    className={
+                                                                        styles.tableBodyCell
+                                                                    }
+                                                                >
+                                                                    {item.title}
+                                                                </TableCell>
+                                                                <TableCell
+                                                                    className={
+                                                                        styles.tableBodyCell
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        item.quantity
+                                                                    }{' '}
+                                                                    {item.unit}
+                                                                </TableCell>
+                                                                <TableCell
+                                                                    className={
+                                                                        styles.tableBodyCell
+                                                                    }
+                                                                >
+                                                                    $
+                                                                    {(
+                                                                        item.price /
+                                                                        100
+                                                                    ).toFixed(
+                                                                        2,
+                                                                    )}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        </>
                                                     ))
                                                 ) : (
                                                     <TableRow>
@@ -274,6 +297,34 @@ function CustomerCarts({ customer }: { customer: Customer }) {
                 ))}
             </TableBody>
         </Table>
+    );
+}
+
+function PaymentDetails({ payment }: { payment: Payment }) {
+    if (!payment) {
+        return 'No payment information available.';
+    }
+
+    return (
+        <div className={styles.paymentDetails}>
+            <p>
+                <strong>Payment Method:</strong>{' '}
+                {payment.payment_method_details.card_number
+                    ? `Card ending in ${payment.payment_method_details.card_number.slice(
+                          -4,
+                      )}`
+                    : 'N/A'}
+            </p>
+            <p>
+                <strong>Amount:</strong> ${(payment.amount / 100).toFixed(2)}
+            </p>
+            <p>
+                <strong>Status:</strong> {payment.status}
+            </p>
+            <p>
+                <strong>Payment Gateway:</strong> {payment.payment_gateway}
+            </p>
+        </div>
     );
 }
 
@@ -579,30 +630,39 @@ export default function Customers({
                         ))}
                     </TableBody>
                 </Table>
+
                 <div className={styles.pagination}>
                     <Pagination>
                         <PaginationContent>
                             {prev_page_url && (
                                 <PaginationItem>
-                                    <Link href={prev_page_url} preserveScroll>
-                                        <PaginationPrevious />
-                                    </Link>
+                                    <PaginationPrevious
+                                        href={prev_page_url}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            router.visit(prev_page_url, {
+                                                preserveScroll: true,
+                                            });
+                                        }}
+                                    />
                                 </PaginationItem>
                             )}
                             {links.map((link, index) => {
                                 if (!isNaN(Number(link.label))) {
                                     return (
                                         <PaginationItem key={index}>
-                                            <Link
+                                            <PaginationLink
                                                 href={link.url!}
-                                                preserveScroll
+                                                isActive={link.active}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    router.visit(link.url!, {
+                                                        preserveScroll: true,
+                                                    });
+                                                }}
                                             >
-                                                <PaginationLink
-                                                    isActive={link.active}
-                                                >
-                                                    {link.label}
-                                                </PaginationLink>
-                                            </Link>
+                                                {link.label}
+                                            </PaginationLink>
                                         </PaginationItem>
                                     );
                                 }
@@ -610,18 +670,21 @@ export default function Customers({
                             })}
                             {next_page_url && (
                                 <PaginationItem>
-                                    <Link href={next_page_url} preserveScroll>
-                                        <PaginationNext />
-                                    </Link>
+                                    <PaginationNext
+                                        href={next_page_url}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            router.visit(next_page_url, {
+                                                preserveScroll: true,
+                                            });
+                                        }}
+                                    />
                                 </PaginationItem>
                             )}
                         </PaginationContent>
                     </Pagination>
                 </div>
             </div>
-            {/* <pre className={styles.debugPre}>
-                {JSON.stringify(customers, null, 2)}
-            </pre> */}
         </DashboardLayout>
     );
 }

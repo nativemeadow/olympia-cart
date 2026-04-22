@@ -1,4 +1,5 @@
 import React from 'react';
+import RenderImage from '@/components/render-image';
 import { Categories } from '@/types/model-types';
 import classes from './list.module.css';
 import { Link } from '@inertiajs/react';
@@ -14,43 +15,32 @@ const categoryImageFolder =
 const list = ({ categories, basePath }: Props) => {
     return (
         <div className={classes.grid}>
-            {categories.map((category) => {
-                const href = basePath
-                    ? `/categories/${basePath}/${category.slug}`
-                    : `/categories/${category.slug}`;
-
-                return (
-                    <div
-                        key={category.slug}
-                        className={`${classes.grid_cell} ${classes.image_container}`}
+            {categories.map((category) => (
+                <div key={category.slug} className={`${classes.grid_cell}`}>
+                    <Link
+                        href={`/categories/${category.slug}`}
+                        className={classes.list_item_title_link}
                     >
-                        <Link
-                            href={`/categories/${category.slug}`}
-                            className={classes.list_item_title_link}
+                        <div
+                            key={category.id}
+                            className={classes.image_container}
                         >
-                            <div
-                                key={category.id}
-                                className={
-                                    classes.list_grid_cell +
-                                    ' ' +
-                                    classes.image_container
-                                }
+                            {category.image && (
+                                <RenderImage
+                                    className={classes.list_item_image}
+                                    src={`/${categoryImageFolder}/${category.image}`}
+                                    alt={category.title}
+                                />
+                            )}
+                            <h2
+                                className={`${classes.gallery_card} ${classes['gallery_category-title']}`}
                             >
-                                {category.image && (
-                                    <img
-                                        className={classes.list_item_image}
-                                        src={`/${categoryImageFolder}/${category.image}`}
-                                        alt={category.title}
-                                    />
-                                )}
-                                <h2 className={classes.detail_title}>
-                                    {category.title}
-                                </h2>
-                            </div>
-                        </Link>
-                    </div>
-                );
-            })}
+                                {category.title}
+                            </h2>
+                        </div>
+                    </Link>
+                </div>
+            ))}
         </div>
     );
 };

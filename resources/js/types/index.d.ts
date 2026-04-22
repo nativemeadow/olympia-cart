@@ -74,6 +74,29 @@ export type Checkout = {
     billing_address: Address | null;
     instructions: string | null;
     customer_id: number | null;
+    payment: Payment | null;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Payment = {
+    id: number;
+    checkout_id: number;
+    amount: number;
+    status: string;
+    payment_method_details: PaymentMethod;
+    payment_gateway: string;
+    gateway_transaction_id: string | null;
+    transaction_id: string | null;
+    created_at: string;
+    updated_at: string;
+};
+
+export type PaymentMethod = {
+    card_holder_name: string;
+    card_number: string | null;
+    cvv: string | null;
+    expiry_date: string | null;
 };
 
 // Type for an attribute (e.g., "Color", "Size")

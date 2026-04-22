@@ -1,5 +1,5 @@
 import DashboardLayout from '@/layouts/dashboard-layout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { OrdersPaginated } from '@/types';
 import { Customer, Order, OrderItem } from '@/types/model-types';
 import {
@@ -31,6 +31,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { router } from '@inertiajs/react';
 import { Search, X } from 'lucide-react';
+import { User } from '@/types/model-types';
 
 interface CustomerOrdersProps {
     customers: OrdersPaginated<Customer>;
@@ -39,10 +40,17 @@ interface CustomerOrdersProps {
     };
 }
 
+type PageProps = {
+    auth: {
+        user: User;
+    };
+};
+
 export default function CustomerOrders({
     customers,
     filters,
 }: CustomerOrdersProps) {
+    const { auth } = usePage<PageProps>().props;
     const { data, links, prev_page_url, next_page_url } = customers;
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
 
@@ -76,7 +84,7 @@ export default function CustomerOrders({
 
     if (!customers) {
         return (
-            <DashboardLayout>
+            <DashboardLayout user={auth.user as User}>
                 <Head title="Customer Orders" />
                 <div className={styles.container}>
                     <p>Loading...</p>
@@ -86,7 +94,7 @@ export default function CustomerOrders({
     }
 
     return (
-        <DashboardLayout>
+        <DashboardLayout user={auth.user as User}>
             <Head title="Customer Orders" />
             <div className={styles.container}>
                 <div className={styles.header}>

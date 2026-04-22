@@ -12,19 +12,23 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $customers = Customer::when($request->input('search'), function ($query, $search) {
-                $query->where(function ($query) use ($search) {
-                    $query
-                        ->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%");
-                });
-            })
+            $query->where(function ($query) use ($search) {
+                $query
+                    ->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%");
+            });
+        })
             ->with([
-            'carts',
-            'carts.items',
-            'carts.items.product',
-            'orders',
-            'orders.items',
-            'orders.items.product'
+                'carts',
+                'carts.items',
+                'carts.items.product',
+                // 'carts.checkout',
+                // 'carts.checkout.payment',
+                'orders',
+                'orders.checkout',
+                'orders.checkout.payment',
+                'orders.items',
+                'orders.items.product'
             ])->with([
                 'orders' => function ($query) {
                     $query->with('items')->orderBy('created_at', 'desc');
