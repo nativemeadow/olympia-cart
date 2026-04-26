@@ -29,6 +29,8 @@ type ProductAdminState = {
         category: CategoryHierarchy | null,
         layoutView: 'list' | 'grid',
     ) => void;
+    categoryLayouts: { [categoryId: number]: 'list' | 'grid' };
+    setCategoryLayout: (categoryId: number, layout: 'list' | 'grid') => void;
     currentProduct: CurrentProduct | null;
     setCurrentProduct: (currentProduct: CurrentProduct | null) => void;
 };
@@ -42,6 +44,14 @@ export const useProductsAdminStore = create<ProductAdminState>()(
                 currentCategory: { category: null, layoutView: 'list' },
                 setCurrentCategory: (category, layoutView) =>
                     set({ currentCategory: { category, layoutView } }),
+                categoryLayouts: {},
+                setCategoryLayout: (categoryId, layout) =>
+                    set((state) => ({
+                        categoryLayouts: {
+                            ...state.categoryLayouts,
+                            [categoryId]: layout,
+                        },
+                    })),
                 currentProduct: null,
                 setCurrentProduct: (currentProduct) => set({ currentProduct }),
                 addCategory: (newCategory) =>

@@ -69,12 +69,9 @@ const ProductNode: React.FC<ProductNodeProps> = ({
     category,
     onProductOrderChange,
 }) => {
-    const {
-        openNodes,
-        toggleNode,
-        setActiveCategoryId,
-    } = useProductTreeStore();
-    const { setCurrentProduct } = useProductsAdminStore();
+    const { openNodes, toggleNode, setActiveCategoryId } =
+        useProductTreeStore();
+    const { categoryLayouts, setCategoryLayout } = useProductsAdminStore();
     const { props } = usePage();
     const isOpen = openNodes[category.id] || false;
     const hasChildren = category.children && category.children.length > 0;
@@ -87,9 +84,7 @@ const ProductNode: React.FC<ProductNodeProps> = ({
         null,
     );
     const [dropTargetId, setDropTargetId] = useState<number | null>(null);
-    const [pageLayout, setPageLayout] = useState<'list' | 'grid'>('list');
-
-    console.log('Rendering ProductNode for category:', category);
+    const pageLayout = categoryLayouts[category.id] || 'list';
 
     useEffect(() => {
         setProducts(category.products || []);
@@ -248,10 +243,10 @@ const ProductNode: React.FC<ProductNodeProps> = ({
                 {isExpandable && hasProducts && (
                     <ToggleGroup
                         type="single"
-                        defaultValue="list"
+                        value={pageLayout}
                         onValueChange={(value: 'list' | 'grid') => {
                             if (value) {
-                                setPageLayout(value);
+                                setCategoryLayout(category.id, value);
                             }
                         }}
                         className={classes.layout_toggle}
