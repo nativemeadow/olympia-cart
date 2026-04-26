@@ -349,6 +349,9 @@ export default function Customers({
     const [openCartCustomerIds, setOpenCartCustomerIds] = useState<number[]>(
         [],
     );
+    const [customerData, setCustomerData] = useState<{
+        [key: number]: { orders?: Order[]; carts?: Cart[]; loading: boolean };
+    }>({});
 
     const handleSearch = () => {
         router.get(
@@ -373,25 +376,66 @@ export default function Customers({
         );
     };
 
-    // Toggle the open state of the order history for a specific customer
-    const handleOpenCloseOrderHistory = (customerId: number) => {
-        setOpenCustomerIds((prev) =>
-            // If the customer ID is already in the openCustomerIds array,
-            // remove it (close the order history)
-            prev.includes(customerId)
-                ? prev.filter((id) => id !== customerId)
-                : [...prev, customerId],
+    const handleOpenCloseOrderHistory = async (customerId: number) => {
+        const isOpening = !openCustomerIds.includes(customerId);
+        setOpenCustomerIds(
+            isOpening
+                ? [...openCustomerIds, customerId]
+                : openCustomerIds.filter((id) => id !== customerId),
         );
+
+        if (isOpening && !customerData[customerId]?.orders) {
+            setCustomerData((prev) => ({
+                ...prev,
+                [customerId]: { ...prev[customerId], loading: true },
+            }));
+            try {
+                const response = await fetch(
+                    route('dashboard.customers.orders', {
+                        customer: customerId,
+                    }),
+                );
+                const orders = await response.json();
+                setCustomerData((prev) => ({
+                    ...prev,
+                    [customerId]: {
+                        ...prev[customerId],
+                        orders,
+                        loading: false,
+                    },
+                }));
+            } catch (error) {
+                console.error('Failed to fetch orders:', error);
+                setCustomerData((prev) => ({
+                    ...prev,
+                    [customerId]: { ...prev[customerId], loading: false },
+                }));
+            }
+        }
     };
 
-    const handleOpenCloseCartDetails = (customerId: number) => {
-        setOpenCartCustomerIds((prev) =>
-            // If the customer ID is already in the openCartCustomerIds array,
-            // remove it (close the cart details)
-            prev.includes(customerId)
-                ? prev.filter((id) => id !== customerId)
-                : [...prev, customerId],
+    const handleOpenCloseCartDetails = async (customerId: number) => {
+        const isOpening = !openCartCustomerIds.includes(customerId);
+        setOpenCartCustomerIds(
+            isOpening
+                ? [...openCartCustomerIds, customerId]
+                : openCartCustomerIds.filter((id) => id !== customerId),
         );
+
+        if (isOpening && !customerData[customerId]?.carts) {
+            setCustomerData((prev) => ({
+                ...prev,
+                [customerId]: { ...prev[customerId], loading: true },
+            }));
+            const response = await fetch(
+                route('dashboard.customers.carts', { customer: customerId }),
+            );
+            const carts = await response.json();
+            setCustomerData((prev) => ({
+                ...prev,
+                [customerId]: { ...prev[customerId], carts, loading: false },
+            }));
+        }
     };
 
     return (
@@ -475,150 +519,120 @@ export default function Customers({
                                         className={styles.customer_details}
                                     ></TableCell>
                                 </TableRow>
-                                {customer.orders &&
-                                    customer.orders.length > 0 && (
-                                        <TableRow>
-                                            <TableCell
-                                                colSpan={4}
-                                                className="p-0"
+                                <TableRow>
+                                    <TableCell colSpan={4} className="p-0">
+                                        <Collapsible
+                                            open={openCustomerIds.includes(
+                                                customer.id,
+                                            )}
+                                            onOpenChange={() =>
+                                                handleOpenCloseOrderHistory(
+                                                    customer.id,
+                                                )
+                                            }
+                                        >
+                                            <CollapsibleTrigger
+                                                asChild
+                                                className="w-full"
                                             >
-                                                <Collapsible
-                                                    open={openCustomerIds.includes(
-                                                        customer.id,
-                                                    )}
-                                                    onOpenChange={() =>
-                                                        handleOpenCloseOrderHistory(
-                                                            customer.id,
-                                                        )
+                                                <div
+                                                    className={
+                                                        styles.order_history_header
                                                     }
                                                 >
-                                                    <CollapsibleTrigger
-                                                        asChild
-                                                        className="w-full"
-                                                    >
-                                                        <div
-                                                            className={
-                                                                styles.order_history_header
-                                                            }
-                                                        >
-                                                            View Order History
-                                                            {openCustomerIds.includes(
-                                                                customer.id,
-                                                            ) ? (
-                                                                <ChevronDown
-                                                                    className={
-                                                                        styles.chevron_icon
-                                                                    }
-                                                                />
-                                                            ) : (
-                                                                <ChevronRight
-                                                                    className={
-                                                                        styles.chevron_icon
-                                                                    }
-                                                                />
-                                                            )}
-                                                        </div>
-                                                    </CollapsibleTrigger>
-                                                    <CollapsibleContent
-                                                        className={
-                                                            styles.collapsibleContent
-                                                        }
-                                                    >
-                                                        <div
-                                                            className={
-                                                                styles.collapsibleContent
-                                                            }
-                                                        >
-                                                            <h3
-                                                                className={
-                                                                    styles.orderHistoryTitle
-                                                                }
-                                                            >
-                                                                Order History
-                                                            </h3>
-                                                            <CustomerOrders
-                                                                customer={
-                                                                    customer as Customer
-                                                                }
-                                                            />
-                                                        </div>
-                                                    </CollapsibleContent>
-                                                </Collapsible>
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                {customer.carts &&
-                                    customer.carts.length > 0 && (
-                                        <TableRow>
-                                            <TableCell
-                                                colSpan={4}
-                                                className="p-0"
-                                            >
-                                                <Collapsible
-                                                    open={openCartCustomerIds.includes(
+                                                    View Order History
+                                                    {openCustomerIds.includes(
                                                         customer.id,
+                                                    ) ? (
+                                                        <ChevronDown
+                                                            className={
+                                                                styles.chevron_icon
+                                                            }
+                                                        />
+                                                    ) : (
+                                                        <ChevronRight
+                                                            className={
+                                                                styles.chevron_icon
+                                                            }
+                                                        />
                                                     )}
-                                                    onOpenChange={() =>
-                                                        handleOpenCloseCartDetails(
-                                                            customer.id,
-                                                        )
+                                                </div>
+                                            </CollapsibleTrigger>
+                                            <CollapsibleContent>
+                                                {customerData[customer.id]
+                                                    ?.loading && (
+                                                    <div>Loading...</div>
+                                                )}
+                                                {customerData[customer.id]
+                                                    ?.orders && (
+                                                    <CustomerOrders
+                                                        customer={
+                                                            {
+                                                                ...customer,
+                                                                orders: customerData[
+                                                                    customer.id
+                                                                ].orders,
+                                                            } as Customer
+                                                        }
+                                                    />
+                                                )}
+                                            </CollapsibleContent>
+                                        </Collapsible>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell colSpan={4} className="p-0">
+                                        <Collapsible
+                                            open={openCartCustomerIds.includes(
+                                                customer.id,
+                                            )}
+                                            onOpenChange={() =>
+                                                handleOpenCloseCartDetails(
+                                                    customer.id,
+                                                )
+                                            }
+                                        >
+                                            <CollapsibleTrigger
+                                                asChild
+                                                className="w-full"
+                                            >
+                                                <div
+                                                    className={
+                                                        styles.order_history_header
                                                     }
                                                 >
-                                                    <CollapsibleTrigger
-                                                        asChild
-                                                        className="w-full"
-                                                    >
-                                                        <div
-                                                            className={
-                                                                styles.order_history_header
-                                                            }
-                                                        >
-                                                            View Cart Details
-                                                            {openCartCustomerIds.includes(
-                                                                customer.id,
-                                                            ) ? (
-                                                                <ChevronDown
-                                                                    className={
-                                                                        styles.chevron_icon
-                                                                    }
-                                                                />
-                                                            ) : (
-                                                                <ChevronRight
-                                                                    className={
-                                                                        styles.chevron_icon
-                                                                    }
-                                                                />
-                                                            )}
-                                                        </div>
-                                                    </CollapsibleTrigger>
-                                                    <CollapsibleContent
-                                                        className={
-                                                            styles.collapsibleContent
+                                                    View Cart Details
+                                                    {openCartCustomerIds.includes(
+                                                        customer.id,
+                                                    ) ? (
+                                                        <ChevronDown />
+                                                    ) : (
+                                                        <ChevronRight />
+                                                    )}
+                                                </div>
+                                            </CollapsibleTrigger>
+                                            <CollapsibleContent>
+                                                {customerData[customer.id]
+                                                    ?.loading && (
+                                                    <div>Loading...</div>
+                                                )}
+                                                {customerData[customer.id]
+                                                    ?.carts && (
+                                                    <CustomerCarts
+                                                        customer={
+                                                            {
+                                                                ...customer,
+                                                                carts: customerData[
+                                                                    customer.id
+                                                                ].carts,
+                                                            } as Customer
                                                         }
-                                                    >
-                                                        <div
-                                                            className={
-                                                                styles.collapsibleContent
-                                                            }
-                                                        >
-                                                            <h3
-                                                                className={
-                                                                    styles.orderHistoryTitle
-                                                                }
-                                                            >
-                                                                Cart Details
-                                                            </h3>
-                                                            <CustomerCarts
-                                                                customer={
-                                                                    customer as Customer
-                                                                }
-                                                            />
-                                                        </div>
-                                                    </CollapsibleContent>
-                                                </Collapsible>
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
+                                                    />
+                                                )}
+                                            </CollapsibleContent>
+                                        </Collapsible>
+                                    </TableCell>
+                                </TableRow>
                                 <TableRow className={styles.dividerRow}>
                                     <TableCell colSpan={4} className="p-0">
                                         <Separator

@@ -6,6 +6,7 @@ use App\Http\Controllers\Dashboard\MediaController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\Dashboard\CustomerController;
+use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\Dashboard\ProductOrderController;
 use App\Http\Controllers\Dashboard\CategoryOrderController;
 use App\Http\Controllers\Dashboard\CustomersOrdersController;
@@ -40,10 +41,9 @@ Route::prefix('dashboard')
         Route::put('/category/update/{categoryId}', [CategoryController::class, 'update'])->name('category.update');
         Route::delete('/category/destroy/{categoryId}', [CategoryController::class, 'destroy'])->name('category.destroy');
 
-        Route::get('/products', [
-            DashboardController::class,
+        Route::get('/products', [DashboardController::class, 'products'])->name(
             'products',
-        ])->name('products');
+        );
 
         Route::put('products/order', ProductOrderController::class)->name(
             'products.order',
@@ -65,13 +65,27 @@ Route::prefix('dashboard')
             'getPriceAttributes',
         ])->name('price.attributes');
 
-        Route::get('/customers', [CustomerController::class, 'index'])->name(
-            'customers',
-        );
+        Route::get('/customers', [
+            CustomerController::class,
+            'index',
+        ])->name('customers');
+        Route::get('/customers/{customer}/orders', [
+            CustomerController::class,
+            'getCustomerOrders',
+        ])->name('customers.orders');
+        Route::get('/customers/{customer}/carts', [
+            CustomerController::class,
+            'getCustomerCarts',
+        ])->name('customers.carts');
 
-        Route::get('/customer-orders', [CustomersOrdersController::class, 'index'])->name(
-            'customer.orders'
+        Route::get('/orders', [CustomersOrdersController::class, 'index'])->name(
+            'orders',
         );
+        Route::get('/orders/{customer}', [
+            CustomersOrdersController::class,
+            'getCustomerOrders',
+        ])->name('orders.customer');
+        Route::get('/orders/{order}/details', [CustomersOrdersController::class, 'getOrderDetails'])->name('orders.details');
 
         Route::get('/media/{sort_column?}/{order?}/{search_term?}', [
             MediaController::class,

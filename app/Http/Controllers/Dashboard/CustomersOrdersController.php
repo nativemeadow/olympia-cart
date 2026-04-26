@@ -20,11 +20,6 @@ class CustomersOrdersController extends Controller
                         ->orWhere('last_name', 'like', "%{$search}%");
                 });
             })
-            ->with([
-                'orders' => function ($query) {
-                    $query->with('items')->orderBy('created_at', 'desc');
-                },
-            ])
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->paginate(10)
@@ -34,5 +29,20 @@ class CustomersOrdersController extends Controller
             'customers' => $customers,
             'filters' => $request->only(['search']),
         ]);
+    }
+
+    public function getCustomerOrders(Customer $customer)
+    {
+        $orders = $customer
+            ->orders()
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return response()->json($orders);
+    }
+
+    public function getOrderDetails(Order $order)
+    {
+        $order->load(['items', 'checkout.payment']);
+        return response()->json($order);
     }
 }

@@ -1,8 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { CategoryHierarchy } from '@/types';
 import { Product as ProductType } from '@/types/model-types';
+import { ProductType as prodType } from '@/types';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronRight, Package, GripVertical } from 'lucide-react';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import {
+    ChevronDown,
+    ChevronRight,
+    Package,
+    GripVertical,
+    ListTree,
+    LayoutGrid,
+    Car,
+} from 'lucide-react';
 import {
     AddProductAction,
     EditProductAction,
@@ -13,12 +30,38 @@ import { useProductTreeStore } from '@/zustand/product-tree-store';
 import { useProductsAdminStore } from '@/zustand/product-admin-store';
 import Toastify from 'toastify-js';
 import 'toastify-js/src/toastify.css';
+import RenderImage from '@/components/render-image';
+import { PriceVariantType } from '@/types';
 import classes from './products.module.css';
+
+type ProductWithVariant = ProductType & {
+    variants: [
+        {
+            id: number;
+            sku: string;
+            price: number;
+            description: string;
+            title: string;
+            image: string;
+            variants: {
+                id: number;
+                name: string;
+                value: string;
+            }[];
+        },
+    ];
+};
 
 interface ProductNodeProps {
     category: CategoryHierarchy;
-    onProductOrderChange: (categoryId: number, products: ProductType[]) => void;
+    onProductOrderChange: (
+        categoryId: number,
+        products: ProductWithVariant[],
+    ) => void;
 }
+
+const productImageFolder =
+    import.meta.env.VITE_PRODUCT_IMAGE_FOLDER ?? 'products';
 
 const ProductNode: React.FC<ProductNodeProps> = ({
     category,
@@ -32,13 +75,16 @@ const ProductNode: React.FC<ProductNodeProps> = ({
     const hasChildren = category.children && category.children.length > 0;
     const hasProducts = category.products && category.products.length > 0;
     const isExpandable = hasChildren || hasProducts;
-    const [products, setProducts] = useState<ProductType[]>(
+    const [products, setProducts] = useState<ProductWithVariant[]>(
         category.products || [],
     );
     const [draggedProductId, setDraggedProductId] = useState<number | null>(
         null,
     );
     const [dropTargetId, setDropTargetId] = useState<number | null>(null);
+    const [pageLayout, setPageLayout] = useState<'list' | 'grid'>('list');
+
+    console.log('Rendering ProductNode for category:', category);
 
     useEffect(() => {
         setProducts(category.products || []);
@@ -167,21 +213,25 @@ const ProductNode: React.FC<ProductNodeProps> = ({
         >
             <div className={classes.node_header}>
                 {isExpandable ? (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggle();
-                        }}
-                        className={classes.toggle_button}
-                    >
-                        {isOpen ? (
-                            <ChevronDown className={classes.chevron_icon} />
-                        ) : (
-                            <ChevronRight className={classes.chevron_icon} />
-                        )}
-                    </Button>
+                    <>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggle();
+                            }}
+                            className={classes.toggle_button}
+                        >
+                            {isOpen ? (
+                                <ChevronDown className={classes.chevron_icon} />
+                            ) : (
+                                <ChevronRight
+                                    className={classes.chevron_icon}
+                                />
+                            )}
+                        </Button>
+                    </>
                 ) : (
                     <div className={classes.toggle_button_placeholder} />
                 )}
@@ -190,6 +240,32 @@ const ProductNode: React.FC<ProductNodeProps> = ({
                         {category.title}
                     </span>
                 </div>
+                {isExpandable && (
+                    <div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setPageLayout((prev) => 'list');
+                            }}
+                            className={classes.listTree_icon}
+                        >
+                            <ListTree />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setPageLayout((prev) => 'grid');
+                            }}
+                            className={classes.layout_icon}
+                        >
+                            <LayoutGrid />
+                        </Button>
+                    </div>
+                )}
                 <div className={classes.actions}>
                     <AddProductAction
                         categoryId={category.id}
@@ -198,52 +274,209 @@ const ProductNode: React.FC<ProductNodeProps> = ({
                 </div>
             </div>
             {isOpen && (
-                <div className={classes.children_container}>
+                <div
+                    className={`${classes.children_container} ${
+                        pageLayout === 'grid' ? classes.grid_view : ''
+                    }`}
+                >
                     {hasProducts &&
-                        products.map((product) => (
-                            <div
-                                key={product.id}
-                                className={`${classes.product_item} ${
-                                    dropTargetId === product.id
-                                        ? classes.drop_target
-                                        : ''
-                                }`}
-                                draggable
-                                onDragStart={(e) =>
-                                    handleDragStart(e, product.id)
-                                }
-                                onDragOver={(e) =>
-                                    handleDragOver(e, product.id)
-                                }
-                                onDragLeave={handleDragLeave}
-                                onDrop={(e) => handleDrop(e, product.id)}
-                                onDragEnd={handleDragEnd}
-                            >
+                        products.map((product) =>
+                            pageLayout === 'list' ? (
                                 <div
-                                    className={
-                                        classes.drag_handle_icon_container
+                                    key={product.id}
+                                    className={`${classes.product_item} ${
+                                        dropTargetId === product.id
+                                            ? classes.drop_target
+                                            : ''
+                                    }`}
+                                    draggable
+                                    onDragStart={(e) =>
+                                        handleDragStart(e, product.id)
                                     }
+                                    onDragOver={(e) =>
+                                        handleDragOver(e, product.id)
+                                    }
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={(e) => handleDrop(e, product.id)}
+                                    onDragEnd={handleDragEnd}
                                 >
-                                    <GripVertical
-                                        className={classes.drag_handle_icon}
-                                    />
+                                    <div
+                                        className={
+                                            classes.drag_handle_icon_container
+                                        }
+                                    >
+                                        <GripVertical
+                                            className={classes.drag_handle_icon}
+                                        />
+                                    </div>
+                                    <Package className={classes.product_icon} />
+                                    <div className={classes.node_title}>
+                                        <span>{product.title}</span>
+                                    </div>
+                                    <div className={classes.actions}>
+                                        <EditProductAction
+                                            product={product}
+                                            onSuccess={handleSuccess}
+                                        />
+                                        <DeleteProductAction
+                                            product={product}
+                                            onSuccess={handleSuccess}
+                                        />
+                                    </div>
                                 </div>
-                                <Package className={classes.product_icon} />
-                                <div className={classes.node_title}>
-                                    <span>{product.title}</span>
-                                </div>
-                                <div className={classes.actions}>
-                                    <EditProductAction
-                                        product={product}
-                                        onSuccess={handleSuccess}
-                                    />
-                                    <DeleteProductAction
-                                        product={product}
-                                        onSuccess={handleSuccess}
-                                    />
-                                </div>
-                            </div>
-                        ))}
+                            ) : (
+                                <Card
+                                    className={classes.grid_item}
+                                    key={product.id}
+                                >
+                                    <CardHeader>
+                                        <CardTitle
+                                            className={classes.card_title_bar}
+                                        >
+                                            <div
+                                                key={product.id}
+                                                className={` ${classes.product_item} ${
+                                                    dropTargetId === product.id
+                                                        ? classes.drop_target
+                                                        : ''
+                                                }`}
+                                                draggable
+                                                onDragStart={(e) =>
+                                                    handleDragStart(
+                                                        e,
+                                                        product.id,
+                                                    )
+                                                }
+                                                onDragOver={(e) =>
+                                                    handleDragOver(
+                                                        e,
+                                                        product.id,
+                                                    )
+                                                }
+                                                onDragLeave={handleDragLeave}
+                                                onDrop={(e) =>
+                                                    handleDrop(e, product.id)
+                                                }
+                                                onDragEnd={handleDragEnd}
+                                            >
+                                                <div
+                                                    className={
+                                                        classes.grid_item_header
+                                                    }
+                                                >
+                                                    <div
+                                                        className={
+                                                            classes.grid_icons
+                                                        }
+                                                    >
+                                                        <div
+                                                            className={
+                                                                classes.drag_handle_icon_container
+                                                            }
+                                                        >
+                                                            <GripVertical
+                                                                className={
+                                                                    classes.drag_handle_icon
+                                                                }
+                                                            />
+                                                        </div>
+                                                        <Package
+                                                            className={
+                                                                classes.product_icon
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div
+                                                        className={
+                                                            classes.node_title
+                                                        }
+                                                    >
+                                                        <span>
+                                                            {product.title}
+                                                        </span>
+                                                    </div>
+                                                    <div
+                                                        className={
+                                                            classes.actions
+                                                        }
+                                                    >
+                                                        <EditProductAction
+                                                            product={product}
+                                                            onSuccess={
+                                                                handleSuccess
+                                                            }
+                                                        />
+                                                        <DeleteProductAction
+                                                            product={product}
+                                                            onSuccess={
+                                                                handleSuccess
+                                                            }
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent
+                                        className={classes.grid_item_content}
+                                    >
+                                        <RenderImage
+                                            className={classes.grid_item_image}
+                                            src={`/${productImageFolder}/${product.image}`}
+                                            alt={product.title}
+                                        />
+                                        <CardDescription>
+                                            <div
+                                                className={classes.item_pricing}
+                                            >
+                                                <ul>
+                                                    {product.variants &&
+                                                        product.variants.map(
+                                                            (variant) => (
+                                                                <>
+                                                                    <li
+                                                                        key={
+                                                                            variant.id
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            variant.sku
+                                                                        }{' '}
+                                                                        - $
+                                                                        {Number(
+                                                                            variant.price /
+                                                                                100,
+                                                                        ).toFixed(
+                                                                            2,
+                                                                        )}
+                                                                    </li>
+                                                                    <li>
+                                                                        <span className={classes.labelBold}>
+                                                                            Select
+                                                                            Label:
+                                                                        </span>
+                                                                        {
+                                                                            variant.description
+                                                                        }
+                                                                    </li>
+                                                                    <li>
+                                                                        <span className={classes.labelBold}>
+                                                                            Price Label:
+                                                                        </span>
+                                                                        {
+                                                                            variant.title
+                                                                        }
+                                                                    </li>
+                                                                </>
+                                                            ),
+                                                        )}
+                                                </ul>
+                                            </div>
+                                        </CardDescription>
+                                    </CardContent>
+                                </Card>
+                            ),
+                        )}
                     {hasChildren &&
                         category.children &&
                         category.children.map((child) => (

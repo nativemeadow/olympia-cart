@@ -97,6 +97,14 @@
     cursor: pointer;
 }
 
+.listTree_icon {
+    cursor: pointer;
+}
+
+.layout_icon {
+    cursor: pointer;
+}
+
 .expand_icon,
 .collapse_icon {
     cursor: pointer;
@@ -133,6 +141,7 @@
 
 .node_title {
     flex-grow: 1;
+    font-size: 0.85rem; /* text-sm */
 }
 
 .actions {
@@ -171,4 +180,85 @@
 .toolbar {
     display: flex;
     gap: 0.5rem; /* 8px */
+}
+
+.grid_view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem; /* 16px */
+}
+
+.grid_item {
+    border: 1px solid var(--border);
+    border-radius: 0.5rem; /* rounded-lg */
+    padding: 1rem; /* p-4 */
+    background-color: var(--background);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.grid_item .product_item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-left: 0;
+}
+
+.grid_item_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.grid_item_header .grid_icons {
+    display: flex;
+    align-items: center;
+}
+
+.grid_item_header .node_title {
+    flex-grow: 1;
+    text-align: center;
+}
+
+.grid_item_header .actions {
+    opacity: 1;
+    display: flex;
+    align-items: center;
+}
+
+.grid_item_content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: center;
+    gap: 0.5rem; /* 8px */
+    padding: 0;
+}
+
+.grid_item_image {
+    /* min-height: 50px; 
+    max-height: fit-content; 
+    height: auto; */
+    transform: scale(0.7);
+    background-color: var(--muted);
+}
+
+.grid_item_pricing {
+    width: 100%;
+    height: 20px;
+    background-color: var(--muted);
+}
+
+.product_item:hover .actions {
+    opacity: 1;
+}
+
+.card_title_bar {
+    margin: 0;
+    padding: 0;
+}
+
+.labelBold {
+    font-weight: 900;
+    padding-right: 0.25rem; /* pr-1 */
 }

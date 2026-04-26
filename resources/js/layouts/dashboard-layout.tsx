@@ -28,8 +28,8 @@ const navLinks = [
     { href: 'dashboard.products', label: 'Products', icon: Package },
     { href: 'dashboard.media', label: 'Media', icon: LayoutGrid },
     {
-        href: 'dashboard.customer.orders',
-        label: 'Customer Orders',
+        href: 'dashboard.orders',
+        label: 'Orders',
         icon: ShoppingCart,
     },
     { href: 'dashboard.customers', label: 'Customers', icon: Users },

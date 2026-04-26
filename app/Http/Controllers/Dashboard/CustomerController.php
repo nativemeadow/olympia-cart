@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
-
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -18,22 +17,7 @@ class CustomerController extends Controller
                     ->orWhere('last_name', 'like', "%{$search}%");
             });
         })
-            ->with([
-                'carts',
-                'carts.items',
-                'carts.items.product',
-                // 'carts.checkout',
-                // 'carts.checkout.payment',
-                'orders',
-                'orders.checkout',
-                'orders.checkout.payment',
-                'orders.items',
-                'orders.items.product'
-            ])->with([
-                'orders' => function ($query) {
-                    $query->with('items')->orderBy('created_at', 'desc');
-                },
-            ])->orderBy('last_name')
+            ->orderBy('last_name')
             ->orderBy('first_name')
             ->paginate(10)
             ->withQueryString();
@@ -42,5 +26,25 @@ class CustomerController extends Controller
             'customers' => $customers,
             'filters' => $request->only(['search']),
         ]);
+    }
+
+    public function getCustomerOrders(Customer $customer)
+    {
+        $orders = $customer->orders()
+            ->with(['checkout.payment', 'items.product'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($orders);
+    }
+
+    public function getCustomerCarts(Customer $customer)
+    {
+        $carts = $customer->carts()
+            ->with(['items.product'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($carts);
     }
 }

@@ -1,5 +1,5 @@
 import DashboardLayout from '@/layouts/dashboard-layout';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { OrdersPaginated } from '@/types';
 import { Customer, Order, OrderItem } from '@/types/model-types';
 import {
@@ -46,6 +46,92 @@ type PageProps = {
     };
 };
 
+const OrderDetails = ({
+    order: initialOrder,
+    isLoaded,
+}: {
+    order: Order;
+    isLoaded: boolean;
+}) => {
+    if (!isLoaded) {
+        return null; // Don't render anything until details are loaded
+    }
+
+    const hasPayment = initialOrder.checkout?.payment;
+    const hasItems = initialOrder.items && initialOrder.items.length > 0;
+
+    if (!hasPayment && !hasItems) {
+        return <div>No order details or payment information available.</div>;
+    }
+
+    return (
+        <div>
+            {hasPayment ? (
+                <div className={styles.paymentDetails}>
+                    <h4 className={styles.detailsTitle}>Payment Details</h4>
+                    <p>
+                        <strong>Amount:</strong> $
+                        {initialOrder.checkout?.payment?.amount !== undefined
+                            ? (
+                                  initialOrder.checkout.payment.amount / 100
+                              ).toFixed(2)
+                            : ''}
+                    </p>
+                    <p>
+                        <strong>Status:</strong>{' '}
+                        {initialOrder.checkout?.payment?.status ?? ''}
+                    </p>
+                    <p>
+                        <strong>Gateway:</strong>{' '}
+                        {initialOrder.checkout?.payment?.payment_gateway ?? ''}
+                    </p>
+                </div>
+            ) : (
+                <div className={styles.paymentDetails}>
+                    <h4 className={styles.detailsTitle}>Payment Details</h4>
+                    <p>No payment information available.</p>
+                </div>
+            )}
+            {hasItems ? (
+                <>
+                    <h4 className={styles.detailsTitle}>Order Items</h4>
+                    <Table className={styles.orderItemsTable}>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>SKU</TableHead>
+                                <TableHead>Product</TableHead>
+                                <TableHead>Quantity</TableHead>
+                                <TableHead>Price</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {initialOrder.items &&
+                                initialOrder.items.map((item: OrderItem) => (
+                                    <TableRow key={item.id}>
+                                        <TableCell>{item.sku}</TableCell>
+                                        <TableCell>{item.title}</TableCell>
+                                        <TableCell>{item.quantity}</TableCell>
+                                        <TableCell>
+                                            $
+                                            {Number(item.price / 100).toFixed(
+                                                2,
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </>
+            ) : (
+                <>
+                    <h4 className={styles.detailsTitle}>Order Items</h4>
+                    <p>No items in this order.</p>
+                </>
+            )}
+        </div>
+    );
+};
+
 export default function CustomerOrders({
     customers,
     filters,
@@ -53,10 +139,18 @@ export default function CustomerOrders({
     const { auth } = usePage<PageProps>().props;
     const { data, links, prev_page_url, next_page_url } = customers;
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
+    const [orderDetails, setOrderDetails] = useState<{ [key: number]: Order }>(
+        {},
+    );
+    const [customerOrders, setCustomerOrders] = useState<{
+        [key: number]: Order[];
+    }>({});
+    const [loadingOrder, setLoadingOrder] = useState<number | null>(null);
+    const [loadingCustomer, setLoadingCustomer] = useState<number | null>(null);
 
     const handleSearch = () => {
         router.get(
-            route('dashboard.customer.orders'),
+            route('dashboard.orders'),
             { search: searchTerm },
             {
                 preserveState: true,
@@ -68,13 +162,51 @@ export default function CustomerOrders({
     const handleClear = () => {
         setSearchTerm('');
         router.get(
-            route('dashboard.customer.orders'),
+            route('dashboard.orders'),
             {},
             {
                 preserveState: true,
                 replace: true,
             },
         );
+    };
+
+    const handleAccordionChange = async (orderId: number) => {
+        if (orderDetails[orderId] || loadingOrder === orderId) {
+            return;
+        }
+
+        setLoadingOrder(orderId);
+        try {
+            const response = await fetch(
+                route('dashboard.orders.details', { order: orderId }),
+            );
+            const data: Order = await response.json();
+            setOrderDetails((prev) => ({ ...prev, [orderId]: data }));
+        } catch (error) {
+            console.error('Failed to fetch order details:', error);
+        } finally {
+            setLoadingOrder(null);
+        }
+    };
+
+    const handleCustomerAccordionChange = async (customerId: number) => {
+        if (customerOrders[customerId] || loadingCustomer === customerId) {
+            return;
+        }
+
+        setLoadingCustomer(customerId);
+        try {
+            const response = await fetch(
+                route('dashboard.orders.customer', { customer: customerId }),
+            );
+            const data: Order[] = await response.json();
+            setCustomerOrders((prev) => ({ ...prev, [customerId]: data }));
+        } catch (error) {
+            console.error('Failed to fetch customer orders:', error);
+        } finally {
+            setLoadingCustomer(null);
+        }
     };
 
     useEffect(() => {
@@ -141,6 +273,11 @@ export default function CustomerOrders({
                                     <AccordionItem
                                         key={customer.id}
                                         value={`customer-${customer.id}`}
+                                        onClick={() =>
+                                            handleCustomerAccordionChange(
+                                                customer.id,
+                                            )
+                                        }
                                     >
                                         <AccordionTrigger>
                                             <div
@@ -170,18 +307,29 @@ export default function CustomerOrders({
                                             </div>
                                         </AccordionTrigger>
                                         <AccordionContent>
-                                            <Accordion
-                                                type="single"
-                                                collapsible
-                                                className={
-                                                    styles.orderAccordion
-                                                }
-                                            >
-                                                {customer.orders?.map(
-                                                    (order: Order) => (
+                                            {loadingCustomer === customer.id ? (
+                                                <div>Loading orders...</div>
+                                            ) : customerOrders[customer.id] &&
+                                              customerOrders[customer.id]
+                                                  .length > 0 ? (
+                                                <Accordion
+                                                    type="single"
+                                                    collapsible
+                                                    className={
+                                                        styles.orderAccordion
+                                                    }
+                                                >
+                                                    {customerOrders[
+                                                        customer.id
+                                                    ]?.map((order: Order) => (
                                                         <AccordionItem
                                                             key={order.id}
                                                             value={`order-${order.id}`}
+                                                            onClick={() =>
+                                                                handleAccordionChange(
+                                                                    order.id,
+                                                                )
+                                                            }
                                                         >
                                                             <AccordionTrigger>
                                                                 Order #
@@ -199,71 +347,37 @@ export default function CustomerOrders({
                                                                 ).toFixed(2)}
                                                             </AccordionTrigger>
                                                             <AccordionContent>
-                                                                <Table
-                                                                    className={
-                                                                        styles.orderItemsTable
-                                                                    }
-                                                                >
-                                                                    <TableHeader>
-                                                                        <TableRow>
-                                                                            <TableHead>
-                                                                                SKU
-                                                                            </TableHead>
-                                                                            <TableHead>
-                                                                                Product
-                                                                            </TableHead>
-                                                                            <TableHead>
-                                                                                Quantity
-                                                                            </TableHead>
-                                                                            <TableHead>
-                                                                                Price
-                                                                            </TableHead>
-                                                                        </TableRow>
-                                                                    </TableHeader>
-                                                                    <TableBody>
-                                                                        {order.items?.map(
-                                                                            (
-                                                                                item: OrderItem,
-                                                                            ) => (
-                                                                                <TableRow
-                                                                                    key={
-                                                                                        item.id
-                                                                                    }
-                                                                                >
-                                                                                    <TableCell>
-                                                                                        {
-                                                                                            item.sku
-                                                                                        }
-                                                                                    </TableCell>
-                                                                                    <TableCell>
-                                                                                        {
-                                                                                            item.title
-                                                                                        }
-                                                                                    </TableCell>
-                                                                                    <TableCell>
-                                                                                        {
-                                                                                            item.quantity
-                                                                                        }
-                                                                                    </TableCell>
-                                                                                    <TableCell>
-                                                                                        $
-                                                                                        {Number(
-                                                                                            item.price /
-                                                                                                100,
-                                                                                        ).toFixed(
-                                                                                            2,
-                                                                                        )}
-                                                                                    </TableCell>
-                                                                                </TableRow>
-                                                                            ),
-                                                                        )}
-                                                                    </TableBody>
-                                                                </Table>
+                                                                {loadingOrder ===
+                                                                order.id ? (
+                                                                    <div>
+                                                                        Loading...
+                                                                    </div>
+                                                                ) : (
+                                                                    <OrderDetails
+                                                                        order={
+                                                                            orderDetails[
+                                                                                order
+                                                                                    .id
+                                                                            ] ||
+                                                                            order
+                                                                        }
+                                                                        isLoaded={
+                                                                            !!orderDetails[
+                                                                                order
+                                                                                    .id
+                                                                            ]
+                                                                        }
+                                                                    />
+                                                                )}
                                                             </AccordionContent>
                                                         </AccordionItem>
-                                                    ),
-                                                )}
-                                            </Accordion>
+                                                    ))}
+                                                </Accordion>
+                                            ) : (
+                                                <div>
+                                                    No orders for this customer.
+                                                </div>
+                                            )}
                                         </AccordionContent>
                                     </AccordionItem>
                                 ))}
@@ -276,25 +390,31 @@ export default function CustomerOrders({
                         <PaginationContent>
                             {prev_page_url && (
                                 <PaginationItem>
-                                    <Link href={prev_page_url} preserveScroll>
-                                        <PaginationPrevious />
-                                    </Link>
+                                    <PaginationPrevious
+                                        onClick={() =>
+                                            router.visit(prev_page_url, {
+                                                preserveScroll: true,
+                                            })
+                                        }
+                                    />
                                 </PaginationItem>
                             )}
                             {links.map((link, index) => {
                                 if (!isNaN(Number(link.label))) {
                                     return (
-                                        <PaginationItem key={index}>
-                                            <Link
-                                                href={link.url!}
-                                                preserveScroll
+                                        <PaginationItem
+                                            key={index}
+                                            onClick={() =>
+                                                router.visit(link.url!, {
+                                                    preserveScroll: true,
+                                                })
+                                            }
+                                        >
+                                            <PaginationLink
+                                                isActive={link.active}
                                             >
-                                                <PaginationLink
-                                                    isActive={link.active}
-                                                >
-                                                    {link.label}
-                                                </PaginationLink>
-                                            </Link>
+                                                {link.label}
+                                            </PaginationLink>
                                         </PaginationItem>
                                     );
                                 }
@@ -302,9 +422,13 @@ export default function CustomerOrders({
                             })}
                             {next_page_url && (
                                 <PaginationItem>
-                                    <Link href={next_page_url} preserveScroll>
-                                        <PaginationNext />
-                                    </Link>
+                                    <PaginationNext
+                                        onClick={() =>
+                                            router.visit(next_page_url, {
+                                                preserveScroll: true,
+                                            })
+                                        }
+                                    />
                                 </PaginationItem>
                             )}
                         </PaginationContent>

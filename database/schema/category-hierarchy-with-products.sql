@@ -48,12 +48,23 @@ SELECT
     p.slug AS product_slug,
     p.description AS product_description,
     p.sku AS product_sku,
-    p.image AS product_image
+    p.image AS product_image,
+    pv.id AS variant_id,
+    pv.sku AS variant_sku,
+    pv.price AS variant_price,
+	pvav.product_variant_id AS product_variant_id,
+	attr.id as attribute_id,
+	attr.name AS attribute_name,
+	av.value AS attribute_value
 FROM
     category_hierarchy ch
     LEFT JOIN category_product cp ON ch.id = cp.category_id
     LEFT JOIN categories c ON ch.id = c.id
     LEFT JOIN products p ON cp.product_id = p.id
+    LEFT JOIN product_variants pv ON p.id = pv.product_id
+	LEFT JOIN product_variant_attribute_values pvav on pvav.product_variant_id = p.id
+	LEFT JOIN attribute_values av on av.id = pvav.attribute_value_id
+	LEFT JOIN public.attributes attr on attr.id = av.attribute_id
 ORDER BY
     ch."order",
     product_order ASC,
