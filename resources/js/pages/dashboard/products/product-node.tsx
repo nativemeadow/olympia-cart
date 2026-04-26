@@ -3,6 +3,7 @@ import { CategoryHierarchy } from '@/types';
 import { Product as ProductType } from '@/types/model-types';
 import { ProductType as prodType } from '@/types';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import {
     Card,
     CardContent,
@@ -33,6 +34,7 @@ import 'toastify-js/src/toastify.css';
 import RenderImage from '@/components/render-image';
 import { PriceVariantType } from '@/types';
 import classes from './products.module.css';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 type ProductWithVariant = ProductType & {
     variants: [
@@ -67,8 +69,11 @@ const ProductNode: React.FC<ProductNodeProps> = ({
     category,
     onProductOrderChange,
 }) => {
-    const { openNodes, toggleNode, setActiveCategoryId } =
-        useProductTreeStore();
+    const {
+        openNodes,
+        toggleNode,
+        setActiveCategoryId,
+    } = useProductTreeStore();
     const { setCurrentProduct } = useProductsAdminStore();
     const { props } = usePage();
     const isOpen = openNodes[category.id] || false;
@@ -240,31 +245,24 @@ const ProductNode: React.FC<ProductNodeProps> = ({
                         {category.title}
                     </span>
                 </div>
-                {isExpandable && (
-                    <div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setPageLayout((prev) => 'list');
-                            }}
-                            className={classes.listTree_icon}
-                        >
-                            <ListTree />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setPageLayout((prev) => 'grid');
-                            }}
-                            className={classes.layout_icon}
-                        >
-                            <LayoutGrid />
-                        </Button>
-                    </div>
+                {isExpandable && hasProducts && (
+                    <ToggleGroup
+                        type="single"
+                        defaultValue="list"
+                        onValueChange={(value: 'list' | 'grid') => {
+                            if (value) {
+                                setPageLayout(value);
+                            }
+                        }}
+                        className={classes.layout_toggle}
+                    >
+                        <ToggleGroupItem value="list" aria-label="List view">
+                            <ListTree className={classes.layoutButton} />
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="grid" aria-label="Grid view">
+                            <LayoutGrid className={classes.layoutButton} />
+                        </ToggleGroupItem>
+                    </ToggleGroup>
                 )}
                 <div className={classes.actions}>
                     <AddProductAction
@@ -451,7 +449,11 @@ const ProductNode: React.FC<ProductNodeProps> = ({
                                                                         )}
                                                                     </li>
                                                                     <li>
-                                                                        <span className={classes.labelBold}>
+                                                                        <span
+                                                                            className={
+                                                                                classes.labelBold
+                                                                            }
+                                                                        >
                                                                             Select
                                                                             Label:
                                                                         </span>
@@ -460,12 +462,24 @@ const ProductNode: React.FC<ProductNodeProps> = ({
                                                                         }
                                                                     </li>
                                                                     <li>
-                                                                        <span className={classes.labelBold}>
-                                                                            Price Label:
+                                                                        <span
+                                                                            className={
+                                                                                classes.labelBold
+                                                                            }
+                                                                        >
+                                                                            Price
+                                                                            Label:
                                                                         </span>
                                                                         {
                                                                             variant.title
                                                                         }
+                                                                    </li>
+                                                                    <li>
+                                                                        <Separator
+                                                                            className={
+                                                                                classes.variant_separator
+                                                                            }
+                                                                        />
                                                                     </li>
                                                                 </>
                                                             ),

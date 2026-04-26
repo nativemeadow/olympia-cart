@@ -13,14 +13,22 @@ export type CurrentProduct = {
 type ProductAdminState = {
     categories: CategoryHierarchy[];
     setCategories: (categories: CategoryHierarchy[]) => void;
-    addCategory: (category: CategoryHierarchy) => void; // Add this
-    removeCategory: (categoryId: number) => void; // Add this
-    removeAllCategories: () => void; // Add this
+    addCategory: (category: CategoryHierarchy) => void;
+    removeCategory: (categoryId: number) => void;
+    removeAllCategories: () => void;
     updateProductInCategory: (updatedProduct: Product) => void;
     updateProductOrder: (categoryId: number, products: Product[]) => void;
     updateProduct: (updatedProduct: Product) => void;
     addProduct: (newProduct: Product, categoryId: number) => void;
     deleteProduct: (productId: number, categoryId: number) => void;
+    currentCategory: {
+        category: CategoryHierarchy | null;
+        layoutView: 'list' | 'grid';
+    } | null;
+    setCurrentCategory: (
+        category: CategoryHierarchy | null,
+        layoutView: 'list' | 'grid',
+    ) => void;
     currentProduct: CurrentProduct | null;
     setCurrentProduct: (currentProduct: CurrentProduct | null) => void;
 };
@@ -31,7 +39,11 @@ export const useProductsAdminStore = create<ProductAdminState>()(
             (set, get) => ({
                 categories: [],
                 setCategories: (categories) => set({ categories }),
+                currentCategory: { category: null, layoutView: 'list' },
+                setCurrentCategory: (category, layoutView) =>
+                    set({ currentCategory: { category, layoutView } }),
                 currentProduct: null,
+                setCurrentProduct: (currentProduct) => set({ currentProduct }),
                 addCategory: (newCategory) =>
                     set((state) => {
                         // Avoid adding duplicates
@@ -54,8 +66,6 @@ export const useProductsAdminStore = create<ProductAdminState>()(
                     })),
 
                 removeAllCategories: () => set({ categories: [] }),
-
-                setCurrentProduct: (currentProduct) => set({ currentProduct }),
                 updateProductInCategory: (updatedProduct) => {
                     const { categories } = get();
                     const updatedCategories = categories.map((category) => {
