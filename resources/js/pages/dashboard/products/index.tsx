@@ -1,10 +1,10 @@
 import DashboardLayout from '@/layouts/dashboard-layout';
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { CategoryHierarchy } from '@/types';
 import { Product as ProductType, User } from '@/types/model-types';
 import ProductNode from './product-node';
 import classes from './products.module.css';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useProductTreeStore } from '@/zustand/product-tree-store';
 import { Button } from '@/components/ui/button';
 import Toastify from 'toastify-js';

@@ -25,11 +25,15 @@
 }
 
 .customer_details {
-    font-size: 1.25rem; /* text-sm */
+    font-size: 1rem; /* text-sm */
     color: var(--foreground);
     white-space: nowrap; /* Prevent text from wrapping */
     overflow: hidden;
     text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+}
+
+.viewCartButton {
+    font-size: 1rem;
 }
 
 /* --- Column Widths --- */
@@ -118,8 +122,13 @@
     height: 1.25rem; /* h-5 */
 }
 .order_history_header {
-    font-size: 1.125rem; /* text-lg */
-    font-weight: 600; /* font-semibold */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 1rem; /* text-lg */
+    font-weight: 400; /* font-semibold */
     margin-bottom: 1rem; /* mb-4 */
 }
 

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
+use App\Models\Order;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
@@ -12,7 +15,57 @@ class DashboardController extends Controller
     //
     public function index()
     {
-        return Inertia::render('dashboard/index');
+        $today = Carbon::today();
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $startOfMonth = Carbon::now()->startOfMonth();
+
+        // --- Key Metrics ---
+        $revenueToday = Order::where('status', 'completed')
+            ->whereDate('updated_at', $today)
+            ->sum('total');
+        $revenueThisWeek = Order::where('status', 'completed')
+            ->where('updated_at', '>=', $startOfWeek)
+            ->sum('total');
+        $revenueThisMonth = Order::where('status', 'completed')
+            ->where('updated_at', '>=', $startOfMonth)
+            ->sum('total');
+
+        $ordersToday = Order::whereDate('created_at', $today)->count();
+        $ordersThisWeek = Order::where('created_at', '>=', $startOfWeek)->count();
+        $ordersThisMonth = Order::where('created_at', '>=', $startOfMonth)->count();
+
+        $totalCustomers = Customer::count();
+        $newCustomersThisMonth = Customer::where(
+            'created_at',
+            '>=',
+            $startOfMonth,
+        )->count();
+
+        // --- Recent Activity ---
+        $recentOrders = Order::with('customer')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        return Inertia::render('dashboard/index', [
+            'stats' => [
+                'revenue' => [
+                    'today' => $revenueToday,
+                    'week' => $revenueThisWeek,
+                    'month' => $revenueThisMonth,
+                ],
+                'orders' => [
+                    'today' => $ordersToday,
+                    'week' => $ordersThisWeek,
+                    'month' => $ordersThisMonth,
+                ],
+                'customers' => [
+                    'total' => $totalCustomers,
+                    'new_this_month' => $newCustomersThisMonth,
+                ],
+            ],
+            'recentOrders' => $recentOrders,
+        ]);
     }
 
     public function categories()

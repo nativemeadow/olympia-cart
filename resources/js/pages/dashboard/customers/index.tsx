@@ -8,11 +8,11 @@ import {
     User,
 } from '@/types/model-types';
 import { OrdersPaginated, Payment } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useEffect, useState, Fragment } from 'react';
+import { useState, Fragment } from 'react';
 import { Button } from '@/components/ui/button';
 import { router } from '@inertiajs/react';
 import {
@@ -38,12 +38,10 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import styles from './customers.module.css';
-import { ImSpinner } from 'react-icons/im';
-import { P } from 'node_modules/framer-motion/dist/types.d-DagZKalS';
 
 function CustomerOrders({ customer }: { customer: Customer }) {
     if (!customer.orders || customer.orders.length === 0) {
-        return '0';
+        return <div>No orders found for this customer.</div>;
     }
 
     console.log('Customer Orders:', customer.orders); // --- IGNORE ---
@@ -443,8 +441,7 @@ export default function Customers({
             <Head title="Customers" />
             <h1 className={styles.title}>Manage Customers</h1>
             <p className={styles.subtitle}>
-                This is where you will view customer information and order
-                history.
+                This is where you view customer information and order history.
             </p>
             <div className={styles.searchContainer}>
                 <Input
@@ -605,9 +602,17 @@ export default function Customers({
                                                     {openCartCustomerIds.includes(
                                                         customer.id,
                                                     ) ? (
-                                                        <ChevronDown />
+                                                        <ChevronDown
+                                                            className={
+                                                                styles.chevron_icon
+                                                            }
+                                                        />
                                                     ) : (
-                                                        <ChevronRight />
+                                                        <ChevronRight
+                                                            className={
+                                                                styles.chevron_icon
+                                                            }
+                                                        />
                                                     )}
                                                 </div>
                                             </CollapsibleTrigger>

@@ -10,6 +10,7 @@ use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\Dashboard\ProductOrderController;
 use App\Http\Controllers\Dashboard\CategoryOrderController;
 use App\Http\Controllers\Dashboard\CustomersOrdersController;
+use App\Http\Controllers\Dashboard\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -97,9 +98,7 @@ Route::prefix('dashboard')
         Route::put('/media/{media}', [MediaController::class, 'update'])->name('media.update');
         Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
 
-        Route::get('/users', function () {
-            return Inertia::render('dashboard/users/index');
-        })->name('users');
+        Route::get('/users', [UserController::class, 'index'])->name('users');
 
         Route::get('/settings', function () {
             return Inertia::render('dashboard/settings/index');
