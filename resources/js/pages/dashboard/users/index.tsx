@@ -1,7 +1,14 @@
 import DashboardLayout from '@/layouts/dashboard-layout';
-import { User } from '@/types/model-types';
+import { Role, User } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { OrdersPaginated } from '@/types';
+import { Search, X } from 'lucide-react';
+import {
+    ViewUserDetailsAction,
+    AddUserAction,
+    EditUserAction,
+    DeleteUserAction,
+} from './user-actions';
 import {
     Pagination,
     PaginationContent,
@@ -12,15 +19,14 @@ import {
 } from '@/components/ui/pagination';
 import styles from './users.module.css';
 import { router } from '@inertiajs/react';
-
-type PageProps = {
-    auth: {
-        user: User;
-    };
-};
+import roles from '../roles';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 type UsersProps = {
     users: OrdersPaginated<User>;
+    roles: Role[];
     filters: {
         search: string;
     };
@@ -29,10 +35,37 @@ type UsersProps = {
     };
 };
 
-export default function Users({ users, filters, auth }: UsersProps) {
+export default function Users({ users, roles, filters, auth }: UsersProps) {
     const { data, links, prev_page_url, next_page_url } = users;
+    const [searchTerm, setSearchTerm] = useState(filters.search || '');
 
-    //const { auth } = usePage<PageProps>().props;
+    console.log('Users:', users); // Debugging log to check the structure of users data
+    console.log('Data:', data);
+    console.log('Roles:', roles);
+
+    const handleSearch = () => {
+        router.get(
+            route('dashboard.users'),
+            { search: searchTerm },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
+    };
+
+    const handleClear = () => {
+        setSearchTerm('');
+        router.get(
+            route('dashboard.users'),
+            {},
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
+    };
+
     return (
         <DashboardLayout user={auth.user}>
             <Head title="Admin Users" />
@@ -50,6 +83,28 @@ export default function Users({ users, filters, auth }: UsersProps) {
                 </p>
             ) : (
                 <>
+                    {' '}
+                    <div className={styles.searchContainer}>
+                        <Input
+                            type="text"
+                            placeholder="Search by customer name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className={styles.searchInput}
+                        />
+                        <Button onClick={handleSearch}>
+                            <Search className={styles.buttonSize} />
+                        </Button>
+                        {searchTerm && (
+                            <Button
+                                variant="outline"
+                                onClick={handleClear}
+                                className={styles.clearButton}
+                            >
+                                <X className={styles.buttonSize} />
+                            </Button>
+                        )}
+                    </div>
                     <ul className="divide-y divide-muted">
                         {users.data.map((user) => (
                             <li key={user.id} className="py-4">
@@ -79,15 +134,10 @@ export default function Users({ users, filters, auth }: UsersProps) {
                                         </p>
                                     </div>
                                     <div>
-                                        {/* Actions like edit/delete would go here */}
-                                        <button
-                                            className="text-sm text-blue-600 hover:underline"
-                                            onClick={() => {
-                                                // Handle edit user
-                                            }}
-                                        >
-                                            Edit
-                                        </button>
+                                        <EditUserAction
+                                            user={user}
+                                            roles={roles}
+                                        />
                                     </div>
                                 </div>
                             </li>

@@ -22,6 +22,8 @@ import {
 import { clsx } from 'clsx';
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 import { Input } from '@/components/ui/input';
+import { usePage } from '@inertiajs/react';
+import { User } from '@/types';
 import UploadNewImage from './create';
 import UpdateImage from './update';
 import {
@@ -60,6 +62,7 @@ const MediaComponent = ({
         isModal?: boolean;
         mediaType?: 'product' | 'category';
     }) => {
+    const { auth } = usePage<PageProps>().props;
     const { links, meta } = media;
     const [mediaItems, setMediaItems] = useState<Media[]>(media.data);
     const [mediaToDelete, setMediaToDelete] = useState<Media | null>(null);
@@ -473,7 +476,7 @@ const MediaComponent = ({
     }
 
     return (
-        <DashboardLayout>
+        <DashboardLayout user={auth.user as User}>
             <MediaContent />
         </DashboardLayout>
     );

@@ -5,8 +5,8 @@ import {
     OrderItem,
     Cart,
     CartItem,
-    User,
 } from '@/types/model-types';
+import { User } from '@/types';
 import { OrdersPaginated, Payment } from '@/types';
 import { Head } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';

@@ -1,7 +1,8 @@
 import DashboardLayout from '@/layouts/dashboard-layout';
 import { Head } from '@inertiajs/react';
 import { CategoryHierarchy } from '@/types';
-import { Product as ProductType, User } from '@/types/model-types';
+import { Product as ProductType } from '@/types/model-types';
+import { User } from '@/types';
 import ProductNode from './product-node';
 import classes from './products.module.css';
 import { useEffect } from 'react';

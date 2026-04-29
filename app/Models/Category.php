@@ -7,11 +7,15 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
     /** @use HasFactory<\Database\Factories\CategoryFactory> */
     use HasFactory;
+    // allow soft deletes for categories, so we can keep track of deleted 
+    // categories and potentially restore them later
+    use SoftDeletes;
 
     protected $fillable = [
         'title',

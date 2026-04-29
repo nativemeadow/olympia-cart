@@ -43,18 +43,19 @@ export interface SharedData {
     [key: string]: unknown;
 }
 
-export interface User {
+export type User = {
     id: number;
     first_name: string;
     last_name: string;
     email: string;
     avatar?: string | null;
     email_verified_at?: string | null;
+    roles: Role[];
     is_guest: boolean;
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
-}
+};
 
 import type { Address } from './';
 
@@ -231,6 +232,7 @@ export type User = {
     email: string;
     avatar?: string | null;
     email_verified_at?: string | null;
+    roles: Role[];
     is_guest: boolean;
     created_at: string;
     updated_at: string;
@@ -244,4 +246,12 @@ export type UseFormSetData = (
 
 export type FormErrors = {
     [field: string]: string[]; // Each field can have an array of error messages
+};
+
+export type Role = {
+    uuid: string;
+    name: string;
+    guard_name: string;
+    created_at: string;
+    updated_at: string;
 };

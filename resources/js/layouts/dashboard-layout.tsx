@@ -34,6 +34,7 @@ const navLinks = [
     },
     { href: 'dashboard.customers', label: 'Customers', icon: Users },
     { href: 'dashboard.users', label: 'Users', icon: UserCog },
+    { href: 'dashboard.roles', label: 'Roles', icon: UserCog },
     { href: 'dashboard.settings', label: 'Settings', icon: Settings },
 ];
 

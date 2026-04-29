@@ -11,6 +11,7 @@ use App\Models\Address;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property-read \App\Models\Customer|null $customer
@@ -19,6 +20,10 @@ class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles, HasUuids;
+
+    // allow soft deletes for users, so we can keep track of deleted
+    // users and potentially restore them later
+    use SoftDeletes;
 
     protected $appends = ['is_guest'];
 

@@ -31,7 +31,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { router } from '@inertiajs/react';
 import { Search, X } from 'lucide-react';
-import { User } from '@/types/model-types';
+import { User } from '@/types';
 
 interface CustomerOrdersProps {
     customers: OrdersPaginated<Customer>;

@@ -1,6 +1,7 @@
 import React from 'react';
 import DashboardLayout from '@/layouts/dashboard-layout';
-import { User, Order } from '@/types/model-types';
+import { Order } from '@/types/model-types';
+import { User } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import {
     Card,

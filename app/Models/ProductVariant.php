@@ -7,14 +7,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Product;
-use App\Models\Attribute;
 use App\Models\AttributeValue;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class ProductVariant extends Model
 {
     /** @use HasFactory<\Database\Factories\ProductVariantFactory> */
     use HasFactory;
+    // allow soft deletes for product variants, so we can keep track of deleted
+    // variants and potentially restore them later
+    use SoftDeletes;
 
     protected $fillable = [
         'product_id',

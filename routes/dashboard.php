@@ -11,6 +11,7 @@ use App\Http\Controllers\Dashboard\ProductOrderController;
 use App\Http\Controllers\Dashboard\CategoryOrderController;
 use App\Http\Controllers\Dashboard\CustomersOrdersController;
 use App\Http\Controllers\Dashboard\UserController;
+use App\Http\Controllers\Dashboard\RolesController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -99,6 +100,12 @@ Route::prefix('dashboard')
         Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
 
         Route::get('/users', [UserController::class, 'index'])->name('users');
+        Route::get('/users/{user_id}', [UserController::class, 'show'])->name('users.show');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::put('/users/{user_id}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user_id}', [UserController::class, 'destroy'])->name('users.destroy');
+
+        Route::get('/roles', [RolesController::class, 'index'])->name('roles');
 
         Route::get('/settings', function () {
             return Inertia::render('dashboard/settings/index');

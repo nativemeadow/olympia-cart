@@ -69,9 +69,9 @@ export function AddProductAction({
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Tooltip>
-                    <TooltipTrigger asChild>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <DialogTrigger asChild>
                         <Button
                             variant="ghost"
                             size="icon"
@@ -80,10 +80,10 @@ export function AddProductAction({
                         >
                             <Plus className={classes.plus_icon} />
                         </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Add Product</TooltipContent>
-                </Tooltip>
-            </DialogTrigger>
+                    </DialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Add Product</TooltipContent>
+            </Tooltip>
             <DialogContent
                 className={classes.form_dialog}
                 onInteractOutside={(e) => e.preventDefault()}
@@ -147,9 +147,9 @@ export function EditProductAction({
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Tooltip>
-                    <TooltipTrigger asChild>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <DialogTrigger asChild>
                         <Button
                             variant="ghost"
                             size="icon"
@@ -158,10 +158,10 @@ export function EditProductAction({
                         >
                             <Pencil className={classes.action_icon} />
                         </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Edit Product</TooltipContent>
-                </Tooltip>
-            </DialogTrigger>
+                    </DialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Edit Product</TooltipContent>
+            </Tooltip>
             <DialogContent
                 className={classes.form_dialog}
                 onInteractOutside={(e) => e.preventDefault()}
@@ -259,8 +259,8 @@ export function DeleteProductAction({
     return (
         <AlertDialog>
             <Tooltip>
-                <TooltipTrigger asChild>
-                    <AlertDialogTrigger asChild>
+                <AlertDialogTrigger asChild>
+                    <TooltipTrigger asChild>
                         <Button
                             variant="ghost"
                             size="icon"
@@ -268,8 +268,8 @@ export function DeleteProductAction({
                         >
                             <Trash2 className={classes.delete_icon} />
                         </Button>
-                    </AlertDialogTrigger>
-                </TooltipTrigger>
+                    </TooltipTrigger>
+                </AlertDialogTrigger>
                 <TooltipContent>Delete Product</TooltipContent>
             </Tooltip>
             <AlertDialogContent>

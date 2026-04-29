@@ -49,7 +49,6 @@ import {
     useProductsAdminStore,
     CurrentProduct,
 } from '@/zustand/product-admin-store';
-import { C } from 'node_modules/tailwindcss/dist/resolve-config-QUZ9b-Gn.mjs';
 
 const initialProduct = (): Product => ({
     id: 0,
