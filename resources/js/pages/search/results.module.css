@@ -5,3 +5,7 @@
     align-items: stretch;
     width: 100%;
 }
+
+.pagination {
+    margin-top: 1rem; /* mt-4 */
+}

@@ -2,77 +2,53 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ProductSearchService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use App\Models\Product;
-use App\Models\Price;
-use Inertia\Response;
-
-
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class SearchIndexController extends Controller
 {
-    //
+    protected $productSearchService;
 
-    public function index($searchTerm = null)
+    public function __construct(ProductSearchService $productSearchService)
     {
-        if (!$searchTerm) {
-            // If no search term, just render the page with empty results.
-            return Inertia::render('search/index', [
-                'results' => [],
-                'searchTerm' => '',
-            ]);
-        }
+        $this->productSearchService = $productSearchService;
+    }
 
-        $searchIndex = new \App\Models\SearchIndex();
-        $results = $searchIndex->search($searchTerm);
+    public function index(Request $request, string $searchTerm = null)
+    {
+        $query = $searchTerm ?? $request->input('term', '');
+        $perPage = $request->input('per_page', 10);
 
-        $productIds = [];
-        foreach ($results as $result) {
-            // Add the rank to the result object for later sorting
-            $result->rank = $result->rank ?? 0;
+        $orderedProductIds = $this->productSearchService->search($query);
 
-            if ($result->source_table === 'products') {
-                $productIds[$result->source_id] = $result->rank;
-            } else if ($result->source_table === 'prices') {
-                // Find the price and then get its product_id
-                $price = Price::find($result->source_id);
-                if ($price) {
-                    // If the product isn't already in the list, or if this match has a higher rank
-                    if (!isset($productIds[$price->product_id]) || $productIds[$price->product_id] < $result->rank) {
-                        $productIds[$price->product_id] = $result->rank;
-                    }
-                }
+        $productsQuery = Product::query();
+
+        if (empty($orderedProductIds)) {
+            $paginatedProducts = $productsQuery->whereIn('id', [])->paginate($perPage);
+        } else {
+            $order = [];
+            foreach ($orderedProductIds as $index => $id) {
+                $order[] = "WHEN id = {$id} THEN {$index}";
             }
+            $orderClause = 'CASE ' . implode(' ', $order) . ' END';
+
+            $paginatedProducts = $productsQuery->whereIn('id', $orderedProductIds)
+                ->orderByRaw($orderClause)
+                ->paginate($perPage);
         }
 
-        // Get unique product IDs from the keys
-        $uniqueProductIds = array_keys($productIds);
+        $paginatedProducts->appends(['term' => $query]);
 
-        if (empty($uniqueProductIds)) {
-            return Inertia::render('search/index', [
-                'results' => [],
-                'searchTerm' => $searchTerm,
-            ]);
+        if ($request->wantsJson()) {
+            return response()->json($paginatedProducts);
         }
-
-        // Eager load products with their prices
-        $products = Product::whereIn('id', $uniqueProductIds)->with('prices')->get()->map(function ($product) use ($productIds) {
-            // Attach the rank to the product for sorting
-            $product->rank = $productIds[$product->id] ?? 0;
-            $product->categories; // Load categories if needed
-            return $product;
-        });
-
-
-
-        // Sort the final product list by rank
-        $sortedProducts = $products->sortByDesc('rank')->values();
 
         return Inertia::render('search/index', [
-            'results' => $sortedProducts,
-            'searchTerm' => $searchTerm,
-            'resultCount' => count($sortedProducts),
+            'products' => $paginatedProducts,
+            'searchTerm' => $query,
         ]);
     }
 }

@@ -66,9 +66,17 @@ export type Product = {
     created_at: string;
     updated_at: string;
     // Relationships
-    prices?: Price[];
+    variants?: ProductVariant[];
     categories?: Category[];
     media?: Media[];
+};
+
+export type ProductVariant = {
+    id: number;
+    product_id: number;
+    sku: string;
+    price: number;
+    attributeValues: AttributeValue[];
 };
 
 export type Price = {

@@ -3,10 +3,10 @@ import { Product } from '@/types/model-types';
 import classes from './Card.module.css';
 
 type Props = {
-    results: Product;
+    product: Product;
 };
 
-const ProductCard = ({ results }: Props) => {
+const ProductCard = ({ product: results }: Props) => {
     const categorySlug =
         results.categories && results.categories.length > 0
             ? results.categories[0].slug
@@ -30,7 +30,7 @@ const ProductCard = ({ results }: Props) => {
             <p className={classes.title}>{results.title}</p>
             <p
                 className={classes.price}
-            >{`Starting from ${results.prices?.[0]?.price ?? ''}`}</p>
+            >{`Starting from ${results.variants?.[0]?.price ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(results.variants?.[0]?.price / 100)) : ''}`}</p>
         </div>
     );
 };

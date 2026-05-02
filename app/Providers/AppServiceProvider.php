@@ -6,6 +6,7 @@ use App\Models\Address;
 use App\Policies\AddressPolicy;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +28,12 @@ class AppServiceProvider extends ServiceProvider
         Inertia::version(function () {
             return md5_file(public_path('build/manifest.json'));
         });
+
+        Relation::morphMap([
+            'products' => 'App\Models\Product',
+            'product_variants' => 'App\Models\ProductVariant',
+            'categories' => 'App\Models\Category',
+        ]);
     }
 
     /**
