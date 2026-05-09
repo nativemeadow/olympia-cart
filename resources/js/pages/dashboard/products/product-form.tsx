@@ -20,16 +20,23 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import cx from 'clsx';
-import { Product, Price, ExtendedProps, Attributes } from '@/types/model-types';
+import {
+    Product,
+    Category,
+    Media,
+    Attributes,
+    ProductVariant,
+    ExtendedProps,
+} from '@/types/model-types';
 import { useForm } from '@inertiajs/react';
 import classes from './product-form.module.css';
 import EditorComponent from '@/components/text-editor';
-import { Media } from '@/types/model-types';
+
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import MediaSelectionModal from '@/pages/dashboard/media/media-selection-modal';
 import { generateSlug } from '@/utils/strings';
 import '@/../css/errors.css';
-import { DeletePriceForm } from './delete-price';
+import { DeleteVariantForm } from './delete-variant';
 import {
     Tooltip,
     TooltipContent,
@@ -37,7 +44,6 @@ import {
 } from '@/components/ui/tooltip';
 import { ImSpinner } from 'react-icons/im';
 import AlertDialogComponent from '@/components/AlertDialog';
-import { Category } from '@/types/model-types';
 import { CategoryHierarchy } from '@/types';
 import CategoryManagement from './CategoryManagement';
 import { useProductTreeStore } from '@/zustand/product-tree-store';
@@ -60,7 +66,7 @@ const initialProduct = (): Product => ({
     image: '',
     status: true,
     categories: [],
-    prices: [],
+    variants: [],
     media: [],
     created_at: '',
     updated_at: '',
@@ -68,7 +74,7 @@ const initialProduct = (): Product => ({
 
 const excludeKeys = ['Title', 'Description', 'Image'];
 
-const initialPrice = (attributes?: Attributes[]): Price => {
+const initialVariant = (attributes?: Attributes[]): ProductVariant => {
     const extended_properties: ExtendedProps = {};
     if (attributes) {
         attributes.forEach((attr) => {
@@ -92,43 +98,43 @@ const PrepareProductData = (
     product: Product,
     attributes?: Attributes[],
 ): Product => {
-    const processedPrices = product.prices?.map((price) => {
-        const initial = initialPrice(attributes);
-        const newPrice: Price = {
+    const processedVariants = product.variants?.map((variant) => {
+        const initial = initialVariant(attributes);
+        const newVariant: ProductVariant = {
             ...initial,
-            ...price,
+            ...variant,
             extended_properties: {
                 ...initial.extended_properties,
-                ...price.extended_properties,
+                ...variant.extended_properties,
             },
         };
 
-        newPrice.extended_properties = { ...newPrice.extended_properties };
+        newVariant.extended_properties = { ...newVariant.extended_properties };
 
-        price.attribute_values?.forEach((attrValue) => {
+        variant.new_attribute_values?.forEach((attrValue) => {
             if (attrValue.attribute) {
                 const attrName = attrValue.attribute.name;
                 if (attrName === 'Title') {
-                    newPrice.title = attrValue.value;
+                    newVariant.title = attrValue.value;
                 } else if (attrName === 'Description') {
-                    newPrice.description = attrValue.value;
+                    newVariant.description = attrValue.value;
                 } else if (attrName === 'Image') {
                     // This assumes the value is a path that can be resolved to a media object
                     // This part might need more complex logic if you need to fetch the full Media object
                 } else if (
-                    newPrice.extended_properties &&
+                    newVariant.extended_properties &&
                     !excludeKeys.includes(attrName)
                 ) {
-                    newPrice.extended_properties[attrName] = attrValue.value;
+                    newVariant.extended_properties[attrName] = attrValue.value;
                 }
             }
         });
-        return newPrice;
+        return newVariant;
     });
 
     return {
         ...product,
-        prices: processedPrices,
+        variants: processedVariants,
     };
 };
 
@@ -165,9 +171,8 @@ const ProductForm = ({
     onSuccess: (categoryId: number) => void;
     allCategories: CategoryHierarchy[];
 }) => {
-    const [priceStrings, setPriceStrings] = useState<{ [key: string]: string }>(
-        {},
-    );
+    console.log('ProductForm rendered with product:', product);
+    const [variantStrings, setVariantStrings] = useState<string[]>([]);
     const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(isEdit);
     const [isSaving, setIsSaving] = useState(false);
     const [errorDialogOpen, setErrorDialogOpen] = useState(false);
@@ -213,7 +218,7 @@ const ProductForm = ({
         } else {
             initialData = {
                 ...initialProduct(),
-                prices: [initialPrice(attributes)],
+                variants: [initialVariant(attributes)],
             };
             if (categoryId && allCategories) {
                 const categoryToAdd = findCategory(allCategories, categoryId);
@@ -226,25 +231,31 @@ const ProductForm = ({
             }
         }
         setData('product', initialData);
-    }, [product, attributes, categoryId, allCategories]);
+    }, []); //
+    
+    useEffect(() => {
+        if (product) {
+            setData('product', PrepareProductData(product, attributes));
+        }
+    }, [product, attributes]);
 
     console.log('ProductForm data:', data);
     console.log('ProductForm attributes:', attributes);
 
-    const handleImageSelect = (image: Media, priceId?: number) => {
-        if (priceId !== undefined) {
-            if (!data.product.prices) return;
-            const updatedPrices = data.product.prices.map((price) => {
-                if (price.id === priceId) {
+    const handleImageSelect = (image: Media, variantId?: number) => {
+        if (variantId !== undefined) {
+            if (!data.product.variants) return;
+            const updatedVariants = data.product.variants.map((variant) => {
+                if (variant.id === variantId) {
                     return {
-                        ...price,
+                        ...variant,
                         image: image,
                     };
                 }
-                return price;
+                return variant;
             });
 
-            setData('product.prices', updatedPrices);
+            setData('product.variants', updatedVariants);
         } else {
             setData('product.media', [image]);
             setData('product.image', image.file_name);
@@ -308,41 +319,41 @@ const ProductForm = ({
         }
     };
 
-    const addPrice = () => {
-        const newPrice = {
-            ...initialPrice(attributes),
+    const addVariant = () => {
+        const newVariant = {
+            ...initialVariant(attributes),
             id: Date.now(), // Temporary ID for React key
         };
         setData(
-            'product.prices',
-            data.product?.prices
-                ? [...data.product.prices, newPrice]
-                : [newPrice],
+            'product.variants',
+            data.product?.variants
+                ? [...data.product.variants, newVariant]
+                : [newVariant],
         );
     };
 
-    const removePrice = (priceId: number) => {
-        if (!data.product.prices) return;
-        const updatedPrices = data.product.prices.filter(
-            (price) => price.id !== priceId,
+    const removeVariant = (variantId: number) => {
+        if (!data.product.variants) return;
+        const updatedVariants = data.product.variants.filter(
+            (variant) => variant.id !== variantId,
         );
-        setData('product.prices', updatedPrices);
+        setData('product.variants', updatedVariants);
     };
 
-    const updatePrice = (
+    const updateVariant = (
         e: React.ChangeEvent<HTMLInputElement>,
         index: number,
     ) => {
-        clearErrors(`product.prices.${index}.price` as any);
-        const newPriceStrings = {
-            ...priceStrings,
+        clearErrors(`product.variants.${index}.price` as any);
+        const newVariantStrings = {
+            ...variantStrings,
             [index]: e.target.value,
         };
-        setPriceStrings(newPriceStrings);
+        setVariantStrings(newVariantStrings);
 
         const valueInCents = Math.round(parseFloat(e.target.value) * 100);
         if (!isNaN(valueInCents)) {
-            setData(`product.prices.${index}.price` as any, valueInCents);
+            setData(`product.variants.${index}.price` as any, valueInCents);
         }
     };
 
@@ -591,46 +602,26 @@ const ProductForm = ({
                                                                         classes.product_image_preview
                                                                     }
                                                                 />
+                                                            </figure>
+
+                                                            <div>
                                                                 <MediaSelectionModal
-                                                                    onSelect={
-                                                                        handleImageSelect
-                                                                    }
-                                                                    entityId={
-                                                                        data
-                                                                            .product
-                                                                            .id
-                                                                    }
+                                                                    onSelect={handleImageSelect}
+                                                                    entityId={data.product.id}
                                                                     mediaType="product"
                                                                 >
-                                                                    <Tooltip>
-                                                                        <TooltipTrigger
-                                                                            asChild
-                                                                        >
-                                                                            <Button
-                                                                                type="button"
-                                                                                variant="outline"
-                                                                                size="icon"
-                                                                                className={
-                                                                                    classes.editButton
-                                                                                }
-                                                                                aria-label="Select or change image"
-                                                                            >
-                                                                                <Pencil
-                                                                                    className={
-                                                                                        classes.pencilIcon
-                                                                                    }
-                                                                                />
-                                                                            </Button>
-                                                                        </TooltipTrigger>
-                                                                        <TooltipContent>
-                                                                            Select
-                                                                            or
-                                                                            change
-                                                                            image
-                                                                        </TooltipContent>
-                                                                    </Tooltip>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        className={
+                                                                            classes.changeImageButton
+                                                                        }
+                                                                    >
+                                                                        Change
+                                                                        Image
+                                                                    </Button>
                                                                 </MediaSelectionModal>
-                                                            </figure>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 ),
@@ -708,16 +699,16 @@ const ProductForm = ({
                                 </CategoryExpandedProvider>
                             </CardContent>
                         </Card>
-                        {/* Add fields for prices and categories here */}
-                        {data.product?.prices && (
+                        {/* Add fields for variants and categories here */}
+                        {data.product?.variants && (
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Prices</CardTitle>
+                                    <CardTitle>Variants</CardTitle>
                                     <CardDescription
                                         className={classes.cardDescription}
                                     >
                                         <span>
-                                            Manage product prices and options.
+                                            Manage product variants and options.
                                         </span>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
@@ -725,12 +716,12 @@ const ProductForm = ({
                                                     type="button"
                                                     variant="outline"
                                                     size="icon"
-                                                    title="Add new price option"
+                                                    title="Add new variant option"
                                                     className={
                                                         classes.addPriceButton
                                                     }
-                                                    aria-label="Add new price option"
-                                                    onClick={addPrice}
+                                                    aria-label="Add new variant option"
+                                                    onClick={addVariant}
                                                 >
                                                     <Plus
                                                         className={
@@ -740,7 +731,7 @@ const ProductForm = ({
                                                 </Button>
                                             </TooltipTrigger>
                                             <TooltipContent>
-                                                Add new price option
+                                                Add new variant option
                                             </TooltipContent>
                                         </Tooltip>
                                     </CardDescription>
@@ -752,9 +743,9 @@ const ProductForm = ({
                                     )}
                                 >
                                     <>
-                                        {data.product?.prices?.map(
-                                            (price, index) => (
-                                                <div key={index}>
+                                        {data.product?.variants?.map(
+                                            (variant, index) => (
+                                                <div key={variant.id || index}>
                                                     <div
                                                         className={
                                                             classes.inputSkuPrice
@@ -783,25 +774,25 @@ const ProductForm = ({
                                                                         (
                                                                             errors as any
                                                                         )[
-                                                                            `product.prices.${index}.sku`
+                                                                            `product.variants.${index}.sku`
                                                                         ]
                                                                     }
                                                                 >
                                                                     <Input
-                                                                        id={`sku-${price.id}`}
+                                                                        id={`sku-${variant.id}`}
                                                                         type="text"
                                                                         value={
-                                                                            price.sku ||
+                                                                            variant.sku ||
                                                                             ''
                                                                         }
                                                                         onChange={(
                                                                             e,
                                                                         ) => {
                                                                             clearErrors(
-                                                                                `product.prices.${index}.sku` as any,
+                                                                                `product.variants.${index}.sku` as any,
                                                                             );
                                                                             setData(
-                                                                                `product.prices.${index}.sku` as any,
+                                                                                `product.variants.${index}.sku` as any,
                                                                                 e
                                                                                     .target
                                                                                     .value,
@@ -814,7 +805,7 @@ const ProductForm = ({
                                                                                     (
                                                                                         errors as any
                                                                                     )[
-                                                                                        `product.prices.${index}.sku`
+                                                                                        `product.variants.${index}.sku`
                                                                                     ],
                                                                             },
                                                                         )}
@@ -822,12 +813,12 @@ const ProductForm = ({
                                                                 </FieldWrapper>
                                                             </div>
 
-                                                            <DeletePriceForm
-                                                                priceId={
-                                                                    price.id
+                                                            <DeleteVariantForm
+                                                                variantId={
+                                                                    variant.id
                                                                 }
-                                                                removePrice={
-                                                                    removePrice
+                                                                removeVariant={
+                                                                    removeVariant
                                                                 }
                                                             />
                                                         </div>
@@ -843,7 +834,7 @@ const ProductForm = ({
                                                                 }
                                                             >
                                                                 <Label
-                                                                    htmlFor={`price-${price.id}`}
+                                                                    htmlFor={`price-${variant.id}`}
                                                                     className={
                                                                         classes.label
                                                                     }
@@ -855,19 +846,19 @@ const ProductForm = ({
                                                                         (
                                                                             errors as any
                                                                         )[
-                                                                            `product.prices.${index}.price`
+                                                                            `product.variants.${index}.price`
                                                                         ]
                                                                     }
                                                                 >
                                                                     <Input
-                                                                        id={`price-${price.id}`}
+                                                                        id={`price-${variant.id}`}
                                                                         type="number"
                                                                         value={
-                                                                            priceStrings[
+                                                                            variantStrings[
                                                                                 index
                                                                             ] ??
                                                                             (
-                                                                                price.price /
+                                                                                variant.price /
                                                                                 100
                                                                             ).toFixed(
                                                                                 2,
@@ -876,7 +867,7 @@ const ProductForm = ({
                                                                         onChange={(
                                                                             e,
                                                                         ) =>
-                                                                            updatePrice(
+                                                                            updateVariant(
                                                                                 e,
                                                                                 index,
                                                                             )
@@ -888,7 +879,7 @@ const ProductForm = ({
                                                                                     (
                                                                                         errors as any
                                                                                     )[
-                                                                                        `product.prices.${index}.price`
+                                                                                        `product.variants.${index}.price`
                                                                                     ],
                                                                             },
                                                                         )}
@@ -897,7 +888,7 @@ const ProductForm = ({
                                                             </div>
                                                             <div>
                                                                 <Label
-                                                                    htmlFor={`price-${price.id}-description`}
+                                                                    htmlFor={`price-${variant.id}-description`}
                                                                     className={
                                                                         classes.label
                                                                     }
@@ -909,25 +900,25 @@ const ProductForm = ({
                                                                         (
                                                                             errors as any
                                                                         )[
-                                                                            `product.prices.${index}.description`
+                                                                            `product.variants.${index}.description`
                                                                         ]
                                                                     }
                                                                 >
                                                                     <Input
-                                                                        id={`price-${price.id}-description`}
+                                                                        id={`price-${variant.id}-description`}
                                                                         type="text"
                                                                         value={
-                                                                            price.description ||
+                                                                            variant.description ||
                                                                             ''
                                                                         }
                                                                         onChange={(
                                                                             e,
                                                                         ) => {
                                                                             clearErrors(
-                                                                                `product.prices.${index}.description` as any,
+                                                                                `product.variants.${index}.description` as any,
                                                                             );
                                                                             setData(
-                                                                                `product.prices.${index}.description` as any,
+                                                                                `product.variants.${index}.description` as any,
                                                                                 e
                                                                                     .target
                                                                                     .value,
@@ -940,7 +931,7 @@ const ProductForm = ({
                                                                                     (
                                                                                         errors as any
                                                                                     )[
-                                                                                        `product.prices.${index}.description`
+                                                                                        `product.variants.${index}.description`
                                                                                     ],
                                                                             },
                                                                         )}
@@ -949,7 +940,7 @@ const ProductForm = ({
                                                             </div>
                                                             <div>
                                                                 <Label
-                                                                    htmlFor={`price-${price.id}-title`}
+                                                                    htmlFor={`price-${variant.id}-title`}
                                                                     className={
                                                                         classes.label
                                                                     }
@@ -961,25 +952,25 @@ const ProductForm = ({
                                                                         (
                                                                             errors as any
                                                                         )[
-                                                                            `product.prices.${index}.title`
+                                                                            `product.variants.${index}.title`
                                                                         ]
                                                                     }
                                                                 >
                                                                     <Input
-                                                                        id={`price-${price.id}-title`}
+                                                                        id={`price-${variant.id}-title`}
                                                                         type="text"
                                                                         value={
-                                                                            price.title ||
+                                                                            variant.title ||
                                                                             ''
                                                                         }
                                                                         onChange={(
                                                                             e,
                                                                         ) => {
                                                                             clearErrors(
-                                                                                `product.prices.${index}.title` as any,
+                                                                                `product.variants.${index}.title` as any,
                                                                             );
                                                                             setData(
-                                                                                `product.prices.${index}.title` as any,
+                                                                                `product.variants.${index}.title` as any,
                                                                                 e
                                                                                     .target
                                                                                     .value,
@@ -992,7 +983,7 @@ const ProductForm = ({
                                                                                     (
                                                                                         errors as any
                                                                                     )[
-                                                                                        `product.prices.${index}.title`
+                                                                                        `product.variants.${index}.title`
                                                                                     ],
                                                                             },
                                                                         )}
@@ -1000,7 +991,7 @@ const ProductForm = ({
                                                                 </FieldWrapper>
                                                             </div>
                                                         </div>
-                                                        {price.image ? (
+                                                        {variant.image ? (
                                                             <div
                                                                 className={`${classes.mediaItem}`}
                                                             >
@@ -1008,7 +999,7 @@ const ProductForm = ({
                                                                     className={`${classes.mediaCard}`}
                                                                 >
                                                                     <Label
-                                                                        htmlFor={`price-${price.id}-image`}
+                                                                        htmlFor={`price-${variant.id}-image`}
                                                                         className={
                                                                             classes.label
                                                                         }
@@ -1025,16 +1016,16 @@ const ProductForm = ({
                                                                         >
                                                                             <img
                                                                                 src={
-                                                                                    `/${price.image?.file_path}` +
-                                                                                    price
+                                                                                    `/${variant.image?.file_path}` +
+                                                                                    variant
                                                                                         .image
                                                                                         ?.file_name
                                                                                 }
                                                                                 alt={
-                                                                                    price
+                                                                                    variant
                                                                                         .image
                                                                                         ?.alt_text ||
-                                                                                    price
+                                                                                    variant
                                                                                         .image
                                                                                         ?.title
                                                                                 }
@@ -1046,7 +1037,7 @@ const ProductForm = ({
                                                                             ) =>
                                                                                 handleImageSelect(
                                                                                     image,
-                                                                                    price.id,
+                                                                                    variant.id,
                                                                                 )
                                                                             }
                                                                             entityId={
@@ -1094,7 +1085,7 @@ const ProductForm = ({
                                                                 ) =>
                                                                     handleImageSelect(
                                                                         image,
-                                                                        price.id,
+                                                                        variant.id,
                                                                     )
                                                                 }
                                                                 entityId={
@@ -1122,7 +1113,7 @@ const ProductForm = ({
                                                                 className={`${classes.mediaCard}`}
                                                             >
                                                                 <Label
-                                                                    htmlFor={`price-${price.id}-file`}
+                                                                    htmlFor={`price-${variant.id}-file`}
                                                                     className={
                                                                         classes.label
                                                                     }
@@ -1130,10 +1121,10 @@ const ProductForm = ({
                                                                     Image
                                                                 </Label>
                                                                 <Input
-                                                                    id={`price-${price.id}-file`}
+                                                                    id={`price-${variant.id}-file`}
                                                                     type="text"
                                                                     value={
-                                                                        price
+                                                                        variant
                                                                             .image
                                                                             ?.file_name ||
                                                                         ''
@@ -1142,7 +1133,7 @@ const ProductForm = ({
                                                                         e,
                                                                     ) =>
                                                                         setData(
-                                                                            `product.prices.${index}.image` as any,
+                                                                            `product.variants.${index}.image` as any,
                                                                             e
                                                                                 .target
                                                                                 .value,
@@ -1161,9 +1152,9 @@ const ProductForm = ({
                                                                 classes.inputGroup
                                                             }
                                                         >
-                                                            {price.extended_properties &&
+                                                            {variant.extended_properties &&
                                                                 Object.entries(
-                                                                    price.extended_properties,
+                                                                    variant.extended_properties,
                                                                 ).map(
                                                                     (
                                                                         [
@@ -1186,7 +1177,7 @@ const ProductForm = ({
                                                                                     }
                                                                                 >
                                                                                     <Label
-                                                                                        htmlFor={`price-${price.id}-prop-${key}`}
+                                                                                        htmlFor={`price-${variant.id}-prop-${key}`}
                                                                                         className={
                                                                                             classes.label
                                                                                         }
@@ -1200,12 +1191,12 @@ const ProductForm = ({
                                                                                             (
                                                                                                 errors as any
                                                                                             )[
-                                                                                                `product.prices.${index}.extended_properties.${propIndex}.value`
+                                                                                                `product.variants.${index}.extended_properties.${propIndex}.value`
                                                                                             ]
                                                                                         }
                                                                                     >
                                                                                         <Input
-                                                                                            id={`price-${price.id}-prop-${key}`}
+                                                                                            id={`price-${variant.id}-prop-${key}`}
                                                                                             type="text"
                                                                                             value={String(
                                                                                                 value ||
@@ -1215,10 +1206,10 @@ const ProductForm = ({
                                                                                                 e,
                                                                                             ) => {
                                                                                                 clearErrors(
-                                                                                                    `product.prices.${index}.extended_properties.${key}` as any,
+                                                                                                    `product.variants.${index}.extended_properties.${key}` as any,
                                                                                                 );
                                                                                                 setData(
-                                                                                                    `product.prices.${index}.extended_properties.${key}` as any,
+                                                                                                    `product.variants.${index}.extended_properties.${key}` as any,
                                                                                                     e
                                                                                                         .target
                                                                                                         .value,
@@ -1231,7 +1222,7 @@ const ProductForm = ({
                                                                                                         (
                                                                                                             errors as any
                                                                                                         )[
-                                                                                                            `product.prices.${index}.extended_properties.${propIndex}.value`
+                                                                                                            `product.variants.${index}.extended_properties.${propIndex}.value`
                                                                                                         ],
                                                                                                 },
                                                                                             )}

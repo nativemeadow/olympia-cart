@@ -87,6 +87,7 @@ const ProductNode: React.FC<ProductNodeProps> = ({
     const pageLayout = categoryLayouts[category.id] || 'list';
 
     useEffect(() => {
+        console.log('Category products updated:', category.products);
         setProducts(category.products || []);
     }, [category.products]);
 
