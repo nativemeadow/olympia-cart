@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '@/layouts/dashboard-layout';
 import { Paginated, PageProps } from '@/types';
 import { Media } from '@/types/model-types';
@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { usePage } from '@inertiajs/react';
 import { User } from '@/types';
 import UploadNewImage from './create';
+import MediaSearchInput from './search';
 import UpdateImage from './update';
 import {
     AlertDialog,
@@ -66,6 +67,7 @@ const MediaComponent = ({
     const { links, meta } = media;
     const [mediaItems, setMediaItems] = useState<Media[]>(media.data);
     const [mediaToDelete, setMediaToDelete] = useState<Media | null>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         setMediaItems(media.data);
@@ -86,65 +88,80 @@ const MediaComponent = ({
         );
     };
 
-    const handleModalNavigation = async (url: string) => {
-        if (!url || !onUpdate) return;
+    const handleModalNavigation = async (url: string, params?: object) => {
         try {
-            const response = await fetch(url);
+            const fullUrl = params
+                ? `${url}?${new URLSearchParams(params as any).toString()}`
+                : url;
+            const response = await fetch(fullUrl);
             const newData = await response.json();
-            onUpdate(newData);
+            onUpdate && onUpdate(newData);
         } catch (error) {
             console.error('Failed to fetch new media page:', error);
         }
     };
 
     const handlePerPageChange = (per_page: string) => {
+        const newFilters = { ...filters, per_page };
         const routeName = isModal
-            ? 'dashboard.product.media'
+            ? mediaType === 'category'
+                ? 'dashboard.category.media'
+                : 'dashboard.product.media'
             : 'dashboard.media';
-        router.get(
-            route(routeName),
-            { ...filters, per_page },
-            {
+
+        if (isModal) {
+            const baseUrl = route(routeName);
+            handleModalNavigation(baseUrl, newFilters);
+        } else {
+            router.get(route(routeName), newFilters, {
                 preserveState: true,
                 replace: true,
-            },
-        );
+            });
+        }
     };
 
     const handleSortChange = (value: string) => {
         const [sort_column, order] = value.includes('created_at')
-            ? // split the value of created_at from the order (asc or desc) to get the sort_column and order separately
-              value.endsWith('_asc')
+            ? value.endsWith('_asc')
                 ? ['created_at', 'asc']
                 : ['created_at', 'desc']
-            : //  if the value does not include created_at, it means it is sorting by title, so we split the value of title from the order (asc or desc) to get the sort_column and order separately
-              value.split('_');
+            : value.split('_');
+
+        const newFilters = { ...filters, sort_column, order };
         const routeName = isModal
-            ? 'dashboard.product.media'
+            ? mediaType === 'category'
+                ? 'dashboard.category.media'
+                : 'dashboard.product.media'
             : 'dashboard.media';
-        router.get(
-            route(routeName),
-            { ...filters, sort_column, order },
-            {
+
+        if (isModal) {
+            const baseUrl = route(routeName);
+            handleModalNavigation(baseUrl, newFilters);
+        } else {
+            router.get(route(routeName), newFilters, {
                 preserveState: true,
                 replace: true,
-            },
-        );
+            });
+        }
     };
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const search_term = e.target.value;
+    const handleSearchChange = (search_term: string) => {
+        const newFilters = { ...filters, search_term };
         const routeName = isModal
-            ? 'dashboard.product.media'
+            ? mediaType === 'category'
+                ? 'dashboard.category.media'
+                : 'dashboard.product.media'
             : 'dashboard.media';
-        router.get(
-            route(routeName),
-            { ...filters, search_term },
-            {
+
+        if (isModal) {
+            const baseUrl = route(routeName);
+            handleModalNavigation(baseUrl, newFilters);
+        } else {
+            router.get(route(routeName), newFilters, {
                 preserveState: true,
                 replace: true,
-            },
-        );
+            });
+        }
     };
 
     const handleDelete = () => {
@@ -163,6 +180,14 @@ const MediaComponent = ({
         }
     };
 
+    const handleClearSearch = () => {
+        if (searchInputRef.current) {
+            searchInputRef.current.value = '';
+        }
+
+        handleSearchChange('');
+    };
+
     const MediaContent = () => (
         <>
             {!isModal && (
@@ -179,12 +204,11 @@ const MediaComponent = ({
                     imageType={mediaType}
                 />
                 <div className="flex flex-grow items-center justify-end gap-2">
-                    <Input
-                        name="search"
-                        placeholder="Search media..."
-                        className="w-64"
-                        value={filters.search_term || ''}
-                        onChange={handleSearchChange}
+                    <MediaSearchInput
+                        initialValue={filters.search_term || ''}
+                        onSearch={handleSearchChange}
+                        onClear={handleClearSearch}
+                        inputRef={searchInputRef}
                     />
                     <Select
                         value={`${filters.sort_column}_${filters.order}`}
