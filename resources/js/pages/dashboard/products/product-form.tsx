@@ -1,16 +1,8 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { Page } from '@inertiajs/core';
-import React, {
-    FormEventHandler,
-    PropsWithChildren,
-    useEffect,
-    useState,
-} from 'react';
+import React, { FormEventHandler, useState } from 'react';
 import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
@@ -28,7 +20,6 @@ import {
     ProductVariant,
     ExtendedProps,
 } from '@/types/model-types';
-import { useForm } from '@inertiajs/react';
 import classes from './product-form.module.css';
 import EditorComponent from '@/components/text-editor';
 
@@ -47,30 +38,7 @@ import AlertDialogComponent from '@/components/AlertDialog';
 import { CategoryHierarchy } from '@/types';
 import CategoryManagement from './CategoryManagement';
 import { useProductTreeStore } from '@/zustand/product-tree-store';
-import {
-    CategoryExpandedProvider,
-    useCategoryExpanded,
-} from '@/context/CategoryExpandedContext';
-import {
-    useProductsAdminStore,
-    CurrentProduct,
-} from '@/zustand/product-admin-store';
-
-const initialProduct = (): Product => ({
-    id: 0,
-    uuid: '',
-    title: '',
-    sku: '',
-    slug: '',
-    description: '',
-    image: '',
-    status: true,
-    categories: [],
-    variants: [],
-    media: [],
-    created_at: '',
-    updated_at: '',
-});
+import { CategoryExpandedProvider } from '@/context/CategoryExpandedContext';
 
 const excludeKeys = ['Title', 'Description', 'Image'];
 
@@ -92,50 +60,6 @@ const initialVariant = (attributes?: Attributes[]): ProductVariant => {
         extended_properties: extended_properties,
     };
     return defaultExtendedProps;
-};
-
-const PrepareProductData = (
-    product: Product,
-    attributes?: Attributes[],
-): Product => {
-    const processedVariants = product.variants?.map((variant) => {
-        const initial = initialVariant(attributes);
-        const newVariant: ProductVariant = {
-            ...initial,
-            ...variant,
-            extended_properties: {
-                ...initial.extended_properties,
-                ...variant.extended_properties,
-            },
-        };
-
-        newVariant.extended_properties = { ...newVariant.extended_properties };
-
-        variant.new_attribute_values?.forEach((attrValue) => {
-            if (attrValue.attribute) {
-                const attrName = attrValue.attribute.name;
-                if (attrName === 'Title') {
-                    newVariant.title = attrValue.value;
-                } else if (attrName === 'Description') {
-                    newVariant.description = attrValue.value;
-                } else if (attrName === 'Image') {
-                    // This assumes the value is a path that can be resolved to a media object
-                    // This part might need more complex logic if you need to fetch the full Media object
-                } else if (
-                    newVariant.extended_properties &&
-                    !excludeKeys.includes(attrName)
-                ) {
-                    newVariant.extended_properties[attrName] = attrValue.value;
-                }
-            }
-        });
-        return newVariant;
-    });
-
-    return {
-        ...product,
-        variants: processedVariants,
-    };
 };
 
 type ProductFormData = {
@@ -163,6 +87,7 @@ const ProductForm = ({
     isEdit = false,
     onSuccess,
     allCategories,
+    useFormProps,
 }: {
     product?: Product;
     categoryId?: number;
@@ -170,90 +95,34 @@ const ProductForm = ({
     isEdit?: boolean;
     onSuccess: (categoryId: number) => void;
     allCategories: CategoryHierarchy[];
+    useFormProps: any;
 }) => {
-    console.log('ProductForm rendered with product:', product);
+    const { data, setData, errors, clearErrors, put, post, reset } =
+        useFormProps;
     const [variantStrings, setVariantStrings] = useState<string[]>([]);
     const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(isEdit);
     const [isSaving, setIsSaving] = useState(false);
     const [errorDialogOpen, setErrorDialogOpen] = useState(false);
     const [errorDialogMessage, setErrorDialogMessage] = useState('');
 
-    const { setCurrentProduct } = useProductsAdminStore();
-
-    useEffect(() => {
-        if (isEdit && product) {
-            const currentProduct: CurrentProduct = {
-                status: 'updated',
-                product: PrepareProductData(product!, attributes),
-                categoryId: categoryId || null,
-            };
-            setCurrentProduct(currentProduct);
-        }
-    }, [product, isEdit, attributes, categoryId, setCurrentProduct]);
-
-    const { data, setData, post, put, processing, errors, reset, clearErrors } =
-        useForm<ProductFormData>();
-
     const { setActiveCategoryId } = useProductTreeStore(); // Get the action from the store
 
-    useEffect(() => {
-        const findCategory = (
-            categories: CategoryHierarchy[],
-            id: number,
-        ): Category | undefined => {
-            for (const category of categories) {
-                if (category.id === id) {
-                    return category as Category;
-                }
-                if (category.children) {
-                    const found = findCategory(category.children, id);
-                    if (found) return found;
-                }
-            }
-        };
-
-        let initialData;
-        if (product) {
-            initialData = PrepareProductData(product, attributes);
-        } else {
-            initialData = {
-                ...initialProduct(),
-                variants: [initialVariant(attributes)],
-            };
-            if (categoryId && allCategories) {
-                const categoryToAdd = findCategory(allCategories, categoryId);
-                if (categoryToAdd) {
-                    initialData.categories = [
-                        ...(initialData.categories || []),
-                        categoryToAdd,
-                    ];
-                }
-            }
-        }
-        setData('product', initialData);
-    }, []); //
-    
-    useEffect(() => {
-        if (product) {
-            setData('product', PrepareProductData(product, attributes));
-        }
-    }, [product, attributes]);
-
     console.log('ProductForm data:', data);
-    console.log('ProductForm attributes:', attributes);
 
     const handleImageSelect = (image: Media, variantId?: number) => {
         if (variantId !== undefined) {
             if (!data.product.variants) return;
-            const updatedVariants = data.product.variants.map((variant) => {
-                if (variant.id === variantId) {
-                    return {
-                        ...variant,
-                        image: image,
-                    };
-                }
-                return variant;
-            });
+            const updatedVariants = data.product.variants.map(
+                (variant: ProductVariant) => {
+                    if (variant.id === variantId) {
+                        return {
+                            ...variant,
+                            image: image,
+                        };
+                    }
+                    return variant;
+                },
+            );
 
             setData('product.variants', updatedVariants);
         } else {
@@ -335,7 +204,7 @@ const ProductForm = ({
     const removeVariant = (variantId: number) => {
         if (!data.product.variants) return;
         const updatedVariants = data.product.variants.filter(
-            (variant) => variant.id !== variantId,
+            (variant: ProductVariant) => variant.id !== variantId,
         );
         setData('product.variants', updatedVariants);
     };
@@ -571,7 +440,7 @@ const ProductForm = ({
                                     data.product.media.length > 0 ? (
                                         <>
                                             {data.product.media.map(
-                                                (mediaItem) => (
+                                                (mediaItem: Media) => (
                                                     <div
                                                         key={mediaItem.id}
                                                         className={
@@ -606,8 +475,14 @@ const ProductForm = ({
 
                                                             <div>
                                                                 <MediaSelectionModal
-                                                                    onSelect={handleImageSelect}
-                                                                    entityId={data.product.id}
+                                                                    onSelect={
+                                                                        handleImageSelect
+                                                                    }
+                                                                    entityId={
+                                                                        data
+                                                                            .product
+                                                                            .id
+                                                                    }
                                                                     mediaType="product"
                                                                 >
                                                                     <Button
@@ -744,7 +619,10 @@ const ProductForm = ({
                                 >
                                     <>
                                         {data.product?.variants?.map(
-                                            (variant, index) => (
+                                            (
+                                                variant: ProductVariant,
+                                                index: number,
+                                            ) => (
                                                 <div key={variant.id || index}>
                                                     <div
                                                         className={
@@ -1016,18 +894,12 @@ const ProductForm = ({
                                                                         >
                                                                             <img
                                                                                 src={
-                                                                                    `/${variant.image?.file_path}` +
-                                                                                    variant
-                                                                                        .image
-                                                                                        ?.file_name
+                                                                                    `/products/` +
+                                                                                    variant.image
                                                                                 }
                                                                                 alt={
-                                                                                    variant
-                                                                                        .image
-                                                                                        ?.alt_text ||
-                                                                                    variant
-                                                                                        .image
-                                                                                        ?.title
+                                                                                    variant?.title ||
+                                                                                    ''
                                                                                 }
                                                                             />
                                                                         </figure>

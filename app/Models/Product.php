@@ -29,11 +29,6 @@ class Product extends Model
         'updated_at',
     ];
 
-    function prices(): HasMany
-    {
-        return $this->hasMany(Price::class);
-    }
-
     public function categories()
     {
         return $this->belongsToMany(Category::class)
@@ -41,13 +36,30 @@ class Product extends Model
             ->withTimestamps();
     }
 
+    public function firstCategory(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Category::class, 'id', 'category_id');
+    }
+
     function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
     }
 
-    function media(): HasMany
+    public function lowestPriceVariant(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasMany(Media::class,  'file_name', 'image');
+        return $this->hasOne(ProductVariant::class)->ofMany('price', 'min');
     }
+
+    public function media()
+    {
+        return $this->morphToMany(Media::class, 'mediable', 'media_associations');
+    }
+
+
+    // function media(): HasMany
+    // {
+    //     return $this->hasMany(Media::class,  'file_name', 'image');
+    // }
+
 }

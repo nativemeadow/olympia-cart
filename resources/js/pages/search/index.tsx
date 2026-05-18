@@ -64,7 +64,10 @@ const Index = ({ products, searchTerm }: Props) => {
                                     </PaginationItem>
                                 )}
                                 {links.map((link, index) => {
-                                    if (!isNaN(Number(link.label))) {
+                                    if (
+                                        !isNaN(Number(link.label)) ||
+                                        link.label === '...'
+                                    ) {
                                         return (
                                             <PaginationItem key={index}>
                                                 <PaginationLink
@@ -105,7 +108,7 @@ const Index = ({ products, searchTerm }: Props) => {
                     </div>
                 </>
             ) : (
-                <p>No results found.</p>
+                <p>No products found.</p>
             )}
         </div>
     );

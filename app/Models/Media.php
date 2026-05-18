@@ -25,4 +25,9 @@ class Media extends Model
         'disk',
         'type',
     ];
+
+    public function products()
+    {
+        return $this->morphedByMany(Product::class, 'mediable', 'media_associations');
+    }
 }

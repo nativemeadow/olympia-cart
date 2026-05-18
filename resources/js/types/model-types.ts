@@ -76,20 +76,18 @@ export type ProductVariant = {
     product_id: number;
     sku: string;
     price: number;
-    attributeValues: AttributeValue[];
-};
-
-export type Price = {
-    id: number;
-    product_id: number;
-    sku?: string | null;
-    price: number;
+    new_attribute_values?: AttributeValue[];
+    attributes?: (Attributes & {
+        value: string | number | boolean | null;
+    })[];
     extended_properties?: ExtendedProps;
-    product?: Product;
     title?: string | null;
     description?: string | null;
     image?: Media | null;
-    attribute_values?: AttributeValue[];
+};
+
+export type ExtendedProperties = {
+    [key: string]: string | number | boolean | null | undefined;
 };
 
 export type Attributes = {
@@ -108,6 +106,13 @@ export type AttributeValue = {
     created_at: string;
     updated_at: string;
     attribute?: Attributes;
+};
+
+export type VariantAttributes = Omit<
+    Attributes,
+    'created_at' | 'updated_at'
+> & {
+    value: string | null | number | boolean | null;
 };
 
 export type ExtendedProps = {

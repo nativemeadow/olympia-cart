@@ -41,8 +41,11 @@ export function useBreadcrumbsFromPath(): Breadcrumb[] {
         const breadcrumbs: Breadcrumb[] = [{ title: 'Home', href: '/' }];
 
         let currentPath = '';
-        // Build breadcrumbs from the filtered segments, which corrects the hrefs for subsequent crumbs.
+        // Build breadcrumbs from the filtered segments, which corrects the href for subsequent crumbs.
         filteredSegments.forEach((segment) => {
+            if (segment.includes('&term=')) {
+                segment = segment.split('&term=')[1];
+            }
             if (segment.includes('?term=')) {
                 segment = segment.split('?term=')[1];
             }

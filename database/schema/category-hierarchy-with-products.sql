@@ -52,19 +52,33 @@ SELECT
     pv.id AS variant_id,
     pv.sku AS variant_sku,
     pv.price AS variant_price,
-	pvav.product_variant_id AS product_variant_id,
-	attr.id as attribute_id,
-	attr.name AS attribute_name,
-	av.value AS attribute_value
+    avpv.product_variant_id AS product_variant_id,
+    attr.id as attribute_id,
+    attr.name AS attribute_name,
+    attr.data_type AS attribute_data_type,
+    attr.list_of_values AS attribute_list_of_values,
+    av.value AS attribute_value,
+    ma.media_id AS media_id,
+    ma.mediable_type AS media_type,
+    ma.order AS media_order,
+    m.title AS image_title,
+    m.description AS image_description,
+    m.alt_text AS image_alt_text,
+    m.file_path AS image_file_path,
+    m.file_name AS image_file_name,
+    m.size AS image_file_size,
+    m.type AS image_file_type
 FROM
     category_hierarchy ch
     LEFT JOIN category_product cp ON ch.id = cp.category_id
     LEFT JOIN categories c ON ch.id = c.id
     LEFT JOIN products p ON cp.product_id = p.id
     LEFT JOIN product_variants pv ON p.id = pv.product_id
-	LEFT JOIN product_variant_attribute_values pvav on pvav.product_variant_id = p.id
-	LEFT JOIN attribute_values av on av.id = pvav.attribute_value_id
-	LEFT JOIN public.attributes attr on attr.id = av.attribute_id
+    LEFT JOIN attribute_value_product_variant as avpv on avpv.product_variant_id = pv.id
+    LEFT JOIN attribute_values av on av.id = avpv.attribute_value_id
+    LEFT JOIN public.attributes attr on attr.id = av.attribute_id
+    LEFT JOIN media_associations ma ON ma.mediable_id = p.id
+    LEFT JOIN media m ON ma.media_id = m.id
 ORDER BY
     ch."order",
     product_order ASC,

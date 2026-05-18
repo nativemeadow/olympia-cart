@@ -11,7 +11,7 @@ import MediaComponent, {
     MediaProps as MediaComponentProps,
 } from '@/pages/dashboard/media';
 import { Media } from '@/types/model-types';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import classes from './media-selection-modal.module.css';
 
 type PageProps<T = {}> = T & {
@@ -36,8 +36,17 @@ const MediaSelectionModal = ({
     const [modalMediaProps, setModalMediaProps] =
         useState<PageProps<MediaComponentProps> | null>(null);
 
+    useEffect(() => {
+        console.log('MediaSelectionModal props changed:', {
+            onSelect,
+            mediaType,
+            entityId,
+        });
+    }, [onSelect, mediaType, entityId]);
+
     const openMediaModal = async () => {
         try {
+            console.log('Opening media modal...');
             const routeName =
                 mediaType === 'category'
                     ? 'dashboard.category.media'
@@ -52,9 +61,14 @@ const MediaSelectionModal = ({
             const mediaData = await response.json();
             setModalMediaProps(mediaData as PageProps<MediaComponentProps>);
             setIsModalOpen(true);
+            console.log('Media modal opened and data set.');
         } catch (error) {
             console.error('Failed to fetch media:', error);
         }
+    };
+
+    const handleModalUpdate = (props: PageProps<MediaComponentProps>) => {
+        setModalMediaProps(props);
     };
 
     const handleImageSelect = (image: Media) => {
@@ -63,6 +77,7 @@ const MediaSelectionModal = ({
     };
 
     const handleClose = (e: React.MouseEvent<HTMLElement> | Event) => {
+        console.log('handleClose called');
         e.preventDefault();
         e.stopPropagation();
         setIsModalOpen(false);
@@ -73,10 +88,17 @@ const MediaSelectionModal = ({
             <div onClick={openMediaModal} style={{ display: 'inline-block' }}>
                 {children}
             </div>
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <Dialog
+                open={isModalOpen}
+                onOpenChange={(open) => {
+                    console.log('Dialog onOpenChange triggered with:', open);
+                    setIsModalOpen(open);
+                }}
+            >
                 <DialogContent
                     className="wide-dialog h-[80vh] overflow-y-auto"
                     onInteractOutside={handleClose}
+                    aria-describedby="media selection"
                 >
                     <DialogHeader>
                         <DialogTitle>Select an Image</DialogTitle>
@@ -86,10 +108,9 @@ const MediaSelectionModal = ({
                             {...modalMediaProps}
                             isModal={true}
                             onSelect={handleImageSelect}
-                            onUpdate={(newProps) =>
-                                setModalMediaProps(newProps)
-                            }
+                            onUpdate={handleModalUpdate}
                             mediaType={mediaType}
+                            entityId={entityId}
                         />
                     )}
                     <DialogFooter>
@@ -106,3 +127,12 @@ const MediaSelectionModal = ({
 };
 
 export default MediaSelectionModal;
+/**
+ * 
+ *     media,
+filters,
+onSelect,
+onUpdate,
+isModal,
+mediaType,
+ */

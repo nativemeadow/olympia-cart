@@ -51,6 +51,13 @@ Route::prefix('dashboard')
             'products.order',
         );
 
+        Route::resource('products', ProductController::class)->except([
+            'index',
+            'create',
+            'show',
+            'edit',
+        ]);
+
         Route::get('/product/media/{sort_column?}/{order?}/{search_term?}', [ProductController::class, 'productMedia'])->name('product.media');
 
         Route::get('/product/{product_id}', [

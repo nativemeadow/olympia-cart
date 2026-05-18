@@ -23,6 +23,11 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
         setCategoryModalOpen(false);
     };
 
+    console.log('Rendering CategoryManagement with props:', {
+        allCategories,
+        associatedCategories,
+    });
+
     return (
         <div>
             <h3 className="text-lg font-medium">Associated Categories</h3>

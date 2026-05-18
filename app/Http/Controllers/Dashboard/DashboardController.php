@@ -144,7 +144,30 @@ class DashboardController extends Controller
                         'status' => $row->product_status,
                         'image' => $row->product_image,
                         'variants' => [],
+                        'media' => [],
+                        'categories' => [],
                     ];
+                }
+                if ($categoryId && $productId) {
+                    // Check if the category is already associated with the product
+                    $categoryExists = false;
+                    foreach ($categoriesById[$categoryId]['products'][$productId]['categories'] as $category) {
+                        if ($category['id'] === $categoryId) {
+                            $categoryExists = true;
+                            break;
+                        }
+                    }
+
+                    if (!$categoryExists) {
+                        // Associate category with product, add the category details to the product's categories array
+                        $categoriesById[$categoryId]['products'][$productId]['categories'][] = [
+                            'id' => $categoryId,
+                            'uuid' => $row->category_uuid,
+                            'title' => $row->category_title,
+                            'slug' => $row->category_slug,
+                            'description' => $row->category_description,
+                        ];
+                    }
                 }
 
                 // Process variant data if it exists
@@ -166,6 +189,8 @@ class DashboardController extends Controller
                     if ($row->attribute_id) {
                         $attributeName = $row->attribute_name;
                         $attributeValue = $row->attribute_value;
+                        $attributeDataType = $row->attribute_data_type;
+                        $attributeListOfValues = $row->attribute_list_of_values;
 
                         // Handle special attributes by assigning them directly to the variant
                         if ($attributeName === 'Description') {
@@ -180,8 +205,32 @@ class DashboardController extends Controller
                                 'id' => $row->attribute_id,
                                 'name' => $attributeName,
                                 'value' => $attributeValue,
+                                'data_type' => $attributeDataType,
+                                'list_of_values' => $attributeListOfValues,
                             ];
                         }
+                    }
+                }
+                // process media data if it exists
+                if ($row->media_id) {
+                    // Check if the media item already exists to avoid duplicates
+                    $mediaExists = false;
+                    foreach ($categoriesById[$categoryId]['products'][$productId]['media'] as $mediaItem) {
+                        if ($mediaItem['id'] === $row->media_id) {
+                            $mediaExists = true;
+                            break;
+                        }
+                    }
+
+                    if (!$mediaExists) {
+                        $categoriesById[$categoryId]['products'][$productId]['media'][] = [
+                            'id' => $row->media_id,
+                            'order' => $row->media_order,
+                            'file_name' => $row->image_file_name,
+                            'file_path' => $row->image_file_path,
+                            'size' => $row->image_file_size,
+                            'type' => $row->image_file_type,
+                        ];
                     }
                 }
             }

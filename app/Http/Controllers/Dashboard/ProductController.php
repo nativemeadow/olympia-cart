@@ -61,7 +61,7 @@ class ProductController extends Controller
     private $excludeKeys = ['Title', 'Description', 'Image']; // Define derived keys
 
     // This method retrieves a product along with its related categories, variants, and media.
-    public function show($product_id)
+    public function show(int $product_id)
     {
         $product = Product::with([
             'categories',
@@ -75,24 +75,14 @@ class ProductController extends Controller
             return response()->json(['product' => null], 404);
         }
 
+        $product->media()->orderBy('order')->get();
+
         // Manually build breadcrumbs for each category
         $product->categories->each(function ($category) {
             $category->breadcrumb = $category->getBreadcrumb();
         });
 
         $productArray = $product->toArray();
-
-        if (isset($productArray['variants'])) {
-            $productArray['prices'] = $productArray['variants'];
-            unset($productArray['variants']);
-
-            // Unset the now-redundant attribute_values from each price
-            foreach ($productArray['prices'] as &$price) {
-                if (isset($price['attribute_values'])) {
-                    unset($price['attribute_values']);
-                }
-            }
-        }
 
         $allAttributes = Attribute::distinct()->get(['id', 'name', 'data_type']);
         $allCategories = $this->getCategoryTree();
@@ -200,13 +190,13 @@ class ProductController extends Controller
             'product.image' => 'nullable|string|max:255',
             'product.status' => 'required|boolean',
             'product.categories.*.id' => 'required_with:product.categories|integer|exists:categories,id',
-            'product.prices' => 'required|array|min:1',
-            'product.prices.*.sku' => 'nullable|string|max:255|unique:product_variants,sku',
-            'product.prices.*.price' => 'required|numeric|min:1',
-            'product.prices.*.extended_properties' => 'nullable|array',
-            'product.prices.*.title' => 'nullable|string',
-            'product.prices.*.description' => 'nullable|string',
-            'product.prices.*.image' => 'nullable|array',
+            'product.variants' => 'required|array|min:1',
+            'product.variants.*.sku' => 'nullable|string|max:255|unique:product_variants,sku',
+            'product.variants.*.price' => 'required|numeric|min:1',
+            'product.variants.*.extended_properties' => 'nullable|array',
+            'product.variants.*.title' => 'nullable|string',
+            'product.variants.*.description' => 'nullable|string',
+            'product.variants.*.image' => 'nullable|array',
         ], [
             'product.title.required' => 'The product title is required.',
             'product.sku.required' => 'The product SKU is required.',
@@ -218,12 +208,12 @@ class ProductController extends Controller
             'product.categories.*.id.required_with' => 'Each category must have an ID.',
             'product.categories.*.id.integer' => 'Each category ID must be an integer.',
             'product.categories.*.id.exists' => 'Each category ID must exist in the categories table.',
-            'product.prices.required' => 'At least one price is required.',
-            'product.prices.*.sku.required' => 'Price must have a SKU.',
-            'product.prices.*.sku.unique' => 'Price SKU must be unique.',
-            'product.prices.*.price.required' => 'Price must have a value.',
-            'product.prices.*.price.numeric' => 'Price value must be numeric.',
-            'product.prices.*.price.min' => 'Price must be at least 1.',
+            'product.variants.required' => 'At least one variant is required.',
+            'product.variants.*.sku.required' => 'Variant must have a SKU.',
+            'product.variants.*.sku.unique' => 'Variant SKU must be unique.',
+            'product.variants.*.price.required' => 'Variant must have a value.',
+            'product.variants.*.price.numeric' => 'Variant value must be numeric.',
+            'product.variants.*.price.min' => 'Variant must be at least 1.',
         ]);
 
         $productData = $validatedData['product'];
@@ -253,27 +243,27 @@ class ProductController extends Controller
                 'sku' => $productData['sku'],
             ]);
 
-            foreach ($productData['prices'] as $priceData) {
+            foreach ($productData['variants'] as $variantData) {
                 $variant = $product->variants()->create([
-                    'sku' => $priceData['sku'],
-                    'price' => $priceData['price'],
+                    'sku' => $variantData['sku'],
+                    'price' => $variantData['price'],
                 ]);
 
                 $attributesToSync = [];
 
                 // Delegate handling of the 'title' derived attribute.
                 // This ensures the title is correctly created and associated with the variant.
-                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttribute($variant, 'title', $priceData['title'] ?? null));
+                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttribute($variant, 'title', $variantData['title'] ?? null));
 
                 // Delegate handling of the 'description' derived attribute.
-                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttribute($variant, 'description', $priceData['description'] ?? null));
+                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttribute($variant, 'description', $variantData['description'] ?? null));
 
                 // Delegate handling of the 'image' derived attribute.
-                $attributesToSync = array_merge($attributesToSync, $this->handleImageAttribute($variant, $priceData['image'] ?? null));
+                $attributesToSync = array_merge($attributesToSync, $this->handleImageAttribute($variant, $variantData['image'] ?? null));
 
                 // Handle standard extended_properties that are not derived.
-                if (isset($priceData['extended_properties'])) {
-                    foreach ($priceData['extended_properties'] as $name => $value) {
+                if (isset($variantData['extended_properties'])) {
+                    foreach ($variantData['extended_properties'] as $name => $value) {
                         // Skip derived attributes since they are handled separately
                         if (in_array($name, $this->excludeKeys)) {
                             continue;
@@ -314,19 +304,19 @@ class ProductController extends Controller
             'product.image' => 'nullable|string|max:255',
             'product.status' => 'required|boolean',
             'product.categories.*.id' => 'required_with:product.categories|integer|exists:categories,id',
-            'product.prices' => 'required|array|min:1',
-            'product.prices.*.id' => 'nullable|integer',
-            'product.prices.*.sku' => ['nullable', 'string', 'max:255', Rule::unique('product_variants', 'sku')->where(function ($query) use ($request) {
-                $priceIds = collect($request->input('product.prices'))->pluck('id')->filter();
-                if ($priceIds->isNotEmpty()) {
-                    return $query->whereNotIn('id', $priceIds);
+            'product.variants' => 'required|array|min:1',
+            'product.variants.*.id' => 'nullable|integer',
+            'product.variants.*.sku' => ['nullable', 'string', 'max:255', Rule::unique('product_variants', 'sku')->where(function ($query) use ($request) {
+                $variantIds = collect($request->input('product.variants'))->pluck('id')->filter();
+                if ($variantIds->isNotEmpty()) {
+                    return $query->whereNotIn('id', $variantIds);
                 }
             })],
-            'product.prices.*.price' => 'required|numeric|min:1',
-            'product.prices.*.extended_properties' => 'nullable|array',
-            'product.prices.*.title' => 'nullable|string',
-            'product.prices.*.description' => 'nullable|string',
-            'product.prices.*.image' => 'nullable|array',
+            'product.variants.*.price' => 'required|numeric|min:1',
+            'product.variants.*.extended_properties' => 'nullable|array',
+            'product.variants.*.title' => 'nullable|string',
+            'product.variants.*.description' => 'nullable|string',
+            'product.variants.*.image' => 'nullable|array',
         ], [
             'product.title.required' => 'The product title is required.',
             'product.sku.required' => 'The product SKU is required.',
@@ -338,12 +328,12 @@ class ProductController extends Controller
             'product.categories.*.id.required_with' => 'Each category must have an ID.',
             'product.categories.*.id.integer' => 'Each category ID must be an integer.',
             'product.categories.*.id.exists' => 'Each category ID must exist in the categories table.',
-            'product.prices.required' => 'At least one price is required.',
-            'product.prices.*.sku.required' => 'Each price must have a SKU.',
-            'product.prices.*.sku.unique' => 'Price SKU must be unique.',
-            'product.prices.*.price.required' => 'Price must have a price value.',
-            'product.prices.*.price.numeric' => 'Price value must be numeric.',
-            'product.prices.*.price.min' => 'Price must be at least 1.',
+            'product.variants.required' => 'At least one variant is required.',
+            'product.variants.*.sku.required' => 'Each variant must have a SKU.',
+            'product.variants.*.sku.unique' => 'Variant SKU must be unique.',
+            'product.variants.*.price.required' => 'Variant must have a price value.',
+            'product.variants.*.price.numeric' => 'Variant value must be numeric.',
+            'product.variants.*.price.min' => 'Variant must be at least 1.',
         ]);
 
         $productData = $validatedData['product'];
@@ -400,33 +390,33 @@ class ProductController extends Controller
                 $product->categories()->detach();
             }
 
-            $priceIds = [];
+            $variantIds = [];
 
-            foreach ($productData['prices'] as $priceData) {
+            foreach ($productData['variants'] as $variantData) {
                 $variant = $product->variants()->updateOrCreate(
-                    ['id' => $priceData['id'] ?? null],
+                    ['id' => $variantData['id'] ?? null],
                     [
-                        'sku' => $priceData['sku'],
-                        'price' => $priceData['price'],
+                        'sku' => $variantData['sku'],
+                        'price' => $variantData['price'],
                     ]
                 );
-                $priceIds[] = $variant->id;
+                $variantIds[] = $variant->id;
 
                 $attributesToSync = [];
 
                 // Delegate handling of the 'title' derived attribute.
                 // This function will correctly update the existing title or create a new one if needed.
-                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttribute($variant, 'title', $priceData['title'] ?? null));
+                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttribute($variant, 'title', $variantData['title'] ?? null));
 
                 // Delegate handling of the 'description' derived attribute.
-                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttribute($variant, 'description', $priceData['description'] ?? null));
+                $attributesToSync = array_merge($attributesToSync, $this->handleDerivedAttribute($variant, 'description', $variantData['description'] ?? null));
 
                 // Delegate handling of the 'image' derived attribute.
-                $attributesToSync = array_merge($attributesToSync, $this->handleImageAttribute($variant, $priceData['image'] ?? null));
+                $attributesToSync = array_merge($attributesToSync, $this->handleImageAttribute($variant, $variantData['image'] ?? null));
 
                 // Handle standard extended_properties that are not derived.
-                if (isset($priceData['extended_properties'])) {
-                    foreach ($priceData['extended_properties'] as $name => $value) {
+                if (isset($variantData['extended_properties'])) {
+                    foreach ($variantData['extended_properties'] as $name => $value) {
                         // Skip derived attributes since they are handled separately
                         if (in_array($name, $this->excludeKeys)) {
                             continue;
@@ -447,7 +437,7 @@ class ProductController extends Controller
             }
 
             // Delete variants that are no longer in the request
-            $product->variants()->whereNotIn('id', $priceIds)->delete();
+            $product->variants()->whereNotIn('id', $variantIds)->delete();
 
             DB::commit();
             return redirect()->route('dashboard.products')->with('success', 'Product updated successfully.');

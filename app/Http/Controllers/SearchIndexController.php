@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ProductSearchResource;
 use App\Services\ProductSearchService;
 use Illuminate\Http\Request;
 use App\Models\Product;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class SearchIndexController extends Controller
@@ -24,10 +24,13 @@ class SearchIndexController extends Controller
 
         $orderedProductIds = $this->productSearchService->search($query);
 
-        $productsQuery = Product::query();
+        $productsQuery = Product::with([
+            'lowestPriceVariant',
+            'categories',
+        ]);
 
         if (empty($orderedProductIds)) {
-            $paginatedProducts = $productsQuery->whereIn('id', [])->paginate($perPage);
+            $products = $productsQuery->whereIn('id', [])->paginate($perPage);
         } else {
             $order = [];
             foreach ($orderedProductIds as $index => $id) {
@@ -35,10 +38,12 @@ class SearchIndexController extends Controller
             }
             $orderClause = 'CASE ' . implode(' ', $order) . ' END';
 
-            $paginatedProducts = $productsQuery->whereIn('id', $orderedProductIds)
+            $products = $productsQuery->whereIn('id', $orderedProductIds)
                 ->orderByRaw($orderClause)
                 ->paginate($perPage);
         }
+
+        $paginatedProducts = $products->through(fn($product) => new ProductSearchResource($product));
 
         $paginatedProducts->appends(['term' => $query]);
 

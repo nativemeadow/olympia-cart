@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { devtools } from 'zustand/middleware';
 import { CategoryHierarchy } from '@/types';
+import { Attributes } from '@/types/model-types';
 import { useProductsAdminStore } from './product-admin-store';
 
 type ProductTreeState = {
@@ -12,6 +13,10 @@ type ProductTreeState = {
     expandAll: (categories: CategoryHierarchy[]) => void;
     collapseAll: () => void;
     setActiveCategoryId: (id: number | null) => void;
+    allCategories: CategoryHierarchy[];
+    setAllCategories: (categories: CategoryHierarchy[]) => void;
+    allAttributes: Attributes[];
+    setAllAttributes: (attributes: Attributes[]) => void;
 };
 
 export const useProductTreeStore = create<ProductTreeState>()(
@@ -21,6 +26,12 @@ export const useProductTreeStore = create<ProductTreeState>()(
                 openNodes: {},
                 activeCategoryId: null,
                 setOpenNodes: (openNodes) => set({ openNodes }),
+                allAttributes: [],
+                setAllAttributes: (attributes) =>
+                    set({ allAttributes: attributes }),
+                allCategories: [],
+                setAllCategories: (categories) =>
+                    set({ allCategories: categories }),
                 toggleNode: (category) => {
                     const { openNodes } = get();
                     const { addCategory, removeCategory } =

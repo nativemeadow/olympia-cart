@@ -18,8 +18,24 @@ type CategoriesIndexProps = {
 };
 
 export default function Products({ categories, auth }: CategoriesIndexProps) {
-    const { expandAll, collapseAll, activeCategoryId, setActiveCategoryId } =
-        useProductTreeStore();
+    const {
+        expandAll,
+        collapseAll,
+        activeCategoryId,
+        setActiveCategoryId,
+        setAllCategories,
+        setAllAttributes,
+    } = useProductTreeStore();
+
+    // Fetch this data once when the page loads
+    useEffect(() => {
+        fetch(route('dashboard.price.attributes'))
+            .then((res) => res.json())
+            .then((data) => {
+                setAllAttributes(data.allAttributes);
+                setAllCategories(data.allCategories);
+            });
+    }, []);
 
     // This effect runs when the page reloads after a product is saved
     useEffect(() => {

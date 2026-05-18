@@ -159,13 +159,8 @@ function Dashboard({ auth, stats, recentOrders }: PageProps) {
     );
 }
 
-Dashboard.layout = (page: React.ReactNode) => {
-    const { auth, stats, recentOrders } = usePage<PageProps>().props;
-    return (
-        <DashboardLayout user={auth.user}>
-            <Dashboard auth={auth} stats={stats} recentOrders={recentOrders} />
-        </DashboardLayout>
-    );
-};
+Dashboard.layout = (page: React.ReactElement<PageProps>) => (
+    <DashboardLayout user={page.props.auth.user}>{page}</DashboardLayout>
+);
 
 export default Dashboard;

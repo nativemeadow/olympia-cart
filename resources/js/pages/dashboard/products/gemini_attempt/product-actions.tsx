@@ -12,36 +12,33 @@ import {
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
-    DialogClose,
     DialogContent,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogFooter,
+    DialogClose,
 } from '@/components/ui/dialog';
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Attributes, Product, Category } from '@/types/model-types';
+import { CategoryHierarchy } from '@/types';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { router, useForm } from '@inertiajs/react';
+import axios from 'axios';
+import { useProductTreeStore } from '@/zustand/product-tree-store';
+import ProductForm from './product-form';
+import classes from './product-form.module.css';
 import {
     initialProduct,
     initialVariant,
     PrepareProductData,
     findCategory,
 } from './product-form-helpers';
-import { Attributes, Product, Category } from '@/types/model-types';
-import { CategoryHierarchy } from '@/types';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { ImSpinner } from 'react-icons/im';
-import { useEffect, useState } from 'react';
-import { router, useForm } from '@inertiajs/react';
-import { useProductTreeStore } from '@/zustand/product-tree-store';
-
-import axios, { all } from 'axios';
-
-import ProductForm from './product-form';
-import classes from './product-form.module.css';
 
 type ProductFormData = {
     product: Product;
@@ -59,11 +56,6 @@ export function AddProductAction({
     const [allCategories, setAllCategories] = useState<CategoryHierarchy[]>([]);
     const useFormProps = useForm<ProductFormData>();
     const { setData } = useFormProps;
-
-    const handleSuccess = (categoryId: number) => {
-        setIsOpen(false);
-        onSuccess(categoryId);
-    };
 
     useEffect(() => {
         if (isOpen) {
@@ -93,6 +85,11 @@ export function AddProductAction({
         }
     }, [isOpen, categoryId, setData]);
 
+    const handleSuccess = (categoryId: number) => {
+        setIsOpen(false);
+        onSuccess(categoryId);
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <Tooltip>
@@ -119,7 +116,6 @@ export function AddProductAction({
                 <div className={classes.scrollable_content}>
                     <ProductForm
                         attributes={attributes}
-                        categoryId={categoryId}
                         isEdit={false}
                         onSuccess={handleSuccess}
                         allCategories={allCategories}
@@ -146,34 +142,41 @@ export function EditProductAction({
     product: Product;
     onSuccess: (categoryId: number) => void;
 }) {
+    const [isOpen, setIsOpen] = useState(false);
     const [attributes, setAttributes] = useState<Attributes[]>([]);
-    //const [allCategories, setAllCategories] = useState<CategoryHierarchy[]>([]);
-    const { allAttributes, allCategories, setAllCategories, setAllAttributes } =
-        useProductTreeStore();
+    const [allCategories, setAllCategories] = useState<CategoryHierarchy[]>([]);
     const [preparedProduct, setPreparedProduct] = useState<Product | null>(
         null,
     );
-    const [isOpen, setIsOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const useFormProps = useForm<ProductFormData>();
     const { setData } = useFormProps;
 
-    const handleSuccess = (categoryId: number) => {
-        onSuccess(categoryId);
-        setIsOpen(false);
-    };
-
     useEffect(() => {
         if (isOpen) {
-            const prepared = PrepareProductData(product, allAttributes);
-            setPreparedProduct(prepared);
-            setData('product', prepared);
+            // get the list of all price attributes and categories
+            // then prepare the product data for the form and set it in state
+            fetch(route('dashboard.price.attributes'))
+                .then((response) => response.json())
+                .then((data) => {
+                    const prepared = PrepareProductData(
+                        product,
+                        data.allAttributes,
+                    );
+                    setAttributes(data.allAttributes);
+                    setAllCategories(data.allCategories);
+                    setPreparedProduct(prepared);
+                    setData('product', prepared);
+                });
         }
-    }, [isOpen, product, allAttributes, setData]);
+    }, [isOpen, product, setData]);
+
+    const handleSuccess = (categoryId: number) => {
+        setIsOpen(false);
+        onSuccess(categoryId);
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTitle className="sr-only">Edit Product</DialogTitle>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <DialogTrigger asChild>
@@ -192,49 +195,29 @@ export function EditProductAction({
                 className={classes.form_dialog}
                 onInteractOutside={(e) => e.preventDefault()}
             >
-                {isLoading ? (
-                    <div className={classes.loadingContainer}>
-                        <div className={classes.savingSpinner}>
-                            <ImSpinner />
-                        </div>
-                    </div>
-                ) : (
-                    <>
-                        <DialogHeader>
-                            <DialogTitle>Edit: {product.title}</DialogTitle>
-                        </DialogHeader>
-                        <div className={classes.scrollable_content}>
-                            {preparedProduct && (
-                                <ProductForm
-                                    product={preparedProduct}
-                                    categoryId={
-                                        preparedProduct.categories &&
-                                        preparedProduct.categories[0]
-                                            ? preparedProduct.categories[0].id
-                                            : undefined
-                                    }
-                                    attributes={attributes}
-                                    isEdit={true}
-                                    onSuccess={handleSuccess}
-                                    allCategories={allCategories}
-                                    useFormProps={useFormProps}
-                                />
-                            )}
-                        </div>
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button variant="outline">Cancel</Button>
-                            </DialogClose>
-                            <Button
-                                type="submit"
-                                form="product-edit-form"
-                                disabled={isLoading}
-                            >
-                                {isLoading ? 'Loading...' : 'Save'}
-                            </Button>
-                        </DialogFooter>
-                    </>
-                )}
+                <DialogHeader>
+                    <DialogTitle>Edit Product</DialogTitle>
+                </DialogHeader>
+                <div className={classes.scrollable_content}>
+                    {preparedProduct && (
+                        <ProductForm
+                            product={preparedProduct}
+                            attributes={attributes}
+                            isEdit={true}
+                            onSuccess={handleSuccess}
+                            allCategories={allCategories}
+                            useFormProps={useFormProps}
+                        />
+                    )}
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button type="submit" form="product-edit-form">
+                        Save Changes
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );

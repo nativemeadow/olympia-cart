@@ -396,3 +396,10 @@ body.contact-us-page-body .page-container {
     max-width: 100%;
     height: auto;
 }
+
+.hide_input_clear_button::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 0;
+    height: 0;
+}

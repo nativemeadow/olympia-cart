@@ -88,9 +88,13 @@ class Category extends Model
             ->orderBy('product_order');
     }
 
-
-    function media(): HasOne
+    public function media()
     {
-        return $this->hasOne(Media::class,  'file_name', 'image');
+        return $this->morphToMany(Media::class, 'mediable', 'media_associations');
     }
+
+    // function media(): HasOne
+    // {
+    //     return $this->hasOne(Media::class,  'file_name', 'image');
+    // }
 }
