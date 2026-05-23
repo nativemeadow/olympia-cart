@@ -24,6 +24,8 @@ type MediaSelectionModalProps = {
     mediaType: 'product' | 'category';
     entityId?: number;
     children?: React.ReactNode;
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
 };
 
 const MediaSelectionModal = ({
@@ -31,6 +33,8 @@ const MediaSelectionModal = ({
     mediaType = 'product',
     entityId,
     children,
+    isOpen,
+    onOpenChange,
 }: MediaSelectionModalProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMediaProps, setModalMediaProps] =
@@ -60,7 +64,8 @@ const MediaSelectionModal = ({
             }
             const mediaData = await response.json();
             setModalMediaProps(mediaData as PageProps<MediaComponentProps>);
-            setIsModalOpen(true);
+            //setIsModalOpen(true);
+            onOpenChange(true);
             console.log('Media modal opened and data set.');
         } catch (error) {
             console.error('Failed to fetch media:', error);
@@ -73,14 +78,15 @@ const MediaSelectionModal = ({
 
     const handleImageSelect = (image: Media) => {
         onSelect(image);
-        setIsModalOpen(false);
+        // setIsModalOpen(false);
     };
 
     const handleClose = (e: React.MouseEvent<HTMLElement> | Event) => {
         console.log('handleClose called');
         e.preventDefault();
         e.stopPropagation();
-        setIsModalOpen(false);
+        // setIsModalOpen(false);
+        onOpenChange(false);
     };
 
     return (
@@ -88,13 +94,7 @@ const MediaSelectionModal = ({
             <div onClick={openMediaModal} style={{ display: 'inline-block' }}>
                 {children}
             </div>
-            <Dialog
-                open={isModalOpen}
-                onOpenChange={(open) => {
-                    console.log('Dialog onOpenChange triggered with:', open);
-                    setIsModalOpen(open);
-                }}
-            >
+            <Dialog open={isOpen} onOpenChange={onOpenChange}>
                 <DialogContent
                     className="wide-dialog h-[80vh] overflow-y-auto"
                     onInteractOutside={handleClose}

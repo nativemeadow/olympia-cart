@@ -1,7 +1,6 @@
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CategoryHierarchy } from '@/types';
 import { Product as ProductType } from '@/types/model-types';
-import { ProductType as prodType } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -32,7 +31,6 @@ import { useProductsAdminStore } from '@/zustand/product-admin-store';
 import Toastify from 'toastify-js';
 import 'toastify-js/src/toastify.css';
 import RenderImage from '@/components/render-image';
-import { PriceVariantType } from '@/types';
 import classes from './products.module.css';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
@@ -268,225 +266,251 @@ const ProductNode: React.FC<ProductNodeProps> = ({
                 </div>
             </div>
             {isOpen && (
-                <div
-                    className={`${classes.children_container} ${
-                        pageLayout === 'grid' ? classes.grid_view : ''
-                    }`}
-                >
-                    {hasProducts &&
-                        products.map((product) =>
-                            pageLayout === 'list' ? (
-                                <div
-                                    key={product.id}
-                                    className={`${classes.product_item} ${
-                                        dropTargetId === product.id
-                                            ? classes.drop_target
-                                            : ''
-                                    }`}
-                                    draggable
-                                    onDragStart={(e) =>
-                                        handleDragStart(e, product.id)
-                                    }
-                                    onDragOver={(e) =>
-                                        handleDragOver(e, product.id)
-                                    }
-                                    onDragLeave={handleDragLeave}
-                                    onDrop={(e) => handleDrop(e, product.id)}
-                                    onDragEnd={handleDragEnd}
-                                >
+                <div className={classes.children_container}>
+                    <div
+                        className={
+                            pageLayout === 'grid' ? classes.grid_view : ''
+                        }
+                    >
+                        {hasProducts &&
+                            products.map((product) =>
+                                pageLayout === 'list' ? (
                                     <div
-                                        className={
-                                            classes.drag_handle_icon_container
+                                        key={product.id}
+                                        className={`${classes.product_item} ${
+                                            dropTargetId === product.id
+                                                ? classes.drop_target
+                                                : ''
+                                        }`}
+                                        draggable
+                                        onDragStart={(e) =>
+                                            handleDragStart(e, product.id)
                                         }
+                                        onDragOver={(e) =>
+                                            handleDragOver(e, product.id)
+                                        }
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) =>
+                                            handleDrop(e, product.id)
+                                        }
+                                        onDragEnd={handleDragEnd}
                                     >
-                                        <GripVertical
-                                            className={classes.drag_handle_icon}
-                                        />
-                                    </div>
-                                    <Package className={classes.product_icon} />
-                                    <div className={classes.node_title}>
-                                        <span>{product.title}</span>
-                                    </div>
-                                    <div className={classes.actions}>
-                                        <EditProductAction
-                                            product={product}
-                                            onSuccess={handleSuccess}
-                                        />
-                                        <DeleteProductAction
-                                            product={product}
-                                            onSuccess={handleSuccess}
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                <Card
-                                    className={classes.grid_item}
-                                    key={product.id}
-                                >
-                                    <CardHeader>
-                                        <CardTitle
-                                            className={classes.card_title_bar}
+                                        <div
+                                            className={
+                                                classes.drag_handle_icon_container
+                                            }
                                         >
-                                            <div
-                                                key={product.id}
-                                                className={` ${classes.product_item} ${
-                                                    dropTargetId === product.id
-                                                        ? classes.drop_target
-                                                        : ''
-                                                }`}
-                                                draggable
-                                                onDragStart={(e) =>
-                                                    handleDragStart(
-                                                        e,
-                                                        product.id,
-                                                    )
+                                            <GripVertical
+                                                className={
+                                                    classes.drag_handle_icon
                                                 }
-                                                onDragOver={(e) =>
-                                                    handleDragOver(
-                                                        e,
-                                                        product.id,
-                                                    )
+                                            />
+                                        </div>
+                                        <Package
+                                            className={classes.product_icon}
+                                        />
+                                        <div className={classes.node_title}>
+                                            <span>{product.title}</span>
+                                        </div>
+                                        <div className={classes.actions}>
+                                            <EditProductAction
+                                                product={product}
+                                                onSuccess={handleSuccess}
+                                            />
+                                            <DeleteProductAction
+                                                product={product}
+                                                onSuccess={handleSuccess}
+                                            />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <Card
+                                        className={classes.grid_item}
+                                        key={product.id}
+                                    >
+                                        <CardHeader>
+                                            <CardTitle
+                                                className={
+                                                    classes.card_title_bar
                                                 }
-                                                onDragLeave={handleDragLeave}
-                                                onDrop={(e) =>
-                                                    handleDrop(e, product.id)
-                                                }
-                                                onDragEnd={handleDragEnd}
                                             >
                                                 <div
-                                                    className={
-                                                        classes.grid_item_header
+                                                    key={product.id}
+                                                    className={` ${classes.product_item} ${
+                                                        dropTargetId ===
+                                                        product.id
+                                                            ? classes.drop_target
+                                                            : ''
+                                                    }`}
+                                                    draggable
+                                                    onDragStart={(e) =>
+                                                        handleDragStart(
+                                                            e,
+                                                            product.id,
+                                                        )
                                                     }
+                                                    onDragOver={(e) =>
+                                                        handleDragOver(
+                                                            e,
+                                                            product.id,
+                                                        )
+                                                    }
+                                                    onDragLeave={
+                                                        handleDragLeave
+                                                    }
+                                                    onDrop={(e) =>
+                                                        handleDrop(
+                                                            e,
+                                                            product.id,
+                                                        )
+                                                    }
+                                                    onDragEnd={handleDragEnd}
                                                 >
                                                     <div
                                                         className={
-                                                            classes.grid_icons
+                                                            classes.grid_item_header
                                                         }
                                                     >
                                                         <div
                                                             className={
-                                                                classes.drag_handle_icon_container
+                                                                classes.grid_icons
                                                             }
                                                         >
-                                                            <GripVertical
+                                                            <div
                                                                 className={
-                                                                    classes.drag_handle_icon
+                                                                    classes.drag_handle_icon_container
+                                                                }
+                                                            >
+                                                                <GripVertical
+                                                                    className={
+                                                                        classes.drag_handle_icon
+                                                                    }
+                                                                />
+                                                            </div>
+                                                            <Package
+                                                                className={
+                                                                    classes.product_icon
                                                                 }
                                                             />
                                                         </div>
-                                                        <Package
+                                                        <div
                                                             className={
-                                                                classes.product_icon
+                                                                classes.node_title
                                                             }
-                                                        />
-                                                    </div>
-                                                    <div
-                                                        className={
-                                                            classes.node_title
-                                                        }
-                                                    >
-                                                        <span>
-                                                            {product.title}
-                                                        </span>
-                                                    </div>
-                                                    <div
-                                                        className={
-                                                            classes.actions
-                                                        }
-                                                    >
-                                                        <EditProductAction
-                                                            product={product}
-                                                            onSuccess={
-                                                                handleSuccess
+                                                        >
+                                                            <span>
+                                                                {product.title}
+                                                            </span>
+                                                        </div>
+                                                        <div
+                                                            className={
+                                                                classes.actions
                                                             }
-                                                        />
-                                                        <DeleteProductAction
-                                                            product={product}
-                                                            onSuccess={
-                                                                handleSuccess
-                                                            }
-                                                        />
+                                                        >
+                                                            <EditProductAction
+                                                                product={
+                                                                    product
+                                                                }
+                                                                onSuccess={
+                                                                    handleSuccess
+                                                                }
+                                                            />
+                                                            <DeleteProductAction
+                                                                product={
+                                                                    product
+                                                                }
+                                                                onSuccess={
+                                                                    handleSuccess
+                                                                }
+                                                            />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent
-                                        className={classes.grid_item_content}
-                                    >
-                                        <RenderImage
-                                            className={classes.grid_item_image}
-                                            src={`/${productImageFolder}/${product.image}`}
-                                            alt={product.title}
-                                        />
-                                        <CardDescription>
-                                            <div
-                                                className={classes.item_pricing}
-                                            >
-                                                <ul>
-                                                    {product.variants &&
-                                                        product.variants.map(
-                                                            (variant) => (
-                                                                <>
-                                                                    <li
-                                                                        key={
-                                                                            variant.id
-                                                                        }
-                                                                    >
-                                                                        {
-                                                                            variant.sku
-                                                                        }{' '}
-                                                                        - $
-                                                                        {Number(
-                                                                            variant.price /
-                                                                                100,
-                                                                        ).toFixed(
-                                                                            2,
-                                                                        )}
-                                                                    </li>
-                                                                    <li>
-                                                                        <span
-                                                                            className={
-                                                                                classes.labelBold
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent
+                                            className={
+                                                classes.grid_item_content
+                                            }
+                                        >
+                                            <RenderImage
+                                                className={
+                                                    classes.grid_item_image
+                                                }
+                                                src={`/${productImageFolder}/${product.image}`}
+                                                alt={product.title}
+                                            />
+                                            <CardDescription>
+                                                <div
+                                                    className={
+                                                        classes.item_pricing
+                                                    }
+                                                >
+                                                    <ul>
+                                                        {product.variants &&
+                                                            product.variants.map(
+                                                                (variant) => (
+                                                                    <>
+                                                                        <li
+                                                                            key={
+                                                                                variant.id
                                                                             }
                                                                         >
-                                                                            Select
-                                                                            Label:
-                                                                        </span>
-                                                                        {
-                                                                            variant.description
-                                                                        }
-                                                                    </li>
-                                                                    <li>
-                                                                        <span
-                                                                            className={
-                                                                                classes.labelBold
+                                                                            {
+                                                                                variant.sku
+                                                                            }{' '}
+                                                                            - $
+                                                                            {Number(
+                                                                                variant.price /
+                                                                                    100,
+                                                                            ).toFixed(
+                                                                                2,
+                                                                            )}
+                                                                        </li>
+                                                                        <li>
+                                                                            <span
+                                                                                className={
+                                                                                    classes.labelBold
+                                                                                }
+                                                                            >
+                                                                                Select
+                                                                                Label:
+                                                                            </span>
+                                                                            {
+                                                                                variant.description
                                                                             }
-                                                                        >
-                                                                            Price
-                                                                            Label:
-                                                                        </span>
-                                                                        {
-                                                                            variant.title
-                                                                        }
-                                                                    </li>
-                                                                    <li>
-                                                                        <Separator
-                                                                            className={
-                                                                                classes.variant_separator
+                                                                        </li>
+                                                                        <li>
+                                                                            <span
+                                                                                className={
+                                                                                    classes.labelBold
+                                                                                }
+                                                                            >
+                                                                                Price
+                                                                                Label:
+                                                                            </span>
+                                                                            {
+                                                                                variant.title
                                                                             }
-                                                                        />
-                                                                    </li>
-                                                                </>
-                                                            ),
-                                                        )}
-                                                </ul>
-                                            </div>
-                                        </CardDescription>
-                                    </CardContent>
-                                </Card>
-                            ),
-                        )}
+                                                                        </li>
+                                                                        <li>
+                                                                            <Separator
+                                                                                className={
+                                                                                    classes.variant_separator
+                                                                                }
+                                                                            />
+                                                                        </li>
+                                                                    </>
+                                                                ),
+                                                            )}
+                                                    </ul>
+                                                </div>
+                                            </CardDescription>
+                                        </CardContent>
+                                    </Card>
+                                ),
+                            )}
+                    </div>
                     {hasChildren &&
                         category.children &&
                         category.children.map((child) => (

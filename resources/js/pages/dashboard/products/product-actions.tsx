@@ -34,7 +34,7 @@ import { Attributes, Product, Category } from '@/types/model-types';
 import { CategoryHierarchy } from '@/types';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { ImSpinner } from 'react-icons/im';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { router, useForm } from '@inertiajs/react';
 import { useProductTreeStore } from '@/zustand/product-tree-store';
 
@@ -147,7 +147,6 @@ export function EditProductAction({
     onSuccess: (categoryId: number) => void;
 }) {
     const [attributes, setAttributes] = useState<Attributes[]>([]);
-    //const [allCategories, setAllCategories] = useState<CategoryHierarchy[]>([]);
     const { allAttributes, allCategories, setAllCategories, setAllAttributes } =
         useProductTreeStore();
     const [preparedProduct, setPreparedProduct] = useState<Product | null>(
@@ -155,21 +154,21 @@ export function EditProductAction({
     );
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const useFormProps = useForm<ProductFormData>();
-    const { setData } = useFormProps;
 
-    const handleSuccess = (categoryId: number) => {
-        onSuccess(categoryId);
-        setIsOpen(false);
-    };
+    const handleSuccess = useCallback(
+        (categoryId: number) => {
+            onSuccess(categoryId);
+            setIsOpen(false);
+        },
+        [onSuccess],
+    );
 
     useEffect(() => {
         if (isOpen) {
             const prepared = PrepareProductData(product, allAttributes);
             setPreparedProduct(prepared);
-            setData('product', prepared);
         }
-    }, [isOpen, product, allAttributes, setData]);
+    }, [isOpen, product, allAttributes]);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -217,7 +216,6 @@ export function EditProductAction({
                                     isEdit={true}
                                     onSuccess={handleSuccess}
                                     allCategories={allCategories}
-                                    useFormProps={useFormProps}
                                 />
                             )}
                         </div>
@@ -238,7 +236,7 @@ export function EditProductAction({
             </DialogContent>
         </Dialog>
     );
-}
+} // Memoize without dependencies to prevent re-renders
 
 export function DeleteProductAction({
     product,

@@ -1,4 +1,5 @@
-import React, { FormEventHandler, useState } from 'react';
+import { useForm } from '@inertiajs/react';
+import React, { FormEventHandler, memo, useState } from 'react';
 import {
     Card,
     CardContent,
@@ -39,8 +40,8 @@ import { CategoryHierarchy } from '@/types';
 import CategoryManagement from './CategoryManagement';
 import { useProductTreeStore } from '@/zustand/product-tree-store';
 import { CategoryExpandedProvider } from '@/context/CategoryExpandedContext';
-
-const excludeKeys = ['Title', 'Description', 'Image'];
+import ProductVariants from './components/product-variants';
+import ProductDetails from './components/product-details';
 
 const initialVariant = (attributes?: Attributes[]): ProductVariant => {
     const extended_properties: ExtendedProps = {};
@@ -71,13 +72,26 @@ type FieldWrapperProps = {
     error?: string;
 };
 
-const FieldWrapper: React.FC<FieldWrapperProps> = ({ children, error }) => {
+export const FieldWrapper: React.FC<FieldWrapperProps> = ({
+    children,
+    error,
+}) => {
     return (
         <div className={classes.error_container}>
             {children}
             {error && <div className={classes.input_error_bubble}>{error}</div>}
         </div>
     );
+};
+
+type ProductFormProps = {
+    product?: Product;
+    categoryId?: number;
+    attributes?: Attributes[];
+    isEdit?: boolean;
+    onSuccess: (categoryId: number) => void;
+    allCategories: CategoryHierarchy[];
+    useFormProps?: any;
 };
 
 const ProductForm = ({
@@ -87,23 +101,20 @@ const ProductForm = ({
     isEdit = false,
     onSuccess,
     allCategories,
-    useFormProps,
-}: {
-    product?: Product;
-    categoryId?: number;
-    attributes?: Attributes[];
-    isEdit?: boolean;
-    onSuccess: (categoryId: number) => void;
-    allCategories: CategoryHierarchy[];
-    useFormProps: any;
-}) => {
+}: ProductFormProps) => {
     const { data, setData, errors, clearErrors, put, post, reset } =
-        useFormProps;
+        useForm<ProductFormData>({
+            product: product as Product,
+        });
     const [variantStrings, setVariantStrings] = useState<string[]>([]);
     const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(isEdit);
     const [isSaving, setIsSaving] = useState(false);
     const [errorDialogOpen, setErrorDialogOpen] = useState(false);
     const [errorDialogMessage, setErrorDialogMessage] = useState('');
+    const [isMainImageModalOpen, setIsMainImageModalOpen] = useState(false);
+    const [openModalVariantId, setOpenModalVariantId] = useState<number | null>(
+        null,
+    );
 
     const { setActiveCategoryId } = useProductTreeStore(); // Get the action from the store
 
@@ -125,9 +136,11 @@ const ProductForm = ({
             );
 
             setData('product.variants', updatedVariants);
+            setOpenModalVariantId(null);
         } else {
             setData('product.media', [image]);
             setData('product.image', image.file_name);
+            setIsMainImageModalOpen(false);
         }
     };
 
@@ -258,302 +271,18 @@ const ProductForm = ({
             <form id="product-edit-form" onSubmit={handleSubmit}>
                 <div className={classes.product_form}>
                     <div className={classes.center_column}>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Product Details</CardTitle>
-                                <CardDescription>
-                                    Manage Product details.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className={classes.card_content}>
-                                <div>
-                                    <Label
-                                        htmlFor="title"
-                                        className={classes.label}
-                                    >
-                                        Title
-                                    </Label>
-                                    <FieldWrapper
-                                        error={errors['product.title']}
-                                    >
-                                        <Input
-                                            id="title"
-                                            type="text"
-                                            value={data.product.title}
-                                            onChange={(e) => {
-                                                clearErrors('product.title');
-                                                const newTitle = e.target.value;
-                                                setData(
-                                                    'product.title',
-                                                    newTitle,
-                                                );
-                                                if (!isSlugManuallyEdited) {
-                                                    clearErrors('product.slug');
-                                                    setData(
-                                                        'product.slug',
-                                                        generateSlug(newTitle),
-                                                    );
-                                                }
-                                            }}
-                                            className={cx(classes.input, {
-                                                'input-with-error':
-                                                    errors['product.title'],
-                                            })}
-                                        />
-                                    </FieldWrapper>
-                                </div>
-                                <div>
-                                    <Label
-                                        htmlFor="sku"
-                                        className={classes.label}
-                                    >
-                                        SKU
-                                    </Label>
-                                    <FieldWrapper error={errors['product.sku']}>
-                                        <Input
-                                            id="sku"
-                                            type="text"
-                                            value={data.product.sku}
-                                            onChange={(e) => {
-                                                clearErrors('product.sku');
-                                                setData(
-                                                    'product.sku',
-                                                    e.target.value,
-                                                );
-                                            }}
-                                            className={cx(classes.input, {
-                                                'input-with-error':
-                                                    errors['product.sku'],
-                                            })}
-                                        />
-                                    </FieldWrapper>
-                                </div>
-                                <div>
-                                    <Label
-                                        htmlFor="slug"
-                                        className={classes.label}
-                                    >
-                                        Slug
-                                    </Label>
-                                    <FieldWrapper
-                                        error={errors['product.slug']}
-                                    >
-                                        <Input
-                                            id="slug"
-                                            type="text"
-                                            value={data.product.slug}
-                                            onChange={(e) => {
-                                                clearErrors('product.slug');
-                                                setData(
-                                                    'product.slug',
-                                                    e.target.value,
-                                                );
-                                                setIsSlugManuallyEdited(true);
-                                            }}
-                                            className={cx(classes.input, {
-                                                'input-with-error':
-                                                    errors['product.slug'],
-                                            })}
-                                        />
-                                    </FieldWrapper>
-                                </div>
-                                <div>
-                                    <Label
-                                        htmlFor="slug"
-                                        className={classes.label}
-                                    >
-                                        Status
-                                    </Label>
-                                    <FieldWrapper
-                                        error={errors['product.status']}
-                                    >
-                                        <RadioGroup
-                                            onValueChange={(value) => {
-                                                clearErrors('product.status');
-                                                setData(
-                                                    'product.status',
-                                                    value === '1',
-                                                );
-                                            }}
-                                            value={
-                                                data.product.status ? '1' : '0'
-                                            }
-                                            className={cx(classes.radioGroup, {
-                                                'input-with-error':
-                                                    errors['product.status'],
-                                            })}
-                                        >
-                                            <div className={classes.radioItem}>
-                                                <RadioGroupItem
-                                                    value="1"
-                                                    id="status-active"
-                                                />
-                                                <Label htmlFor="status-active">
-                                                    Active
-                                                </Label>
-                                            </div>
-                                            <div className={classes.radioItem}>
-                                                <RadioGroupItem
-                                                    value="0"
-                                                    id="status-draft"
-                                                />
-                                                <Label htmlFor="status-draft">
-                                                    Draft
-                                                </Label>
-                                            </div>
-                                        </RadioGroup>
-                                    </FieldWrapper>
-                                </div>
-                                <div>
-                                    <Label
-                                        htmlFor="description"
-                                        className={classes.label}
-                                    >
-                                        Description
-                                    </Label>
-                                    <FieldWrapper
-                                        error={errors['product.description']}
-                                    >
-                                        <EditorComponent
-                                            id="description"
-                                            initialValue={
-                                                data.product.description || ''
-                                            }
-                                            handleEditorChange={(
-                                                content: string,
-                                            ) => {
-                                                clearErrors(
-                                                    'product.description',
-                                                );
-                                                setData(
-                                                    'product.description',
-                                                    content,
-                                                );
-                                            }}
-                                        />
-                                    </FieldWrapper>
-                                </div>
-                                <Separator className="my-6" />
-                                <div className={classes.imageContainer}>
-                                    <h2>Image</h2>
-                                    {data.product.media &&
-                                    data.product.media.length > 0 ? (
-                                        <>
-                                            {data.product.media.map(
-                                                (mediaItem: Media) => (
-                                                    <div
-                                                        key={mediaItem.id}
-                                                        className={
-                                                            classes.mediaItem
-                                                        }
-                                                    >
-                                                        <div
-                                                            className={
-                                                                classes.mediaCard
-                                                            }
-                                                        >
-                                                            <figure
-                                                                className={
-                                                                    classes.mediaFigure
-                                                                }
-                                                            >
-                                                                <img
-                                                                    src={
-                                                                        '/' +
-                                                                        mediaItem.file_path +
-                                                                        mediaItem.file_name
-                                                                    }
-                                                                    alt={
-                                                                        mediaItem.alt_text ||
-                                                                        mediaItem.title
-                                                                    }
-                                                                    className={
-                                                                        classes.product_image_preview
-                                                                    }
-                                                                />
-                                                            </figure>
-
-                                                            <div>
-                                                                <MediaSelectionModal
-                                                                    onSelect={
-                                                                        handleImageSelect
-                                                                    }
-                                                                    entityId={
-                                                                        data
-                                                                            .product
-                                                                            .id
-                                                                    }
-                                                                    mediaType="product"
-                                                                >
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        className={
-                                                                            classes.changeImageButton
-                                                                        }
-                                                                    >
-                                                                        Change
-                                                                        Image
-                                                                    </Button>
-                                                                </MediaSelectionModal>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ),
-                                            )}
-                                        </>
-                                    ) : (
-                                        <MediaSelectionModal
-                                            onSelect={(image) =>
-                                                handleImageSelect(image)
-                                            }
-                                            entityId={data.product.id}
-                                            mediaType="product"
-                                        >
-                                            <div
-                                                className={
-                                                    classes.addImagePlaceholder
-                                                }
-                                            >
-                                                <p>Add image</p>
-                                            </div>
-                                        </MediaSelectionModal>
-                                    )}
-                                </div>
-
-                                {data.product.media ? (
-                                    <div>
-                                        <Label
-                                            htmlFor="image"
-                                            className={classes.label}
-                                        >
-                                            Image File
-                                        </Label>
-                                        <FieldWrapper
-                                            error={errors['product.image']}
-                                        >
-                                            <Input
-                                                id="image"
-                                                name="image"
-                                                type="text"
-                                                disabled
-                                                value={data.product.image || ''}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'product.image',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className={cx(classes.input, {
-                                                    'input-with-error':
-                                                        errors['product.image'],
-                                                })}
-                                            />
-                                        </FieldWrapper>
-                                    </div>
-                                ) : null}
-                            </CardContent>
-                        </Card>
+                        {/* Product details section with image selection modal */}
+                        <ProductDetails
+                            product={data.product}
+                            setData={setData}
+                            errors={errors}
+                            clearErrors={clearErrors}
+                            isSlugManuallyEdited={isSlugManuallyEdited}
+                            setIsSlugManuallyEdited={setIsSlugManuallyEdited}
+                            handleImageSelect={handleImageSelect}
+                            isMainImageModalOpen={isMainImageModalOpen}
+                            setIsMainImageModalOpen={setIsMainImageModalOpen}
+                        />
                     </div>
                     <div className={classes.right_column}>
                         <Card>
@@ -575,550 +304,16 @@ const ProductForm = ({
                             </CardContent>
                         </Card>
                         {/* Add fields for variants and categories here */}
-                        {data.product?.variants && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Variants</CardTitle>
-                                    <CardDescription
-                                        className={classes.cardDescription}
-                                    >
-                                        <span>
-                                            Manage product variants and options.
-                                        </span>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="icon"
-                                                    title="Add new variant option"
-                                                    className={
-                                                        classes.addPriceButton
-                                                    }
-                                                    aria-label="Add new variant option"
-                                                    onClick={addVariant}
-                                                >
-                                                    <Plus
-                                                        className={
-                                                            classes.plusIcon
-                                                        }
-                                                    />
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                Add new variant option
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent
-                                    className={cx(
-                                        classes.card_content,
-                                        classes.pricesCardContent,
-                                    )}
-                                >
-                                    <>
-                                        {data.product?.variants?.map(
-                                            (
-                                                variant: ProductVariant,
-                                                index: number,
-                                            ) => (
-                                                <div key={variant.id || index}>
-                                                    <div
-                                                        className={
-                                                            classes.inputSkuPrice
-                                                        }
-                                                    >
-                                                        <div
-                                                            className={
-                                                                classes.priceFields
-                                                            }
-                                                        >
-                                                            <div
-                                                                className={
-                                                                    classes.inputItem
-                                                                }
-                                                            >
-                                                                <Label
-                                                                    htmlFor="sku"
-                                                                    className={
-                                                                        classes.label
-                                                                    }
-                                                                >
-                                                                    Sku
-                                                                </Label>
-                                                                <FieldWrapper
-                                                                    error={
-                                                                        (
-                                                                            errors as any
-                                                                        )[
-                                                                            `product.variants.${index}.sku`
-                                                                        ]
-                                                                    }
-                                                                >
-                                                                    <Input
-                                                                        id={`sku-${variant.id}`}
-                                                                        type="text"
-                                                                        value={
-                                                                            variant.sku ||
-                                                                            ''
-                                                                        }
-                                                                        onChange={(
-                                                                            e,
-                                                                        ) => {
-                                                                            clearErrors(
-                                                                                `product.variants.${index}.sku` as any,
-                                                                            );
-                                                                            setData(
-                                                                                `product.variants.${index}.sku` as any,
-                                                                                e
-                                                                                    .target
-                                                                                    .value,
-                                                                            );
-                                                                        }}
-                                                                        className={cx(
-                                                                            classes.skuInput,
-                                                                            {
-                                                                                'input-with-error':
-                                                                                    (
-                                                                                        errors as any
-                                                                                    )[
-                                                                                        `product.variants.${index}.sku`
-                                                                                    ],
-                                                                            },
-                                                                        )}
-                                                                    />
-                                                                </FieldWrapper>
-                                                            </div>
-
-                                                            <DeleteVariantForm
-                                                                variantId={
-                                                                    variant.id
-                                                                }
-                                                                removeVariant={
-                                                                    removeVariant
-                                                                }
-                                                            />
-                                                        </div>
-
-                                                        <div
-                                                            className={
-                                                                classes.inputGroup
-                                                            }
-                                                        >
-                                                            <div
-                                                                className={
-                                                                    classes.inputItem
-                                                                }
-                                                            >
-                                                                <Label
-                                                                    htmlFor={`price-${variant.id}`}
-                                                                    className={
-                                                                        classes.label
-                                                                    }
-                                                                >
-                                                                    Price
-                                                                </Label>
-                                                                <FieldWrapper
-                                                                    error={
-                                                                        (
-                                                                            errors as any
-                                                                        )[
-                                                                            `product.variants.${index}.price`
-                                                                        ]
-                                                                    }
-                                                                >
-                                                                    <Input
-                                                                        id={`price-${variant.id}`}
-                                                                        type="number"
-                                                                        value={
-                                                                            variantStrings[
-                                                                                index
-                                                                            ] ??
-                                                                            (
-                                                                                variant.price /
-                                                                                100
-                                                                            ).toFixed(
-                                                                                2,
-                                                                            )
-                                                                        }
-                                                                        onChange={(
-                                                                            e,
-                                                                        ) =>
-                                                                            updateVariant(
-                                                                                e,
-                                                                                index,
-                                                                            )
-                                                                        }
-                                                                        className={cx(
-                                                                            classes.priceInput,
-                                                                            {
-                                                                                'input-with-error':
-                                                                                    (
-                                                                                        errors as any
-                                                                                    )[
-                                                                                        `product.variants.${index}.price`
-                                                                                    ],
-                                                                            },
-                                                                        )}
-                                                                    />
-                                                                </FieldWrapper>
-                                                            </div>
-                                                            <div>
-                                                                <Label
-                                                                    htmlFor={`price-${variant.id}-description`}
-                                                                    className={
-                                                                        classes.label
-                                                                    }
-                                                                >
-                                                                    Select Label
-                                                                </Label>
-                                                                <FieldWrapper
-                                                                    error={
-                                                                        (
-                                                                            errors as any
-                                                                        )[
-                                                                            `product.variants.${index}.description`
-                                                                        ]
-                                                                    }
-                                                                >
-                                                                    <Input
-                                                                        id={`price-${variant.id}-description`}
-                                                                        type="text"
-                                                                        value={
-                                                                            variant.description ||
-                                                                            ''
-                                                                        }
-                                                                        onChange={(
-                                                                            e,
-                                                                        ) => {
-                                                                            clearErrors(
-                                                                                `product.variants.${index}.description` as any,
-                                                                            );
-                                                                            setData(
-                                                                                `product.variants.${index}.description` as any,
-                                                                                e
-                                                                                    .target
-                                                                                    .value,
-                                                                            );
-                                                                        }}
-                                                                        className={cx(
-                                                                            classes.descriptionInput,
-                                                                            {
-                                                                                'input-with-error':
-                                                                                    (
-                                                                                        errors as any
-                                                                                    )[
-                                                                                        `product.variants.${index}.description`
-                                                                                    ],
-                                                                            },
-                                                                        )}
-                                                                    />
-                                                                </FieldWrapper>
-                                                            </div>
-                                                            <div>
-                                                                <Label
-                                                                    htmlFor={`price-${variant.id}-title`}
-                                                                    className={
-                                                                        classes.label
-                                                                    }
-                                                                >
-                                                                    Price Label
-                                                                </Label>
-                                                                <FieldWrapper
-                                                                    error={
-                                                                        (
-                                                                            errors as any
-                                                                        )[
-                                                                            `product.variants.${index}.title`
-                                                                        ]
-                                                                    }
-                                                                >
-                                                                    <Input
-                                                                        id={`price-${variant.id}-title`}
-                                                                        type="text"
-                                                                        value={
-                                                                            variant.title ||
-                                                                            ''
-                                                                        }
-                                                                        onChange={(
-                                                                            e,
-                                                                        ) => {
-                                                                            clearErrors(
-                                                                                `product.variants.${index}.title` as any,
-                                                                            );
-                                                                            setData(
-                                                                                `product.variants.${index}.title` as any,
-                                                                                e
-                                                                                    .target
-                                                                                    .value,
-                                                                            );
-                                                                        }}
-                                                                        className={cx(
-                                                                            classes.titleInput,
-                                                                            {
-                                                                                'input-with-error':
-                                                                                    (
-                                                                                        errors as any
-                                                                                    )[
-                                                                                        `product.variants.${index}.title`
-                                                                                    ],
-                                                                            },
-                                                                        )}
-                                                                    />
-                                                                </FieldWrapper>
-                                                            </div>
-                                                        </div>
-                                                        {variant.image ? (
-                                                            <div
-                                                                className={`${classes.mediaItem}`}
-                                                            >
-                                                                <div
-                                                                    className={`${classes.mediaCard}`}
-                                                                >
-                                                                    <Label
-                                                                        htmlFor={`price-${variant.id}-image`}
-                                                                        className={
-                                                                            classes.label
-                                                                        }
-                                                                    >
-                                                                        Image
-                                                                    </Label>
-                                                                    <div
-                                                                        className={
-                                                                            classes.imageContainer
-                                                                        }
-                                                                    >
-                                                                        <figure
-                                                                            className={`${classes.mediaFigure} ${classes.priceImage}`}
-                                                                        >
-                                                                            <img
-                                                                                src={
-                                                                                    `/products/` +
-                                                                                    variant.image
-                                                                                }
-                                                                                alt={
-                                                                                    variant?.title ||
-                                                                                    ''
-                                                                                }
-                                                                            />
-                                                                        </figure>
-                                                                        <MediaSelectionModal
-                                                                            onSelect={(
-                                                                                image,
-                                                                            ) =>
-                                                                                handleImageSelect(
-                                                                                    image,
-                                                                                    variant.id,
-                                                                                )
-                                                                            }
-                                                                            entityId={
-                                                                                data
-                                                                                    .product
-                                                                                    .id
-                                                                            }
-                                                                            mediaType="product"
-                                                                        >
-                                                                            <Tooltip>
-                                                                                <TooltipTrigger
-                                                                                    asChild
-                                                                                >
-                                                                                    <Button
-                                                                                        type="button"
-                                                                                        variant="outline"
-                                                                                        size="icon"
-                                                                                        className={
-                                                                                            classes.editButton
-                                                                                        }
-                                                                                        aria-label="Select or change image"
-                                                                                    >
-                                                                                        <Pencil
-                                                                                            className={
-                                                                                                classes.pencilIcon
-                                                                                            }
-                                                                                        />
-                                                                                    </Button>
-                                                                                </TooltipTrigger>
-                                                                                <TooltipContent>
-                                                                                    Select
-                                                                                    or
-                                                                                    change
-                                                                                    image
-                                                                                </TooltipContent>
-                                                                            </Tooltip>
-                                                                        </MediaSelectionModal>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-                                                            <MediaSelectionModal
-                                                                onSelect={(
-                                                                    image,
-                                                                ) =>
-                                                                    handleImageSelect(
-                                                                        image,
-                                                                        variant.id,
-                                                                    )
-                                                                }
-                                                                entityId={
-                                                                    data.product
-                                                                        .id
-                                                                }
-                                                                mediaType="product"
-                                                            >
-                                                                <div
-                                                                    className={
-                                                                        classes.addImagePlaceholderSmall
-                                                                    }
-                                                                >
-                                                                    <p>
-                                                                        Add
-                                                                        image
-                                                                    </p>
-                                                                </div>
-                                                            </MediaSelectionModal>
-                                                        )}
-                                                        <div
-                                                            className={`${classes.mediaItem}`}
-                                                        >
-                                                            <div
-                                                                className={`${classes.mediaCard}`}
-                                                            >
-                                                                <Label
-                                                                    htmlFor={`price-${variant.id}-file`}
-                                                                    className={
-                                                                        classes.label
-                                                                    }
-                                                                >
-                                                                    Image
-                                                                </Label>
-                                                                <Input
-                                                                    id={`price-${variant.id}-file`}
-                                                                    type="text"
-                                                                    value={
-                                                                        variant
-                                                                            .image
-                                                                            ?.file_name ||
-                                                                        ''
-                                                                    }
-                                                                    onChange={(
-                                                                        e,
-                                                                    ) =>
-                                                                        setData(
-                                                                            `product.variants.${index}.image` as any,
-                                                                            e
-                                                                                .target
-                                                                                .value,
-                                                                        )
-                                                                    }
-                                                                    className={
-                                                                        classes.fileInput
-                                                                    }
-                                                                />
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Add other price fields here */}
-                                                        <div
-                                                            className={
-                                                                classes.inputGroup
-                                                            }
-                                                        >
-                                                            {variant.extended_properties &&
-                                                                Object.entries(
-                                                                    variant.extended_properties,
-                                                                ).map(
-                                                                    (
-                                                                        [
-                                                                            key,
-                                                                            value,
-                                                                        ],
-                                                                        propIndex,
-                                                                    ) => (
-                                                                        <React.Fragment
-                                                                            key={String(
-                                                                                key,
-                                                                            )}
-                                                                        >
-                                                                            {!excludeKeys.includes(
-                                                                                key,
-                                                                            ) && (
-                                                                                <div
-                                                                                    className={
-                                                                                        classes.inputItem
-                                                                                    }
-                                                                                >
-                                                                                    <Label
-                                                                                        htmlFor={`price-${variant.id}-prop-${key}`}
-                                                                                        className={
-                                                                                            classes.label
-                                                                                        }
-                                                                                    >
-                                                                                        {
-                                                                                            key
-                                                                                        }
-                                                                                    </Label>
-                                                                                    <FieldWrapper
-                                                                                        error={
-                                                                                            (
-                                                                                                errors as any
-                                                                                            )[
-                                                                                                `product.variants.${index}.extended_properties.${propIndex}.value`
-                                                                                            ]
-                                                                                        }
-                                                                                    >
-                                                                                        <Input
-                                                                                            id={`price-${variant.id}-prop-${key}`}
-                                                                                            type="text"
-                                                                                            value={String(
-                                                                                                value ||
-                                                                                                    '',
-                                                                                            )}
-                                                                                            onChange={(
-                                                                                                e,
-                                                                                            ) => {
-                                                                                                clearErrors(
-                                                                                                    `product.variants.${index}.extended_properties.${key}` as any,
-                                                                                                );
-                                                                                                setData(
-                                                                                                    `product.variants.${index}.extended_properties.${key}` as any,
-                                                                                                    e
-                                                                                                        .target
-                                                                                                        .value,
-                                                                                                );
-                                                                                            }}
-                                                                                            className={cx(
-                                                                                                classes.extendedPropInput,
-                                                                                                {
-                                                                                                    'input-with-error':
-                                                                                                        (
-                                                                                                            errors as any
-                                                                                                        )[
-                                                                                                            `product.variants.${index}.extended_properties.${propIndex}.value`
-                                                                                                        ],
-                                                                                                },
-                                                                                            )}
-                                                                                        />
-                                                                                    </FieldWrapper>
-                                                                                </div>
-                                                                            )}
-                                                                        </React.Fragment>
-                                                                    ),
-                                                                )}
-                                                        </div>
-                                                    </div>
-                                                    <Separator
-                                                        className={
-                                                            classes.separator
-                                                        }
-                                                    />
-                                                </div>
-                                            ),
-                                        )}
-                                    </>
-                                </CardContent>
-                            </Card>
-                        )}
+                        <ProductVariants
+                            variants={data.product.variants || []}
+                            setData={setData}
+                            errors={errors}
+                            clearErrors={clearErrors}
+                            addVariant={addVariant}
+                            removeVariant={removeVariant}
+                            handleImageSelect={handleImageSelect}
+                            productId={data.product.id}
+                        />
                     </div>
                 </div>
             </form>
@@ -1134,4 +329,4 @@ const ProductForm = ({
     );
 };
 
-export default ProductForm;
+export default memo(ProductForm);
