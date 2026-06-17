@@ -104,6 +104,10 @@ class DashboardController extends Controller
             database_path('schema/category-hierarchy-with-products.sql'),
         );
         $results = DB::select($query);
+
+        // Eager load all products with their categories to avoid N+1 queries
+        $allProducts = \App\Models\Product::with('categories')->get()->keyBy('id');
+
         $categories = [];
 
         $categoriesById = [];
@@ -147,26 +151,18 @@ class DashboardController extends Controller
                         'media' => [],
                         'categories' => [],
                     ];
-                }
-                if ($categoryId && $productId) {
-                    // Check if the category is already associated with the product
-                    $categoryExists = false;
-                    foreach ($categoriesById[$categoryId]['products'][$productId]['categories'] as $category) {
-                        if ($category['id'] === $categoryId) {
-                            $categoryExists = true;
-                            break;
-                        }
-                    }
 
-                    if (!$categoryExists) {
-                        // Associate category with product, add the category details to the product's categories array
-                        $categoriesById[$categoryId]['products'][$productId]['categories'][] = [
-                            'id' => $categoryId,
-                            'uuid' => $row->category_uuid,
-                            'title' => $row->category_title,
-                            'slug' => $row->category_slug,
-                            'description' => $row->category_description,
-                        ];
+                    // Assign categories from the eager-loaded collection
+                    if (isset($allProducts[$productId])) {
+                        $categoriesById[$categoryId]['products'][$productId]['categories'] = $allProducts[$productId]->categories->map(function ($category) {
+                            return [
+                                'id' => $category->id,
+                                'uuid' => $category->uuid,
+                                'title' => $category->title,
+                                'slug' => $category->slug,
+                                'description' => $category->description,
+                            ];
+                        })->all();
                     }
                 }
 
@@ -183,6 +179,28 @@ class DashboardController extends Controller
                             'price' => $row->variant_price,
                             'attributes' => [],
                         ];
+                    }
+
+                    // Process variant media if it exists
+                    if ($row->variant_media_id) {
+                        // Check if the media item already exists to avoid duplicates
+                        $mediaExists = false;
+                        foreach ($categoriesById[$categoryId]['products'][$productId]['variants'][$variantId]['media'] ?? [] as $mediaItem) {
+                            if ($mediaItem['id'] === $row->variant_media_id) {
+                                $mediaExists = true;
+                                break;
+                            }
+                        }
+                        if (!$mediaExists) {
+                            $categoriesById[$categoryId]['products'][$productId]['variants'][$variantId]['media'][] = [
+                                'id' => $row->variant_media_id,
+                                'type' => $row->variant_media_type,
+                                'order' => $row->variant_media_order,
+                                'file_name' => $row->variant_image_file_name,
+                                'file_path' => $row->variant_image_file_path,
+                                'size' => $row->variant_image_file_size,
+                            ];
+                        }
                     }
 
                     // Process attribute data if it exists

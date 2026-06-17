@@ -46,6 +46,10 @@
     flex-direction: column;
     gap: 0.5rem;
     margin-bottom: 1rem;
+
+    &.variantMediaItem {
+        margin-bottom: 0;
+    }
 }
 
 .mediaCard {

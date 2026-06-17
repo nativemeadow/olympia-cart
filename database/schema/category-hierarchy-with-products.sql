@@ -52,6 +52,16 @@ SELECT
     pv.id AS variant_id,
     pv.sku AS variant_sku,
     pv.price AS variant_price,
+    mapv.media_id AS variant_media_id,
+    mapv.mediable_type AS variant_media_type,
+    mapv.order AS variant_media_order,
+    mv.title AS variant_image_title,
+    mv.description AS variant_image_description,
+    mv.alt_text AS variant_image_alt_text,
+    mv.file_path AS variant_image_file_path,
+    mv.file_name AS variant_image_file_name,
+    mv.size AS variant_image_file_size,
+    mv.type AS variant_image_file_type,
     avpv.product_variant_id AS product_variant_id,
     attr.id as attribute_id,
     attr.name AS attribute_name,
@@ -79,6 +89,8 @@ FROM
     LEFT JOIN public.attributes attr on attr.id = av.attribute_id
     LEFT JOIN media_associations ma ON ma.mediable_id = p.id
     LEFT JOIN media m ON ma.media_id = m.id
+    LEFT JOIN media_associations mapv ON mapv.mediable_id = pv.id
+    LEFT JOIN media mv ON mapv.media_id = mv.id
 ORDER BY
     ch."order",
     product_order ASC,

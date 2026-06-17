@@ -124,4 +124,11 @@ class ProductVariant extends Model
 
         return implode(' - ', $descriptionParts);
     }
+
+    public function media()
+    {
+        return $this->morphToMany(Media::class, 'mediable', 'media_associations')
+            ->withPivot('order')
+            ->orderBy('media_associations.order');
+    }
 }

@@ -78,7 +78,7 @@ const MediaSelectionModal = ({
 
     const handleImageSelect = (image: Media) => {
         onSelect(image);
-        // setIsModalOpen(false);
+        onOpenChange(false); // Close the modal immediately
     };
 
     const handleClose = (e: React.MouseEvent<HTMLElement> | Event) => {

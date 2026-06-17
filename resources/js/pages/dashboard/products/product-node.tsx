@@ -437,7 +437,7 @@ const ProductNode: React.FC<ProductNodeProps> = ({
                                                 className={
                                                     classes.grid_item_image
                                                 }
-                                                src={`/${productImageFolder}/${product.image}`}
+                                                src={`/${product?.media?.[0]?.file_path}/${product?.media?.[0]?.file_name}`}
                                                 alt={product.title}
                                             />
                                             <CardDescription>

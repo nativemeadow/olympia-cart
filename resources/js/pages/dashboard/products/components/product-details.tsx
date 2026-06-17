@@ -38,10 +38,16 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     clearErrors,
     isSlugManuallyEdited,
     setIsSlugManuallyEdited,
-    handleImageSelect,
     isMainImageModalOpen,
     setIsMainImageModalOpen,
 }) => {
+    const handleImageSelect = (image: Media) => {
+        setData('product.image', image.id);
+        // We also update the media array to reflect the change instantly in the UI
+        setData('product.media', [image]);
+        setIsMainImageModalOpen(false);
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -161,53 +167,61 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                     <h2>Image</h2>
                     {product.media && product.media.length > 0 ? (
                         <>
-                            {product.media.map((mediaItem: Media) => (
-                                <div
-                                    key={mediaItem.id}
-                                    className={classes.mediaItem}
-                                >
-                                    <div className={classes.mediaCard}>
-                                        <figure className={classes.mediaFigure}>
-                                            <img
-                                                src={
-                                                    '/' +
-                                                    mediaItem.file_path +
-                                                    mediaItem.file_name
-                                                }
-                                                alt={
-                                                    mediaItem.alt_text ||
-                                                    mediaItem.title
-                                                }
-                                                className={
-                                                    classes.product_image_preview
-                                                }
-                                            />
-                                        </figure>
-
-                                        <div>
-                                            <MediaSelectionModal
-                                                onSelect={handleImageSelect}
-                                                entityId={product.id}
-                                                mediaType="product"
-                                                isOpen={isMainImageModalOpen}
-                                                onOpenChange={
-                                                    setIsMainImageModalOpen
-                                                }
+                            {
+                                product.media.map((mediaItem: Media) => (
+                                    <div
+                                        key={mediaItem.id}
+                                        className={classes.mediaItem}
+                                    >
+                                        <div className={classes.mediaCard}>
+                                            <figure
+                                                className={classes.mediaFigure}
                                             >
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
+                                                <img
+                                                    src={
+                                                        '/' +
+                                                        mediaItem.file_path +
+                                                        mediaItem.file_name
+                                                    }
+                                                    alt={
+                                                        mediaItem.alt_text ||
+                                                        mediaItem.title
+                                                    }
                                                     className={
-                                                        classes.changeImageButton
+                                                        classes.product_image_preview
+                                                    }
+                                                />
+                                            </figure>
+
+                                            <div>
+                                                <MediaSelectionModal
+                                                    onSelect={handleImageSelect}
+                                                    entityId={product.id}
+                                                    mediaType="product"
+                                                    isOpen={
+                                                        isMainImageModalOpen
+                                                    }
+                                                    onOpenChange={
+                                                        setIsMainImageModalOpen
                                                     }
                                                 >
-                                                    Change Image
-                                                </Button>
-                                            </MediaSelectionModal>
+                                                    <Button
+                                                        variant="outline"
+                                                        type="button"
+                                                        size="sm"
+                                                        className={
+                                                            classes.changeImageButton
+                                                        }
+                                                    >
+                                                        Change Image
+                                                    </Button>
+                                                </MediaSelectionModal>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                    /** get the first media item, this is the primary image */
+                                ))[0]
+                            }
                         </>
                     ) : (
                         <MediaSelectionModal
@@ -224,7 +238,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                     )}
                 </div>
 
-                {product.media ? (
+                {product.media && product.media.length > 0 ? (
                     <div>
                         <Label htmlFor="image" className={classes.label}>
                             Image File
@@ -235,10 +249,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                                 name="image"
                                 type="text"
                                 disabled
-                                value={product.image || ''}
-                                onChange={(e) =>
-                                    setData('product.image', e.target.value)
-                                }
+                                value={product.media[0]?.file_name || ''}
                                 className={cx(classes.input, {
                                     'input-with-error': errors['product.image'],
                                 })}

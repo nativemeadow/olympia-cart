@@ -199,57 +199,96 @@ const VariantForm: React.FC<VariantFormProps> = ({
                         </FieldWrapper>
                     </div>
                 </div>
-                {variant.image ? (
-                    <div className={`${classes.mediaItem}`}>
-                        <div className={`${classes.mediaCard}`}>
-                            <Label
-                                htmlFor={`price-${variant.id}-image`}
-                                className={classes.label}
-                            >
-                                Image
-                            </Label>
-                            <div className={classes.imageContainer}>
-                                <figure
-                                    className={`${classes.mediaFigure} ${classes.priceImage}`}
+                {variant.media && variant.media.length > 0 ? (
+                    variant.media.map((mediaItem, mediaIndex) => {
+                        return (
+                            <React.Fragment key={mediaItem.id}>
+                                <div
+                                    className={`${classes.mediaItem} ${classes.variantMediaItem} `}
                                 >
-                                    <img
-                                        src={`/products/${variant.image}`}
-                                        alt={variant?.title || ''}
-                                    />
-                                </figure>
-                                <MediaSelectionModal
-                                    onSelect={(image) =>
-                                        handleImageSelect(image, variant.id)
-                                    }
-                                    entityId={productId}
-                                    mediaType="product"
-                                    isOpen={isModalOpen}
-                                    onOpenChange={setIsModalOpen}
-                                >
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="icon"
-                                                className={classes.editButton}
-                                                aria-label="Select or change image"
+                                    <div className={`${classes.mediaCard}`}>
+                                        <Label
+                                            htmlFor={`price-${variant.id}-image-${mediaItem.id}`}
+                                            className={classes.label}
+                                        >
+                                            Image
+                                        </Label>
+                                        <div className={classes.imageContainer}>
+                                            <figure
+                                                className={`${classes.mediaFigure} ${classes.priceImage}`}
                                             >
-                                                <Pencil
-                                                    className={
-                                                        classes.pencilIcon
-                                                    }
+                                                <img
+                                                    src={`/${mediaItem.file_path}/${mediaItem.file_name}`}
+                                                    alt={variant?.title || ''}
                                                 />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            Select or change image
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </MediaSelectionModal>
-                            </div>
-                        </div>
-                    </div>
+                                            </figure>
+                                            <MediaSelectionModal
+                                                onSelect={(image) =>
+                                                    handleImageSelect(
+                                                        image,
+                                                        variant.id,
+                                                    )
+                                                }
+                                                entityId={productId}
+                                                mediaType="product"
+                                                isOpen={isModalOpen}
+                                                onOpenChange={setIsModalOpen}
+                                            >
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="icon"
+                                                            className={
+                                                                classes.editButton
+                                                            }
+                                                            aria-label="Select or change image"
+                                                        >
+                                                            <Pencil
+                                                                className={
+                                                                    classes.pencilIcon
+                                                                }
+                                                            />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        Select or change image
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </MediaSelectionModal>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className={`${classes.mediaItem}`}>
+                                    <div className={`${classes.mediaCard}`}>
+                                        <Label
+                                            htmlFor={`price-${variant.id}-file`}
+                                            className={classes.label}
+                                        >
+                                            Image
+                                        </Label>
+                                        <Input
+                                            id={`price-${variant.id}-file`}
+                                            type="text"
+                                            disabled
+                                            value={
+                                                variant.media?.[0]?.file_name ||
+                                                ''
+                                            }
+                                            onChange={(e) =>
+                                                setData(
+                                                    `product.variants.${index}.media.0.file_name`,
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className={classes.fileInput}
+                                        />
+                                    </div>
+                                </div>
+                            </React.Fragment>
+                        );
+                    })[0] /**  this is the primary image for the variant */
                 ) : (
                     <MediaSelectionModal
                         onSelect={(image) =>
@@ -265,28 +304,6 @@ const VariantForm: React.FC<VariantFormProps> = ({
                         </div>
                     </MediaSelectionModal>
                 )}
-                <div className={`${classes.mediaItem}`}>
-                    <div className={`${classes.mediaCard}`}>
-                        <Label
-                            htmlFor={`price-${variant.id}-file`}
-                            className={classes.label}
-                        >
-                            Image
-                        </Label>
-                        <Input
-                            id={`price-${variant.id}-file`}
-                            type="text"
-                            value={variant.image?.file_name || ''}
-                            onChange={(e) =>
-                                setData(
-                                    `product.variants.${index}.image`,
-                                    e.target.value,
-                                )
-                            }
-                            className={classes.fileInput}
-                        />
-                    </div>
-                </div>
 
                 <div className={classes.inputGroup}>
                     {variant.extended_properties &&

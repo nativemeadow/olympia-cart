@@ -61,7 +61,7 @@ export type Product = {
     title: string;
     slug: string;
     description?: string | null;
-    image?: string | null;
+    image?: number | null;
     status: boolean;
     created_at: string;
     updated_at: string;
@@ -77,13 +77,12 @@ export type ProductVariant = {
     sku: string;
     price: number;
     new_attribute_values?: AttributeValue[];
-    attributes?: (Attributes & {
-        value: string | number | boolean | null;
-    })[];
+    attributes?: (Attributes & { value: string | number })[];
     extended_properties?: ExtendedProps;
     title?: string | null;
     description?: string | null;
-    image?: Media | null;
+    image?: number | null; // Allow image to be a number (ID)
+    media?: Media[];
 };
 
 export type ExtendedProperties = {

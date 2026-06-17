@@ -22,7 +22,6 @@ class Product extends Model
         'sku',
         'title',
         'description',
-        'image',
         'status',
         'category_id',
         'created_at',
@@ -31,7 +30,7 @@ class Product extends Model
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class)
+        return $this->belongsToMany(Category::class, 'category_product')
             ->withPivot(['sku', 'product_order'])
             ->withTimestamps();
     }
@@ -53,13 +52,8 @@ class Product extends Model
 
     public function media()
     {
-        return $this->morphToMany(Media::class, 'mediable', 'media_associations');
+        return $this->morphToMany(Media::class, 'mediable', 'media_associations')
+            ->withPivot('order')
+            ->orderBy('media_associations.order');
     }
-
-
-    // function media(): HasMany
-    // {
-    //     return $this->hasMany(Media::class,  'file_name', 'image');
-    // }
-
 }

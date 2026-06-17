@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import React, { FormEventHandler, memo, useState } from 'react';
+import React, { FormEventHandler, memo, useState, useEffect } from 'react';
 import {
     Card,
     CardContent,
@@ -128,18 +128,18 @@ const ProductForm = ({
                     if (variant.id === variantId) {
                         return {
                             ...variant,
-                            image: image,
+                            image: image.id, // Set the image ID directly
+                            media: [image], // Also update media for UI display
                         };
                     }
                     return variant;
                 },
             );
 
-            setData('product.variants', updatedVariants);
+            setData('product.variants', updatedVariants as ProductVariant[]);
             setOpenModalVariantId(null);
         } else {
             setData('product.media', [image]);
-            setData('product.image', image.file_name);
             setIsMainImageModalOpen(false);
         }
     };
@@ -151,6 +151,7 @@ const ProductForm = ({
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
         setIsSaving(true);
+
         const options = {
             onSuccess: () => {
                 reset();

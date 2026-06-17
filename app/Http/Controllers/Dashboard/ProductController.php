@@ -61,27 +61,24 @@ class ProductController extends Controller
     private $excludeKeys = ['Title', 'Description', 'Image']; // Define derived keys
 
     // This method retrieves a product along with its related categories, variants, and media.
-    public function show(int $product_id)
+    public function edit(int $product_id)
     {
+        // Fetch the product with all its relationships, just like in the show() method.
         $product = Product::with([
             'categories',
-            'variants' => function ($query) {
-                $query->with('newAttributeValues.attribute');
-            },
             'media',
-        ])->find($product_id);
-
-        if (!$product) {
-            return response()->json(['product' => null], 404);
-        }
-
-        $product->media()->orderBy('order')->get();
+            'variants.media',
+            'variants.newAttributeValues.attribute'
+        ])->findOrFail($product_id); // Use findOrFail to handle not found cases
 
         // Manually build breadcrumbs for each category
         $product->categories->each(function ($category) {
             $category->breadcrumb = $category->getBreadcrumb();
         });
 
+        // turn the product object that contains relationships 
+        // into an array that can be easily consumed by the frontend form, 
+        // especially for the variants and their attributes.
         $productArray = $product->toArray();
 
         $allAttributes = Attribute::distinct()->get(['id', 'name', 'data_type']);
@@ -147,6 +144,22 @@ class ProductController extends Controller
 
     private function handleImageAttribute($variant, $image)
     {
+
+        // This function now directly manages the polymorphic media relationship for a variant.
+        if ($image instanceof Media) {
+            // If a valid Media object is provided, sync it as the variant's media.
+            // The 'sync' method handles attaching the new image and detaching any old one.
+            $variant->media()->sync([$image->id]);
+        } else {
+            // If null is passed, it means no image is selected or it's being removed.
+            // Detach any and all media associated with this variant.
+            $variant->media()->detach();
+        }
+
+        // This function no longer needs to return attribute IDs for syncing.
+        return [];
+
+
         // This function specifically manages the 'Image' derived attribute for a product variant.
         // It works similarly to handleDerivedAttribute, ensuring a single, correct image association.
 
@@ -187,7 +200,7 @@ class ProductController extends Controller
             'product.sku' => 'required|string|max:255|unique:products,sku',
             'product.slug' => 'required|string|max:255|unique:products,slug',
             'product.description' => 'nullable|string',
-            'product.image' => 'nullable|string|max:255',
+            'product.image' => 'nullable|integer|exists:media,id',
             'product.status' => 'required|boolean',
             'product.categories.*.id' => 'required_with:product.categories|integer|exists:categories,id',
             'product.variants' => 'required|array|min:1',
@@ -196,7 +209,7 @@ class ProductController extends Controller
             'product.variants.*.extended_properties' => 'nullable|array',
             'product.variants.*.title' => 'nullable|string',
             'product.variants.*.description' => 'nullable|string',
-            'product.variants.*.image' => 'nullable|array',
+            'product.variants.*.image' => 'nullable|integer|exists:media,id',
         ], [
             'product.title.required' => 'The product title is required.',
             'product.sku.required' => 'The product SKU is required.',
@@ -227,9 +240,18 @@ class ProductController extends Controller
                 'sku' => $productData['sku'],
                 'slug' => $productData['slug'],
                 'description' => $productData['description'],
-                'image' => $productData['image'],
                 'status' => $productData['status'],
             ]);
+
+            // if (isset($productData['image'])) {
+            //     $product->media()->attach($productData['image'], ['order' => 1]);
+            // }
+            if (array_key_exists('image', $productData) && $productData['image'] !== null) {
+                $product->media()->sync([$productData['image'] => ['order' => 1]]);
+            } elseif (array_key_exists('image', $productData) && $productData['image'] === null) {
+                // If 'image' is explicitly null, it means "remove the image".
+                $product->media()->detach();
+            }
 
             // A new product is always created within a single category context.
             // We calculate the order for the product within that category.
@@ -295,13 +317,31 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
+        $productDataInput = $request->input('product');
+
+        $incomingImageValue = $productDataInput['image'] ?? null;
+
+        if (is_numeric($incomingImageValue)) {
+            // A numeric value means a new image has been selected.
+            // This is the ONLY case where we need to act.
+            $product->media()->sync([$incomingImageValue => ['order' => 1]]);
+        } elseif ($incomingImageValue === null) {
+            // An explicit null means the user wants to remove the image.
+            $product->media()->detach();
+        }
+        // If it's a string (the file_name), we do absolutely nothing,
+        // because the image has not changed.
+        // 4. Remove the 'image' key from the request data to prevent validation issues.
+
+        unset($productDataInput['image']);
+        $request->merge(['product' => $productDataInput]);
 
         $validatedData = $request->validate([
             'product.title' => 'required|string|max:255',
             'product.sku' => ['required', 'string', 'max:255', Rule::unique('products', 'sku')->ignore($product->id)],
             'product.slug' => ['required', 'string', 'max:255', Rule::unique('products', 'slug')->ignore($product->id)],
             'product.description' => 'nullable|string',
-            'product.image' => 'nullable|string|max:255',
+            'product.image' => 'nullable|integer|exists:media,id',
             'product.status' => 'required|boolean',
             'product.categories.*.id' => 'required_with:product.categories|integer|exists:categories,id',
             'product.variants' => 'required|array|min:1',
@@ -316,7 +356,7 @@ class ProductController extends Controller
             'product.variants.*.extended_properties' => 'nullable|array',
             'product.variants.*.title' => 'nullable|string',
             'product.variants.*.description' => 'nullable|string',
-            'product.variants.*.image' => 'nullable|array',
+            'product.variants.*.image' => 'nullable|integer|exists:media,id',
         ], [
             'product.title.required' => 'The product title is required.',
             'product.sku.required' => 'The product SKU is required.',
@@ -346,9 +386,13 @@ class ProductController extends Controller
                 'sku' => $productData['sku'],
                 'slug' => $productData['slug'],
                 'description' => $productData['description'],
-                'image' => $productData['image'],
                 'status' => $productData['status'],
             ]);
+
+            // Use array_key_exists to handle the now-clean data
+            if (array_key_exists('image', $productData)) {
+                $product->media()->sync([$productData['image'] => ['order' => 1]]);
+            }
 
             if (isset($productData['categories'])) {
                 $categoryIds = array_column($productData['categories'], 'id');
